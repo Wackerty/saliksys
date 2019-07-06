@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonhehe57
 import os
 import sys
 
