@@ -165,23 +165,34 @@
                       <th>Re-order level</th>
                     </tr>
                   </thead>
-                  <tbody id ="itemsBody">
-                    {% for product in products %}
-                      <tr>
-                        <td>{{product.name}}</td>
-                      <td>{{ product.description }}</td>
-                        <td>{{product.idCategory.name}}</td>
-                          <td>{{product.suggestedUnitPrice}} <a href="#" data-toggle="modal" data-target="#modal_edit" item_code="{{ product.get_product_code }}" item_name="{{ product.name }}" item_price="{{ product.suggestedUnitPrice }}" item_id="{{ product.idProduct }}" onclick="editItem_Price(this)"><i class="fa fa-edit"></i></a></td>
-                        <td>{{product.unitsInStock}}
-                            {% if product.unitsInStock < product.reorderLevel %}
-                                <span class="label label-danger">LOW STOCK</span>
-                            {% endif %}
-                        </td>
-                        <td>{{product.unitOfMeasure}}</td>
-                        <td>{{product.reorderLevel}}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
+                  <tbody id ="itemsBody" >
+                      {% for product in products %}
+                          {% if product.unitsInStock < product.reorderLevel %}
+                              <tr style="color:black">
+                                  <td bgcolor="lightcoral" >{{product.name}}</td>
+                                  <td bgcolor="lightcoral" >{{ product.description }}</td>
+                                  <td bgcolor="lightcoral">{{product.idCategory.name}}</td>
+                                  <td bgcolor="lightcoral">{{product.suggestedUnitPrice}} <a href="#" data-toggle="modal" data-target="#modal_edit" item_code="{{ product.get_product_code }}" item_name="{{ product.name }}" item_price="{{ product.suggestedUnitPrice }}" item_id="{{ product.idProduct }}" onclick="editItem_Price(this)"><i class="fa fa-edit"></i></a></td>
+                                  <td bgcolor="lightcoral">
+                                      {{product.unitsInStock}}<br>
+                                      <span class="label">LOW STOCK</span>
+                                  </td>
+                                  <td bgcolor="lightcoral">{{product.unitOfMeasure}}</td>
+                                  <td bgcolor="lightcoral">{{product.reorderLevel}}</td>
+                              </tr>
+                          {% else %}
+                              <tr style="color:black">
+                                  <td>{{product.name}}</td>
+                                  <td>{{ product.description }}</td>
+                                  <td>{{product.idCategory.name}}</td>
+                                  <td>{{product.suggestedUnitPrice}} <a href="#" data-toggle="modal" data-target="#modal_edit" item_code="{{ product.get_product_code }}" item_name="{{ product.name }}" item_price="{{ product.suggestedUnitPrice }}" item_id="{{ product.idProduct }}" onclick="editItem_Price(this)"><i class="fa fa-edit"></i></a></td>
+                                  <td>{{product.unitsInStock}}</td>
+                                  <td>{{product.unitOfMeasure}}</td>
+                                  <td>{{product.reorderLevel}}</td>
+                              </tr>
+                          {% endif %}
+                      {% endfor %}
+                      </tbody>
                 </table>
                 <script>
                     $(document).ready(function() {

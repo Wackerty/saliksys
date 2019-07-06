@@ -15,7 +15,12 @@
     <div class="container">
       <form class="form-login" method="post" action="{% url 'register_validate' %}">
         {% csrf_token %}
-          <center><h4 class="mb"><i class="fa fa-angle-right"></i> Register User</h4></center>
+          <center>
+            <h4 class="mb"><i class="fa fa-angle-right"></i>Salikneta Registration</h4>
+            {% load staticfiles %}
+              <img src="{% static 'img/salikneta_ico.png' %}" 
+              style="height: 10vh;width:5vw">
+          </center>
         }
         <div class="login-wrap">
                   <label class="control-label">First Name</label>
