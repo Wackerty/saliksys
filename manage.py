@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonfgrty
 import os
 import sys
 
