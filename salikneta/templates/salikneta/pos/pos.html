@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'salikneta/includes/head.html' %}
+{% load staticfiles %}
+<style>
+    .selectable{
+        cursor: pointer;
+    }
+    .row.no-gutter {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    .error
+    {
+     border:1px solid red;
+    }
+    .row.no-gutter [class*='col-']:not(:first-child),
+    .row.no-gutter [class*='col-']:not(:last-child) {
+      padding-right: 0;
+      padding-left: 0;
+
+    }
+    .font_md{font-size: 12px}
+    .font_lg{font-size: 14px}
+    .right_aln {
+        text-align: right;
+    }
+</style>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<body>
+
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                alert("{{ message }}");
+            {% endfor %}
+        {% endif %}
+    </script>
+  <section id="container">
+      {% include 'salikneta/includes/pos_header.html' %}
+
+      <section class="wrapper site-min-height">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="col-lg-6">
+              <!-- /panel-heading -->
+                        <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="custom-box" style="padding-left: 0px;padding-right: 0px;padding-top: 0;">
+
+                              <div class="row text-left" style="margin-left: 0px;margin-right: 0px;background-color: #03DAC6;padding: 10px">
+                                  <div class="col-md-6 text-left">
+                                    <h4 style="margin: 0;padding: 0; color: black">Sales Invoice {{ si_num }}</h4>
+                                  </div>
+                                  <div class="col-md-6 text-right">
+                                    <h6 style="margin: 0;padding: 0;">{{ date|date:"M d, Y" }}</h6>
+                                  </div>
+                              </div>
+                              <ul class="nav nav-tabs nav-justified">
+                          <li class="active">
+                            <a data-toggle="tab" href="#overview">Point of Sale</a>
+                          </li>
+                          <li>
+                            <a data-toggle="tab" href="#contact" class="contact-map">Receipt</a>
+                          </li>
+                        </ul>
+                        <div class="tab-content">
+                          <div id="overview" class="tab-pane active">
+                              <div style="margin-left: 0px;margin-right: 0px" class="row">
+                                    <table class="table table-hover">
+                                    <thead>
+                                      <tr>
+                                        <th style="text-align: left; width:37%" >Item Name</th>
+                                        <th style="text-align: right; width:20%">Qty</th>
+                                        <th style="text-align: right; width:5%">Disc(%)</th>
+                                        <th style="text-align: right; width:20%">Amount Due</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody id="checkout_tbl">
+
+                                    </tbody>
+                                  </table>
+                                  <hr>
+                                  <div class="row" style="padding: 10px">
+                                      <div class="col-md-6 text-left">
+                                          <b>Net Total</b>
+                                      </div>
+                                      <div class="col-md-6 text-right">
+                                          P<b id="net_total"> 0.0</b>
+                                      </div>
+                                  </div>
+                                </div>
+                              <div>
+                                <button class="btn btn-success" id="pay_btn" type="submit" disabled><i class="fa fa-check"></i> Pay</button>
+                                <a class="btn btn-default" href="#" onclick="resetPOS()"><i class="fa fa-refresh"></i> Clear</a>
+                                <a class="btn btn-info" href="#" onclick="printDiv('print_div')"><i class="fa fa-print"></i> Print Preview</a>
+                              </div>
+                          </div>
+                          <div id="contact" class="tab-pane">
+                            <div class="row" id="print_div">
+                                <div class="invoice-body" style="padding-top: 0px">
+                                <div class="row">
+                                    <div class="col-md-6" style="text-align: left">
+                                      <h3>Salikneta Taft</h3>
+                                      <address class="font_md">
+                                        <strong class="font_lg">Salikneta Coop. Inc</strong>
+                                      </address>
+                                    </div>
+                                    <!-- /pull-left -->
+                                    <div class="col-md-6" style="text-align: right">
+                                        <div class="row">INVOICE NO : {{ si_num }}
+                                        </div>
+                                        <div class="row">INVOICE DATE :  {{ date|date:"d/m/Y" }}
+                                        </div>
+                                        <!-- /row -->
+                                        <br>
+                                    </div>
+
+                                </div>
+                                <!-- /col-lg-10 -->
+                                <table class="table" style="width: 100%;border: 1px solid black;">
+                                  <thead style="border: 1px solid black;">
+                                    <tr>
+                                      <th style="border: 1px solid black;width:10%" class="text-center" style="text-align: center">QTY</th>
+                                      <th style="border: 1px solid black;width:10%" class="text-center">UOM</th>
+                                      <th style="border: 1px solid black;width:35%" class="text-left">ITEM NAME</th>
+                                      <th style="border: 1px solid black;width:20%" class="text-right">UNIT PRICE</th>
+                                      <th style="border: 1px solid black;width:10%" class="text-right">DISC</th>
+                                      <th style="border: 1px solid black;width:15%" class="text-right">TOTAL</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="receipt_tbl">
+
+                                  </tbody>
+                                </table>
+                                <hr>
+                                    <div class="pull-right" style="float:right"><u>TOTAL AMOUNT: P<b id="r_net_total"> 0.0</b></u></div>
+                                <br>
+                                <br>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                  </div>
+                </form>
+
+            </div>
+            <div class="col-lg-6">
+              <div class="custom-box" style="padding-left: 15px;padding-right: 15px;padding-top: 0;">
+              <div class="row no-gutter" style="padding: 10px;padding-bottom: 0px">
+                  <div class="col-md-7" style="margin: 0px">
+                        <input type="text" class="form-control input-sm" id="item_filter" placeholder="Search Item"/>
+                  </div>
+                  <div class="col-md-3">
+                      <select class="form-control input-sm" id="cat_filter">
+                          <option value="null" selected>No Category Filter</option>
+                          {% for cat in categories %}
+                            <option value="{{ cat.name }}">{{ cat.name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div class="col-md-2">
+                      <a class="btn btn-sm btn-info" href="{% url 'sales' %}">
+                          <i class="fa fa-barcode"></i> Sales Log
+                      </a>
+                  </div>
+              </div>
+              <div class="row " id="item_container" style="padding-top: 0; max-height: 100vh;overflow-y: scroll;margin-top: 0px;">
+                  <hr style="border-color: silver">
+            {% for p in products %}
+                  <div class="col-md-4 mb
+                  {% if p.unitsInStock > 0 %}
+                  selectable
+                  {% endif %}"
+                       product_name="{{ p.name }}"
+                       curr_stock="{{ p.unitsInStock }}"
+                       category="{{ p.idCategory.name }}"
+                       unitMeasure="{{ p.unitOfMeasure }}"
+                       SKU="{{ p.SKU }}"
+
+                       product_code="{{ p.get_product_code }}"
+                       product_price="{{ p.suggestedUnitPrice }}">
+                    <div class="w3-card-4" style="width:100%">
+                        <img src="/static/media/{{ p.img_path }}" style="width:100%;height: 180px">
+                        <div class="w3-container" style="text-align: left; font-size: 10px">
+                          {% if p.unitsInStock > 0 %}{% else %}
+                                <span class="label label-danger">NO STOCK</span>{% endif %}<b style="color: black; font-size: 12px">{{ p.name }}</b>
+                            <div>
+                          <b style="float:right;font-size: 10px" class="text-muted">{{ p.idCategory.name }}</b>
+                          <p style="float:left;font-size: 10px" class="text-muted">P{{ p.suggestedUnitPrice }}/{{ p.unitOfMeasure }}</p>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+            {% endfor %}
+              </div>
+              <div>
+              </div>
+              </div>
+            </div>
+            <!-- end col-4 -->
+          </div>
+          <!--  /col-lg-12 -->
+        </div>
+        <!--  /row -->
+      </section>
+    <!-- /MAIN CONTENT -->
+    <!--main content end-->
+  </section>
+</body>
+</html>
+<script>
+    let item_ids = 0;
+    let net_total = 0.0;
+    let prod_ids = {};
+    {% for p in products %}
+        prod_ids[{{ p.get_product_code }}]={{ p.unitsInStock }};
+    {% endfor %}
+    function printDiv(div) {
+        var printStr = "<script>"+"window.print();</"+"script>";
+        var printCont = document.getElementById(div);
+        var html = '<html><head>'+
+               '<title>RECEIPT {{ si_num }}</title>'+
+               '</head><body style="background:#ffffff;">'+
+               printCont.innerHTML+
+               '</body></html>'+printStr;
+        var WindowObject =window.open('',"Print Window",
+            "width=1000,height=1000,top=200, left=200, toolbars=no, scrollbars=no,resizable=no");
+        WindowObject.document.writeln(html);
+        WindowObject.document.close();
+        WindowObject.focus();
+        WindowObject.print();
+        WindowObject.close();
+
+    }
+    function check_empty_tbl() {
+       let ct = $("#checkout_tbl tr").length;
+
+       if (ct != 0){
+            $("#pay_btn").removeAttr("disabled");
+       }else{
+            $("#pay_btn").attr("disabled", "disabled");
+       }
+    }
+    function check_over_order(id) {
+        total_qty = 0;
+        empty=false;
+        prod = $("#qty_"+id).attr('prod');
+        $('.prod_'+prod).each(function(i, obj) {
+            total_qty += $(obj).val();
+            if ($(obj).val() === null || $(obj).val() === ""){
+                empty=true;
+            }
+        });
+        console.log(total_qty);
+        if (prod_ids[prod] < total_qty){
+            $("#pay_btn").attr("disabled", "disabled");
+            $("#qty_"+id).addClass("error");
+            alert("insufficient products!");
+        }
+        else{
+            $("#qty_"+id).removeClass("error");
+            $("#pay_btn").removeAttr("disabled");
+        }
+        if (empty){
+            $("#pay_btn").attr("disabled", "disabled");
+            $("#qty_"+id).addClass("error");
+        }
+
+    }
+    function remove_row(id){
+        $("#item_"+id).remove();
+        $("#r_item_"+id).remove();
+        compute_net();
+        check_empty_tbl()
+    }
+    function resetPOS() {
+        item_ids =0;
+        $("#checkout_tbl").empty();
+        $("#receipt_tbl").empty();
+        compute_net();
+        check_empty_tbl()
+    }
+    function compute_price(id) {
+        gross = $("#qty_"+id).val() * $("#qty_"+id).attr("price") ;
+        disc = parseFloat($("#disc_"+id).val()/100) * gross;
+
+        $("#disp_disc_"+id).html(parseFloat(disc).toFixed(2));
+        $("#amt_"+id).html(parseFloat(gross - disc).toFixed(2));
+
+        $("#r_disc_"+id).html($("#disc_"+id).val());
+        $("#r_amt_"+id).html(parseFloat(gross - disc).toFixed(2));
+        $("#r_qty_"+id).html($("#qty_"+id).val());
+        compute_net();
+        check_over_order(id);
+    }
+    function compute_net(){
+        net_total = 0.0;
+        $('.amt').each(function(i, obj) {
+            net_total += Number(parseFloat($(obj).html()).toFixed(2));
+        });
+
+      $("#net_total").html(parseFloat(net_total).toFixed(2));
+      $("#r_net_total").html(parseFloat(net_total).toFixed(2));
+    }
+    $( ".selectable" ).click(function() {
+      let str = '<tr id="item_'+item_ids+'">';
+      str += '<td style="text-align: left"><input type="hidden" name="prod_codes[]" value="'+($(this).attr('product_code')-1000)+'">';
+      str+= $(this).attr('product_name');
+      str += ' <button type="button" onclick="remove_row('+item_ids+')" class="btn btn-round btn-warning" style="padding-bottom:0px;padding-top:0px;padding-right: 3px;padding-left: 3px"><i class="fa fa-remove"></i></button>';
+      str += '<br><p class="text-muted">['+$(this).attr('product_code')+']</p></td><td style="text-align: right"> ';
+      str+= '<input type="text" onkeyup="compute_price('+item_ids+')" name="qty[]" price="'+$(this).attr('product_price')+'" ids="'+item_ids+'" id="qty_'+item_ids+'" class="right_aln qty form-control input-sm prod_'+$(this).attr('product_code')+'" prod="'+$(this).attr('product_code')+'" value="1"/>';
+      str+= '<span class="help-block">@ '+$(this).attr('product_price')+'/'+$(this).attr('unitMeasure')+'</span></td>';
+      str+= '<td style="text-align: right"><input type="text" name="disc[]" onkeyup="compute_price('+item_ids+')" id="disc_'+item_ids+'"class="disc form-control input-sm right_aln"  value="0"/>';
+      str+= '<span class="help-block">(<p id="disp_disc_'+item_ids+'" style="display: inline">0.0</p>)</span></td>';
+      str+= '<td style="text-align: right">P<b id="amt_'+item_ids+'" class="amt">'+$(this).attr('product_price')+'</b></td>';
+      $("#checkout_tbl").append(str);
+
+      net_total += parseFloat($(this).attr('product_price'));
+      $("#net_total").html(parseFloat(net_total).toFixed(2));
+
+      str = '<tr id="r_item_'+item_ids+'">';
+      str +='<td class="text-center"  style="border: 1px solid black;text-align: center" id="r_qty_'+item_ids+'">1</td>';
+      str +='<td class="text-center"  style="border: 1px solid black;text-align: center">'+$(this).attr('unitMeasure')+'</td>';
+      str +='<td style="border: 1px solid black;text-align: center">'+$(this).attr('product_name')+'</td>';
+      str +='<td class="text-right"  style="border: 1px solid black;text-align: right">P'+$(this).attr('product_price')+'</td>';
+      str +='<td class="text-right" style="border: 1px solid black;text-align: right"><b id="r_disc_'+item_ids+'">0</b>%</td>';
+      str += '<td class="text-right" style="border: 1px solid black;text-align: right">P<b id="r_amt_'+item_ids+'">'+$(this).attr('product_price')+'</b></td>';
+      str +='</tr>';
+      $("#receipt_tbl").append(str);
+      item_ids +=1;
+
+      check_empty_tbl();
+    });
+/*
+<tr>
+  <td class="text-right" style="border: 1px solid black;text-align: right">P10.80</td>
+</tr>
+*/
+    $(document).ready(function(){
+      $("#item_filter").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        var filter_value = $("#cat_filter").find(":selected").text().toLowerCase();
+        $("#item_container .selectable").filter(function() {
+           if(filter_value !== "no category filter"){
+                $(this).toggle($(this).attr("category").toLowerCase() === value);
+           }
+
+           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+      });
+      $("#cat_filter").on("change", function() {
+        var value = $(this).find(":selected").text().toLowerCase();
+        $("#item_container .selectable").filter(function() {
+           if(value !== "no category filter"){
+                $(this).toggle($(this).attr("category").toLowerCase() === value);
+           }else{
+                $(this).toggle($(this).attr("category").toLowerCase() !== value);
+           }
+        });
+      });
+    });
+
+</script>

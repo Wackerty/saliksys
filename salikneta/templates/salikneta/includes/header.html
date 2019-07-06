@@ -1,0 +1,148 @@
+
+{% if request.session.username == None %}
+    <script>
+    //window.location.href = "http://127.0.0.1:8000/salikneta/";
+    </script>
+{% endif %}
+
+
+<!-- **********************************************************************************************************************************************************
+        TOP BAR CONTENT & NOTIFICATIONS
+        *********************************************************************************************************************************************************** -->
+    <!--header start-->
+    <header class="header black-bg">
+      <div class="sidebar-toggle-box">
+          {% load staticfiles %}
+        <img src="{% static 'img/salikneta_ico.png' %}" style="height: 3vh;width:2vw;">
+      </div>
+      <!--logo start-->
+      <a href="index.html" class="logo"><b>SALIKNETA<span>-POSIS</span></b></a>
+      <!--logo end-->
+      <div class="nav notify-row" id="top_menu">
+        <!--  notification start -->
+        <ul class="nav top-menu">
+          <!-- settings start -->
+          <li class="dropdown">
+            <a  class="dropdown-toggle" href="{% url 'home' %}">
+              <i class="fa fa-dashboard"></i>
+            </a>
+          </li>
+          {% if request.session.usertype == 'cashier' %}
+          <li class="dropdown">
+            <a  class="dropdown-toggle" href="{% url 'pos' %}">
+              <i class="fa fa-calculator"></i>
+            </a>
+          </li>
+        {% endif %}
+          <!-- settings end -->
+          <!-- notification dropdown start-->
+          <li id="header_notification_bar" class="dropdown">
+            <a data-toggle="dropdown" class="dropdown-toggle" onclick="openNotif()"  href="#">
+              <i class="fa fa-bell-o"></i>
+              <span class="badge bg-warning" id="notif_num" style="display: none"></span>
+              </a>
+            <ul class="dropdown-menu extended notification" id="notif_list">
+              <div class="notify-arrow notify-arrow-yellow"></div>
+              <li>
+                <p class="yellow">Notifications</p>
+              </li>
+            </ul>
+          </li>
+          <!-- notification dropdown end -->
+        </ul>
+        <!--  notification end -->
+      </div>
+      <div class="top-menu">
+        <ul class="nav pull-right top-menu">
+          <li><a class="logout" href="{% url 'signout' %}">Logout</a></li>
+        </ul>
+      </div>
+    </header>
+    <aside>
+      <div id="sidebar" class="nav-collapse ">
+        <!-- sidebar menu start-->
+        <ul class="sidebar-menu" id="nav-accordion">
+         <h3 class="centered" style="color: greenyellow">Green Basket</h3>
+         <h5 class="centered" >{{request.session.firstname}} {{request.session.lastname}}</h5>
+         <h5 class="centered">{{request.session.usertype}}</h5>
+          <li class="mt">
+            <a class="{% if request.resolver_match.view_name ==  'home' %}active{% endif %}" href="{% url 'home' %}">
+              <i class="fa fa-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sub-menu">
+            <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrder' or request.resolver_match.view_name == 'backload' or request.resolver_match.view_name == 'purchaseOrder' %}active{% endif %}">
+              <i class="fa fa-shopping-basket"></i>
+              <span>Inventory</span>
+              </a>
+            <ul class="sub">
+              <li><a href="{% url 'purchaseOrder' %}">Purchase Orders</a></li>
+              <li><a href="{% url 'transferOrder'%}">Transfer Orders</a></li>
+              <li><a href="{% url 'backload'%}">Backloads</a></li>
+            </ul>
+          </li>
+          <li class="sub-menu">
+            <a class="{% if request.resolver_match.view_name ==  'manageItems' or  request.resolver_match.view_name == 'manageSuppliers' or request.resolver_match.view_name == 'manageCategories'%}active{% endif %}" href="javascript:;">
+              <i class="fa fa-apple"></i>
+              <span>Stocks</span>
+              <span class="label label-danger pull-right mail-danger" id="warn" style="display: none"></span>
+              </a>
+            <ul class="sub">
+              <li><a href="{% url 'manageItems' %}">Items</a></li>
+              <li><a href="{% url 'manageSuppliers' %}">Supplier</a></li>
+              <li><a href="{% url 'manageCategories'%}">Categories</a></li>
+            </ul>
+          </li>
+          <li class="mt">
+            <a class="{% if request.resolver_match.view_name ==  'sales' %}active{% endif %}" href="{% url 'sales' %}">
+              <i class="fa fa-money"></i>
+              <span>Sales</span>
+            </a>
+          </li>
+          <li class="sub-menu">
+            <a class="{% if request.resolver_match.view_name ==  'sales_report' or request.resolver_match.view_name == 'inventory_report' %}active{% endif %}" href="javascript:;">
+              <i class="fa fa-line-chart"></i>
+              <span>Reports</span>
+              </a>
+            <ul class="sub">
+              <li><a href="{% url 'sales_report' %}">Sales</a></li>
+              <li><a href="{% url 'inventory_report' %}">Inventory</a></li>
+            </ul>
+          </li>
+        </ul>
+        <!-- sidebar menu end-->
+      </div>
+    </aside>
+<script>
+    initNotif();
+    function openNotif() {
+        $.get("{% url 'open_notifs' %}");
+        $("#notif_num").hide();
+    }
+    function initNotif(){
+       let notif_data = $.get("{% url 'check_notifs' %}");
+       notif_data.done(function(results){
+       obj = results.data;
+       for (i in obj){
+
+       console.log(obj);
+               if (obj[i].num_notif === 0){$("#notif_num").hide();}
+               else{$("#notif_num").show().html(obj[i].num_notif);}
+               item = '<li><a href="#">';
+               item += obj[i].msg;
+               item +='<br><span class="small italic">'+obj[i].timestamp+'</span></a></li>';
+               $("#notif_list").append(item);
+           }
+               $("#notif_list").append('<li><a href="index.html#">See all notifications</a></li>');
+
+        });
+    }
+    let stock_d =  $.get("{% url 'get_num_lowstock' %}");
+    stock_d.done(function(results){
+        if(results.numb > 0){
+            $("#warn").html(results.numb).show();
+        }
+    });
+</script>
+    <!--sidebar end-->
