@@ -30,6 +30,8 @@ urlpatterns = [
     path('manageCategories/', views.manageCategories, name='manageCategories'),
     path('manageSuppliers/', views.manageSuppliers, name='manageSuppliers'),
     path('manageItems/', views.manageItems, name='manageItems'),
+    path('manageRawMaterials/', views.manageRawMaterials, name='manageRawMaterials'),
+    path('manageIngredients/', views.manageIngredients, name='manageIngredients'),
     path('editItemPrice/', views.editItemPrice, name='editItemPrice'),
     path('purchaseOrder/', views.purchaseOrder, name='purchaseOrder'),
     path('backload/', views.backload, name='backload'),
@@ -61,6 +63,9 @@ urlpatterns = [
     path('ajax/ajaxInTransitTO/', views.ajaxInTransitTO, name='ajaxInTransitTO'),
     path('ajax/ajaxFinishedTO/', views.ajaxFinishedTO, name='ajaxFinishedTO'),
     path('ajax/ajaxCancelTO/', views.ajaxCancelTO, name='ajaxCancelTO'),
+    path('ajax/ajaxGetIngredients/', views.ajaxGetIngredients, name='ajaxGetIngredients'),
+    path('ajax/ajaxGetUOM/', views.ajaxGetUOM, name='ajaxGetUOM'),
+    path('ajax/ajaxAddIngredient/', views.ajaxAddIngredient, name='ajaxAddIngredient'),
 
 ]
 

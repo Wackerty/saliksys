@@ -145,6 +145,35 @@
               </div>
             </div>
 
+            <div class="modal fade" id="modal_ingredients" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">PRODUCT INGREDIENTS</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <table class="table table-hover" id="ingredientTable">
+                              <thead>
+                                <tr>
+                                  <th>Raw Material</th>
+                                  <th>Quantity Needed</th>
+                                  <th>UOM</th>
+                                </tr>
+                              </thead>
+                              <tbody id="ingredientTable_Body">
+                              </tbody>
+                          </table>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
 <section id="main-content">
       <section class="wrapper">
         <div class="row mt">
@@ -163,6 +192,7 @@
                       <th>Current Stocks</th>
                       <th>UOM</th>
                       <th>Re-order level</th>
+                      <th>Ingredients</th>
                     </tr>
                   </thead>
                   <tbody id ="itemsBody" >
@@ -179,6 +209,7 @@
                                   </td>
                                   <td bgcolor="lightcoral">{{product.unitOfMeasure}}</td>
                                   <td bgcolor="lightcoral">{{product.reorderLevel}}</td>
+                                  <td bgcolor="lightcoral"><button class="btn btn-round btn-primary" data-toggle="modal" data-target="#modal_ingredients" item_id="{{ product.idProduct }}" onclick="getIngredients(this)">View</button>
                               </tr>
                           {% else %}
                               <tr style="color:black">
@@ -189,6 +220,7 @@
                                   <td>{{product.unitsInStock}}</td>
                                   <td>{{product.unitOfMeasure}}</td>
                                   <td>{{product.reorderLevel}}</td>
+                                  <td><button class="btn btn-round btn-primary" data-toggle="modal" data-target="#modal_ingredients" item_id="{{ product.idProduct }}" onclick="getIngredients(this)">View</button>
                               </tr>
                           {% endif %}
                       {% endfor %}
@@ -215,6 +247,33 @@
         $("#e_id").val($(obj).attr("item_code"));
         $("#item_id").val($(obj).attr("item_id"));
 
+    }
+
+    function getIngredients(obj){
+        var productPK = $(obj).attr("item_id");
+
+        $.ajax({
+          url: '{% url "ajaxGetIngredients" %}',
+          data: {
+            "productPk":productPK,
+          },
+          dataType: 'json',
+          success: function(data){
+              var rows = "";
+              for(var i = 0; i < data.length; i++){
+                  rows += "<tr>";
+                  rows += "<td>" + data[i].rawMaterialName + "</td>";
+                  rows += "<td>" + data[i].qtyneeded + "</td>";
+                  rows += "<td>" + data[i].uom + "</td>";
+                  rows += "</tr>";
+              }
+              $("#ingredientTable_Body").html(rows);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
     }
 </script>
             <!--custom chart end-->

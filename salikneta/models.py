@@ -315,8 +315,26 @@ class TransferLines(models.Model):
     def get_product(self):
         return Product.objects.get(pk=int(self.idProduct.pk))
 
-class ingredientslist(models.Model):
-    ingredientslistId = models.AutoField(primary_key=True)
-    productProd= models.FloatField()
-    prodUsed= models.FloatField
-    unitOfMeasure = models.CharField(max_length=45)
+
+class RawMaterials(models.Model):
+    idrawmaterials = models.AutoField(db_column='idRawMaterials', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    unitsInStock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
+    unitOfMeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
+    idSupplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,db_column='idSupplier_id')
+
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterials'
+
+
+class IngredientsList(models.Model):
+    ingredientslistid = models.AutoField(db_column='ingredientslistId', primary_key=True)  # Field name made lowercase.
+    idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+    idrawmaterials = models.ForeignKey(RawMaterials, models.DO_NOTHING)  # Field name made lowercase.
+    qtyneeded = models.FloatField(db_column='qtyNeeded')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_ingredientlist'

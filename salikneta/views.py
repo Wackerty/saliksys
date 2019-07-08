@@ -422,6 +422,50 @@ def manageItems(request):
         return HttpResponseRedirect(reverse('manageItems'))
     return render(request, 'salikneta/manageItems.html',context)
 
+
+def manageRawMaterials(request):
+    r = RawMaterials.objects.all()
+    s = Supplier.objects.all()
+
+    context = {
+        "rawmaterials":r,
+        "suppliers":s,
+    }
+
+    if request.method == 'POST':
+        r = RawMaterials(name=request.POST['rawMaterialName'], unitsInStock=request.POST['startStock'],
+                         unitOfMeasure=request.POST['unitsOfMeasure'], idSupplier_id=request.POST['supplier'])
+        r.save()
+
+        Notifs.write("New Raw Material -" +r.name+"- has been added.")
+        return HttpResponseRedirect(reverse('manageRawMaterials'))
+
+    return render(request, 'salikneta/manageRawMats.html',context)
+
+
+def manageIngredients(request):
+    r = RawMaterials.objects.all()
+    c = Category.objects.all()
+    i = Product.objects.all()
+
+    context = {
+        "rawmaterials": r,
+        "categories": c,
+        "products": i,
+    }
+    if request.method == 'POST':
+        c = Product(name=request.POST['itemName'], description=request.POST['description'],
+                    suggestedUnitPrice=request.POST['price'], unitsInStock=request.POST['startStock'],
+                    img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],
+                    unitOfMeasure=request.POST['unitsOfMeasure'],
+                    SKU=request.POST['SKU'], idCategory_id=request.POST['category'])
+        c.save()
+
+        Notifs.write("New Item -" + c.name + "- has been added.")
+        return HttpResponseRedirect(reverse('manageIngredients'))
+    return render(request, 'salikneta/manageIngredients.html', context)
+
+
 def backload(request):
 
     b = BackLoad.objects.all()
@@ -548,8 +592,6 @@ def ajaxGetInStock(request):
 
     products.append({"idProduct":c.pk,"unitsInStock":c.unitsInStock,"incoming":c.get_num_incoming})
         
-
-
 
     return JsonResponse(products, safe=False)
 
@@ -716,3 +758,48 @@ def ajaxCancelTO(request):
     to.status = "Cancelled"
     to.save()
     return JsonResponse([],safe=False)
+
+
+def ajaxGetIngredients(request):
+    pk = request.GET.get('productPk')
+    i = IngredientsList.objects.filter(idProduct=pk)
+    ingredients = []
+
+    for ingredient in i:
+        ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
+
+    return JsonResponse(ingredients, safe=False)
+
+
+def ajaxGetUOM(request):
+    pk = request.GET.get('productPk')
+    i = RawMaterials.objects.get(idrawmaterials=pk)
+    uom = []
+
+    uom.append({"uom": i.unitOfMeasure})
+
+    return JsonResponse(uom, safe=False)
+
+
+def ajaxAddIngredient(request):
+    productPK = request.GET.get('productPK')
+    rawMaterialPK = request.GET.get('rawMaterialPK')
+    qtyNeeded = request.GET.get('qtyNeeded')
+
+    product = Product.objects.get(idProduct=productPK)
+    rawmaterial = RawMaterials.objects.get(idrawmaterials=rawMaterialPK)
+
+    i = IngredientsList(idProduct=product, idrawmaterials=rawmaterial,
+                     qtyneeded=qtyNeeded)
+    i.save()
+
+    Notifs.write("New Ingredient -"+ i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.")
+
+    i = IngredientsList.objects.filter(idProduct=productPK)
+    ingredients = []
+
+    for ingredient in i:
+        ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded,
+                            "uom": ingredient.idProduct.unitOfMeasure})
+
+    return JsonResponse(ingredients, safe=False)
