@@ -1,0 +1,221 @@
+
+{% load staticfiles %}
+{% include 'salikneta/includes/head.html' %}
+<body>
+  <section id="container">
+
+{% include 'salikneta/includes/header.html' %}
+ <!-- **********************************************************************************************************************************************************
+        MAIN CONTENT
+        *********************************************************************************************************************************************************** -->
+    <!--main content start-->
+
+
+
+              <!-- Modal -->
+              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">ADD NEW INGREDIENT</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <div class="row">
+                           <div class="col-md-6">
+
+                              <label class="control-label">Raw Material</label>
+                             <select  class="form-control" name="category" id="rawMaterial">
+                                {% for rawmaterial in rawmaterials %}
+                                  <option value="{{rawmaterial.pk}}">{{rawmaterial.name}}</option>
+                                {% endfor %}
+                              </select>
+                           </div>
+                           <div class= "col-md-6">
+                              <label class="control-label">UOM</label>
+                               {% with rawmaterials|first as first_object %}
+                                   <h4 id="productUOM">{{ first_object.unitOfMeasure }}</h4>
+                               {% endwith %}
+                           </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                           <div class="col-md-6">
+                              <label class="control-label">Quantity Needed</label>
+                          <input type="number" class="form-control" step="0.01" id="qtyNeeded" name="price" placeholder="Quantity Needed" autofocus>
+                           </div>
+                         </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button id='submitNewIngredient' type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+              <div class="modal fade" id="modal_edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">EDIT ITEM PRICE</h4>
+                    </div>
+                  <form action="{% url 'editItemPrice' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_id" id="item_id" value="">
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <div class="row">
+                           <div class="col-md-6">
+                             <label class="control-label">Name</label>
+                             <input type="text" class="form-control" id="e_itemName" name="itemName" placeholder="Item name" readonly>
+                           </div>
+                           <div class= "col-md-6">
+                              <label class="control-label">Product ID</label>
+                              <input  class="form-control" name="item_code" id="e_id">
+                           </div>
+                         </div>
+
+                          <div class="row">
+                                <label class="control-label">Price</label>
+                                <input type="text" class="form-control" id="e_price" name="item_price" value="" >
+                          </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+<section id="main-content">
+      <section class="wrapper">
+        <div class="row mt">
+          <div class="col-lg-12">
+            <div class="form-panel">
+              <h4 class="mb"><i class="fa fa-apple"></i>Ingredients for Items</h4>
+              <h5 class="mb">Select an Item</h5>
+              <select  class="form-control" name="products" id="products">
+                    <option value="-1"></option>
+                    {% for product in products %}
+                      <option value="{{product.pk}}">{{product.name}}</option>
+                    {% endfor %}
+              </select>
+              <br>
+              <button class="btn btn-success btn-md" data-toggle="modal" data-target="#myModal" style="margin-bottom: 1vh" id="ingredientsButton" disabled>Add Ingredients</button>
+                <table id="itm_tbl" class="table table-bordered table-striped table-condensed">
+                  <thead>
+                    <tr>
+                      <th>Raw Material</th>
+                      <th>Quantity Needed</th>
+                      <th>UOM</th>
+                    </tr>
+                  </thead>
+                  <tbody id ="itemsBody" >
+                  </tbody>
+                </table>
+                <script>
+                    $(document).ready(function() {
+                        $('#itm_tbl').DataTable();
+                    });
+                </script>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+  </section>
+</body>
+
+<script>
+    function editItem_Price(obj){
+
+        $("#e_price").val($(obj).attr("item_price"));
+        $("#e_itemName").val($(obj).attr("item_name"));
+        $("#e_id").val($(obj).attr("item_code"));
+        $("#item_id").val($(obj).attr("item_id"));
+
+    }
+
+    $( "#products" ).change(function() {
+        if($(this).val() != -1)
+            $("#ingredientsButton").attr("disabled", false);
+        else
+            $("#ingredientsButton").attr("disabled", true);
+
+        $.ajax({
+          url: '{% url "ajaxGetIngredients" %}',
+          data: {
+            "productPk":$(this).val(),
+          },
+          dataType: 'json',
+          success: function(data){
+              update_table(data);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+    });
+
+    $( "#rawMaterial" ).change(function() {
+        $.ajax({
+          url: '{% url "ajaxGetUOM" %}',
+          data: {
+            "productPk":$(this).val(),
+          },
+          dataType: 'json',
+          success: function(data){
+              $("#productUOM").html(data[0].uom)
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+    });
+
+    $( "#submitNewIngredient" ).click(function() {
+      var rawMaterialPK = $( "#rawMaterial" ).val();
+      var productPK = $( "#products" ).val();
+      var qtyNeeded = $( "#qtyNeeded" ).val();
+
+      console.log(rawMaterialPK + " " + productPK + " " + qtyNeeded);
+
+      $("#qtyNeeded").val('');
+
+      $.ajax({
+          url: '{% url "ajaxAddIngredient" %}',
+          data: {
+            "rawMaterialPK":rawMaterialPK,
+            "productPK":productPK,
+            "qtyNeeded":qtyNeeded,
+          },
+          dataType: 'json',
+          success: function(data){
+              update_table(data);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+
+    });
+
+    function update_table(data){
+        var myTable = $('#itm_tbl').DataTable();
+              myTable.clear();
+              for(var i = 0; i < data.length; i++){
+                  myTable.row.add([data[i].rawMaterialName, data[i].qtyneeded, data[i].uom]);
+              }
+              myTable.draw();
+    }
+</script>
+            <!--custom chart end-->

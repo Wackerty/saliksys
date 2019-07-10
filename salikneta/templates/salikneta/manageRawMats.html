@@ -1,0 +1,156 @@
+
+{% load staticfiles %}
+{% include 'salikneta/includes/head.html' %}
+<body>
+  <section id="container">
+
+{% include 'salikneta/includes/header.html' %}
+ <!-- **********************************************************************************************************************************************************
+        MAIN CONTENT
+        *********************************************************************************************************************************************************** -->
+    <!--main content start-->
+
+
+
+              <!-- Modal -->
+              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">ADD NEW RAW MATERIAL</h4>
+                    </div>
+                  <form action="" method="post"  enctype="multipart/form-data">
+                  {% csrf_token %}
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <div class="row">
+                           <div class="col-md-6">
+
+                              <label class="control-label">Name</label>
+                             <input type="text" class="form-control" id="rawMaterialName" name="rawMaterialName" placeholder="Raw Material name" autofocus>
+                           </div>
+
+                           <div class= "col-md-6">
+                              <label class="control-label">Supplier</label>
+                              <select  class="form-control" name="supplier" id="supplier">
+                                {% for supplier in suppliers %}
+                                  <option value="{{supplier.pk}}">{{supplier.name}}</option>
+                                {% endfor %}
+                              </select>
+                           </div>
+
+                         </div>
+                         <br>
+                          <div class="row">
+                           <div class="col-md-6">
+                              <label class="control-label">Units of measure</label>
+                              <input type="text" class="form-control" id="unitsOfMeasure" name="unitsOfMeasure" placeholder="Units of measure" autofocus>
+                           </div>
+                           <div class="col-md-6">
+                                <label class="control-label">Starting Stock</label>
+                                <input type="number" class="form-control" id="SKU" name="startStock" placeholder="Opening stock" autofocus>
+                            </div>
+                         </div>
+                         <br>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+              <div class="modal fade" id="modal_edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">EDIT ITEM PRICE</h4>
+                    </div>
+                  <form action="{% url 'editItemPrice' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_id" id="item_id" value="">
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <div class="row">
+                           <div class="col-md-6">
+                             <label class="control-label">Name</label>
+                             <input type="text" class="form-control" id="e_itemName" name="itemName" placeholder="Item name" readonly>
+                           </div>
+                           <div class= "col-md-6">
+                              <label class="control-label">Product ID</label>
+                              <input  class="form-control" name="item_code" id="e_id">
+                              </input>
+                           </div>
+                         </div>
+
+                          <div class="row">
+                                <label class="control-label">Price</label>
+                                <input type="text" class="form-control" id="e_price" name="item_price" value="" >
+                          </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+<section id="main-content">
+      <section class="wrapper">
+        <div class="row mt">
+          <div class="col-lg-12">
+            <div class="form-panel">
+              <h4 class="mb"><i class="fa fa-apple"></i> Current Inventory for Raw Materials</h4>
+              <button class="btn btn-success btn-md" data-toggle="modal" data-target="#myModal" style="margin-bottom: 1vh">Add Raw Materials</button>
+
+                <table id="itm_tbl" class="table table-bordered table-striped table-condensed">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Current Stocks</th>
+                      <th>UOM</th>
+                      <th>Supplier</th>
+                    </tr>
+                  </thead>
+                  <tbody id ="itemsBody" >
+                      {% for rawmaterial in rawmaterials %}
+                          <tr style="color:black">
+                              <td>{{rawmaterial.name}}</td>
+                              <td>{{rawmaterial.unitsInStock}}</td>
+                              <td>{{rawmaterial.unitOfMeasure}}</td>
+                              <td>{{rawmaterial.idSupplier.name }}</td>
+                          </tr>
+                      {% endfor %}
+                      </tbody>
+                </table>
+                <script>
+                    $(document).ready(function() {
+                        $('#itm_tbl').DataTable();
+                    });
+                </script>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+  </section>
+</body>
+
+<script>
+    function editItem_Price(obj){
+
+        $("#e_price").val($(obj).attr("item_price"));
+        $("#e_itemName").val($(obj).attr("item_name"));
+        $("#e_id").val($(obj).attr("item_code"));
+        $("#item_id").val($(obj).attr("item_id"));
+
+    }
+</script>
+            <!--custom chart end-->
