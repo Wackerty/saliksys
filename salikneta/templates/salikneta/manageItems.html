@@ -165,6 +165,7 @@
                               <tbody id="ingredientTable_Body">
                               </tbody>
                           </table>
+                          <center><a href="" id="addIngredientsLink">Add ingredients</a></center>
                       </div>
                     </div>
                     <div class="modal-footer">
@@ -251,6 +252,8 @@
 
     function getIngredients(obj){
         var productPK = $(obj).attr("item_id");
+
+        $("#addIngredientsLink").attr("href","/salikneta/manageIngredients/" + productPK);
 
         $.ajax({
           url: '{% url "ajaxGetIngredients" %}',

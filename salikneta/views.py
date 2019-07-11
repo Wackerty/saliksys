@@ -264,6 +264,17 @@ def editItemPrice(request):
         p.save()
         Notifs.write("Price for " +p.name+" has been updated.")
     return HttpResponseRedirect(reverse('manageItems'))
+
+def editMaterialStock(request):
+    if request.method == 'POST':
+        print("waaat",request.POST['item_price'])
+        print("waaat",request.POST['item_id'])
+        p = Product.objects.get(idProduct=request.POST['item_id'])
+        print("waaat",request.POST['item_price'])
+        p.suggestedUnitPrice = float(request.POST['item_price'])
+        p.save()
+        Notifs.write("Price for " +p.name+" has been updated.")
+    return HttpResponseRedirect(reverse('manageItems'))
 def open_notif(request):
     notifs = Notifs.objects.all()
     for n in notifs:
@@ -443,7 +454,7 @@ def manageRawMaterials(request):
     return render(request, 'salikneta/manageRawMats.html',context)
 
 
-def manageIngredients(request):
+def manageIngredients(request, id):
     r = RawMaterials.objects.all()
     c = Category.objects.all()
     i = Product.objects.all()
@@ -452,6 +463,7 @@ def manageIngredients(request):
         "rawmaterials": r,
         "categories": c,
         "products": i,
+        "productID": id
     }
     if request.method == 'POST':
         c = Product(name=request.POST['itemName'], description=request.POST['description'],

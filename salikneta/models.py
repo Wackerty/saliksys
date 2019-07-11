@@ -328,6 +328,10 @@ class RawMaterials(models.Model):
         managed = False
         db_table = 'salikneta_rawmaterials'
 
+    @property
+    def get_material_code(self):
+        return self.idrawmaterials + 1000
+
 
 class IngredientsList(models.Model):
     ingredientslistid = models.AutoField(db_column='ingredientslistId', primary_key=True)  # Field name made lowercase.

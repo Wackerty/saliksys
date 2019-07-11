@@ -68,7 +68,7 @@
                   <div class="modal-content">
                     <div class="modal-header">
                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                      <h4 class="modal-title" id="myModalLabel">EDIT ITEM PRICE</h4>
+                      <h4 class="modal-title" id="myModalLabel">EDIT RAW MATERIAL STOCKS</h4>
                     </div>
                   <form action="{% url 'editItemPrice' %}" method="post">
                   {% csrf_token %}
@@ -82,14 +82,14 @@
                            </div>
                            <div class= "col-md-6">
                               <label class="control-label">Product ID</label>
-                              <input  class="form-control" name="item_code" id="e_id">
+                              <input  class="form-control" name="item_code" id="e_id" readonly>
                               </input>
                            </div>
                          </div>
 
                           <div class="row">
-                                <label class="control-label">Price</label>
-                                <input type="text" class="form-control" id="e_price" name="item_price" value="" >
+                                <label class="control-label">Stocks</label>
+                                <input type="number" class="form-control" id="e_stocks" name="e_stocks" value="" min="0" >
                           </div>
                       </div>
                     </div>
@@ -123,7 +123,7 @@
                       {% for rawmaterial in rawmaterials %}
                           <tr style="color:black">
                               <td>{{rawmaterial.name}}</td>
-                              <td>{{rawmaterial.unitsInStock}}</td>
+                              <td>{{rawmaterial.unitsInStock}} <a href="#" data-toggle="modal" data-target="#modal_edit"  item_code="{{ rawmaterial.get_material_code }}" item_name="{{ rawmaterial.name }}" item_stock="{{ rawmaterial.unitsInStock }}" item_id="{{ rawmaterial.idProduct }}" onclick="edit_Stock(this)"><i class="fa fa-edit"></i></a></td>
                               <td>{{rawmaterial.unitOfMeasure}}</td>
                               <td>{{rawmaterial.idSupplier.name }}</td>
                           </tr>
@@ -144,9 +144,9 @@
 </body>
 
 <script>
-    function editItem_Price(obj){
+    function edit_Stock(obj){
 
-        $("#e_price").val($(obj).attr("item_price"));
+        $("#e_stocks").val($(obj).attr("item_stock"));
         $("#e_itemName").val($(obj).attr("item_name"));
         $("#e_id").val($(obj).attr("item_code"));
         $("#item_id").val($(obj).attr("item_id"));
