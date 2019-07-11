@@ -766,7 +766,7 @@ def ajaxGetIngredients(request):
     ingredients = []
 
     for ingredient in i:
-        ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
+        ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
 
     return JsonResponse(ingredients, safe=False)
 
@@ -794,6 +794,26 @@ def ajaxAddIngredient(request):
     i.save()
 
     Notifs.write("New Ingredient -"+ i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.")
+
+    i = IngredientsList.objects.filter(idProduct=productPK)
+    ingredients = []
+
+    for ingredient in i:
+        ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded,
+                            "uom": ingredient.idProduct.unitOfMeasure})
+
+    return JsonResponse(ingredients, safe=False)
+
+def ajaxRemoveIngredient(request):
+    ingredientID = request.GET.get('ingredientID')
+
+    ingredient = IngredientsList.objects.get(ingredientslistid=ingredientID)
+
+    productPK = ingredient.idProduct
+
+    Notifs.write("Ingredient -"+ ingredient.idrawmaterials.name + "- for -" + ingredient.idProduct.name + "- has been removed.")
+
+    ingredient.delete()
 
     i = IngredientsList.objects.filter(idProduct=productPK)
     ingredients = []

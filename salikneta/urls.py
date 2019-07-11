@@ -66,6 +66,7 @@ urlpatterns = [
     path('ajax/ajaxGetIngredients/', views.ajaxGetIngredients, name='ajaxGetIngredients'),
     path('ajax/ajaxGetUOM/', views.ajaxGetUOM, name='ajaxGetUOM'),
     path('ajax/ajaxAddIngredient/', views.ajaxAddIngredient, name='ajaxAddIngredient'),
+    path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),
 
 ]
 

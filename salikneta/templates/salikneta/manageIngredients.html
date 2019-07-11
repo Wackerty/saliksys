@@ -114,6 +114,7 @@
                       <th>Raw Material</th>
                       <th>Quantity Needed</th>
                       <th>UOM</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id ="itemsBody" >
@@ -213,9 +214,28 @@
         var myTable = $('#itm_tbl').DataTable();
               myTable.clear();
               for(var i = 0; i < data.length; i++){
-                  myTable.row.add([data[i].rawMaterialName, data[i].qtyneeded, data[i].uom]);
+                  myTable.row.add([data[i].rawMaterialName, data[i].qtyneeded, data[i].uom, '<button class="btn btn-danger btn-md" value="'+data[i].pk+'" onclick="removeIngredient(this)">Remove</button>']);
               }
               myTable.draw();
+    }
+
+    function removeIngredient(obj){
+        var ingredientID = $(obj).val();
+
+        $.ajax({
+          url: '{% url "ajaxRemoveIngredient" %}',
+          data: {
+            "ingredientID":ingredientID,
+          },
+          dataType: 'json',
+          success: function(data){
+              update_table(data);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
     }
 </script>
             <!--custom chart end-->
