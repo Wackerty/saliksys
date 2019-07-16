@@ -134,7 +134,7 @@
 
 
                                     </table>
-                                    <table class="table table-hover" id="forDelivery{{po.pk}}" style="display: none;">
+                                     <table class="table table-hover" id="forDelivery{{po.pk}}" style="display: none;">
                                       
                                       <thead>
                                         <tr>
@@ -153,11 +153,6 @@
                                           <td>{{ o.get_pending}}</td>
                                           <td><input class="form-control" type="number" value="1" /><span class="i{{o.idProduct.pk}}"></span></td>
                                         </tr>
-
-
-
-                                       
-
                                         {% endfor %}
 
                                       </tbody>
@@ -168,7 +163,7 @@
                                   </div>
                                 <div class="modal-footer">
                                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                  {% if po.status == "In Transit" or po.status == "PARTIALLY RECEIVED" %}
+                                  {% if po.status == "In Transit" or po.status == "PARTIALLY RECEIVED"  %}
 
                                     <button type="button" id="receiveBtn{{po.pk}}" onclick="forDelivery('{{po.pk}}')" class="btn btn-success">Receive</button>
                                   {% endif %}

@@ -28,7 +28,7 @@
                               <label class="control-label">Raw Material</label>
                              <select  class="form-control" name="category" id="rawMaterial">
                                 {% for rawmaterial in rawmaterials %}
-                                  <option value="{{rawmaterial.pk}}">{{rawmaterial.name}}</option>
+                                  <option value="{{rawmaterial.name}}">{{rawmaterial.name}}</option>
                                 {% endfor %}
                               </select>
                            </div>

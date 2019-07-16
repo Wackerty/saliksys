@@ -99,8 +99,6 @@ class Product(models.Model):
     name = models.CharField(max_length=45)
     description = models.CharField(max_length=45)
     suggestedUnitPrice = models.FloatField()
-    unitsInStock = models.FloatField()
-    unitsReserved = models.FloatField(default=0)
     reorderLevel = models.FloatField()
     unitOfMeasure = models.CharField(max_length=45)
     SKU = models.IntegerField()
@@ -114,6 +112,7 @@ class Product(models.Model):
     @property
     def get_product_code(self):
         return self.idProduct + 1000
+
     @property
     def get_num_incoming(self):
         incoming = 0;
@@ -121,6 +120,11 @@ class Product(models.Model):
         for o in objs:
            incoming += o.qty - o.get_delivered_products_num
         return incoming
+
+    @staticmethod
+    def get_product_count(self, branchID):
+        productCount = ProductCount.objects.get(idProduct=self.idProduct, idBranch=branchID).unitsInStock
+        return productCount
 
     @staticmethod
     def get_end_inventory(self, ed):
@@ -150,13 +154,28 @@ class Product(models.Model):
 
         ct = (self.unitsInStock + deliveries)-(sales+backloads+tos)
         return ct
+
+
+class ProductCount(models.Model):
+    idProductCount = models.AutoField(db_column='productCountID', primary_key=True)  # Field name made lowercase.
+    idProduct = models.ForeignKey(Product, models.CASCADE, db_column='idProduct_id')  # Field name made lowercase.
+    idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
+    unitsInStock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
+    unitsReserved = models.IntegerField(db_column='unitsReserved', default=0)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_productcount'
+
     @staticmethod
-    def get_num_lowstock_items():
+    def get_num_lowstock_items(branch):
         ct = 0
-        for p in Product.objects.all():
-            if p.unitsInStock < p.reorderLevel:
-                ct+=1
+        for p in ProductCount.objects.filter(idBranch=branch):
+            if p.unitsInStock < p.idProduct.reorderLevel:
+                ct += 1
         return ct
+
+
 class PurchaseOrder(models.Model):
     idPurchaseOrder = models.AutoField(primary_key=True)
     idCashier = models.ForeignKey(Cashier, on_delete=models.CASCADE)

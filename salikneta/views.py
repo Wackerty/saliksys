@@ -30,6 +30,7 @@ def log_in_validate(request):
             request.session['userID'] = Cashier.objects.get(username=user, password=password).idCashier
             request.session['firstname'] = Cashier.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Cashier.objects.get(username=user, password=password).lastname
+            request.session['branchID'] = Cashier.objects.get(username=user, password=password).idBranch.idBranch
             return redirect('home')
         elif try2: 
             request.session['username'] = user
@@ -39,6 +40,7 @@ def log_in_validate(request):
             request.session['userID'] = Manager.objects.get(username=user, password=password).idManager
             request.session['firstname'] = Manager.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Manager.objects.get(username=user, password=password).lastname
+            request.session['branchID'] = Manager.objects.get(username=user, password=password).idBranch.idBranch
             return redirect('home')
         else:
             messages.warning(request, 'Wrong credentials, please try again.')
@@ -48,7 +50,7 @@ def home(request):
     return render(request, 'salikneta/home.html',{"notifs":Notifs.objects.all()})
 
 def get_num_lowstock(request):
-    return JsonResponse({"numb":Product.get_num_lowstock_items()})
+    return JsonResponse({"numb":ProductCount.get_num_lowstock_items(Branch.objects.get(idBranch=request.session['branchID']))})
 
 def get_invoice_by_id(request, idSales):
     data = []
@@ -415,19 +417,34 @@ def manageSuppliers(request):
     return render(request, 'salikneta/manageSuppliers.html',context)
 
 def manageItems(request):
+    b = Branch.objects.get(idBranch=request.session['branchID'])
     c = Category.objects.all()
     i = Product.objects.all()
+
+    for product in i:
+        unitsInStock = product.get_product_count(product, b)
+        product.unitsInStock = unitsInStock
 
     context = {
         "categories":c,
         "products":i,
+        "branch":b,
     }
     if request.method == 'POST':
         c = Product(name=request.POST['itemName'], description=request.POST['description'],
-                    suggestedUnitPrice=request.POST['price'], unitsInStock=request.POST['startStock'],
-                    img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],unitOfMeasure=request.POST['unitsOfMeasure'],
-                    SKU=request.POST['SKU'],idCategory_id=request.POST['category'])
+                    suggestedUnitPrice=request.POST['price'], img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],
+                    unitOfMeasure=request.POST['unitsOfMeasure'], SKU=request.POST['SKU'],idCategory_id=request.POST['category'])
         c.save()
+
+        branches = Branch.objects.all()
+
+        for branch in branches:
+            if branch == b:
+                cc = ProductCount(idProduct=c, idBranch=branch, unitsInStock=request.POST['startStock'])
+            else:
+                cc = ProductCount(idProduct=c, idBranch=branch, unitsInStock=0)
+
+            cc.save()
 
         Notifs.write("New Item -" +c.name+"- has been added.")
         return HttpResponseRedirect(reverse('manageItems'))
@@ -676,18 +693,17 @@ def ajaxSaveDelivery(request):
     d.save()
 
     isOkay = True
-    print(len(ordered))
-    print(len(quantity))
-    print(len(products))
+    hasExcess = False
+   # print(len(ordered))
+   # print(len(quantity))
+   # print(len(products))
     for x in range(0, len(products)):
-
-
         d1 = DeliveredProducts(qty=quantity[x],idDelivery_id=d.pk,idOrderLines_id=lines[x])
         d1.save()
         p = Product.objects.get(pk=products[x])
-        if float(ordered[x]) != float(quantity[x]):
-            print(float(p.unitsInStock))
-            print(float(quantity[x]))
+        if float(ordered[x]) != float(quantity[x]) and float(ordered[x]) > float(quantity[x]):
+            #print(float(p.unitsInStock))
+            #print(float(quantity[x]))
             isOkay = False
 
         p.unitsInStock = int(p.unitsInStock) + int(quantity[x])
@@ -695,8 +711,18 @@ def ajaxSaveDelivery(request):
 
 
     qwe = PurchaseOrder.objects.get(pk=idPurchaseOrder)
-    if isOkay == True:
+
+    orderLines = qwe.get_orderLines
+
+    for orderLine in orderLines:
+        if orderLine.get_pending < 0:
+            hasExcess = True
+
+    if isOkay == True and hasExcess == False:
         qwe.status = "RECEIVED"
+        qwe.save()
+    elif isOkay == True and hasExcess == True:
+        qwe.status = "RECEIVED WITH EXCESS"
         qwe.save()
     else:
         qwe.status = "PARTIALLY RECEIVED"
