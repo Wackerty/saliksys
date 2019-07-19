@@ -256,6 +256,7 @@ def inventory_report_detail(request):
         return redirect('inventory_report')
     return render(request, 'salikneta/reports/inventory_report_detail.html',{"report_data":report_data,"gen_info":gen_info})
 
+
 def editItemPrice(request):
     if request.method == 'POST':
         print("waaat",request.POST['item_price'])
@@ -267,16 +268,18 @@ def editItemPrice(request):
         Notifs.write("Price for " +p.name+" has been updated.")
     return HttpResponseRedirect(reverse('manageItems'))
 
+
 def editMaterialStock(request):
     if request.method == 'POST':
-        print("waaat",request.POST['item_price'])
         print("waaat",request.POST['item_id'])
-        p = Product.objects.get(idProduct=request.POST['item_id'])
-        print("waaat",request.POST['item_price'])
-        p.suggestedUnitPrice = float(request.POST['item_price'])
-        p.save()
-        Notifs.write("Price for " +p.name+" has been updated.")
-    return HttpResponseRedirect(reverse('manageItems'))
+        rc = RawMaterialCount.objects.get(idrawmaterial_id=request.POST['item_id'], idBranch__idBranch=request.session['branchID'])
+        print("waaat",request.POST['e_stocks'])
+        rc.unitsinstock = float(request.POST['e_stocks'])
+        rc.save()
+        Notifs.write("Raw Material Stocks for " +rc.idrawmaterial.name+" in "+rc.idBranch.name+" branch has been updated.")
+    return HttpResponseRedirect(reverse('manageRawMaterials'))
+
+
 def open_notif(request):
     notifs = Notifs.objects.all()
     for n in notifs:
@@ -346,12 +349,17 @@ def purchaseOrder(request):
     usertype = request.session['usertype']
     if usertype == "manager":
         m = Manager.objects.filter(username=request.session['username']).select_related("idBranch")
-        branch = m[0].idBranch.name
+        branch = m[0].idBranch
     if usertype == "cashier":
         m = Cashier.objects.filter(username=request.session['username']).select_related("idBranch")
-        branch = m[0].idBranch.name
+        branch = m[0].idBranch
 
     i = Product.objects.all()
+
+    for product in i:
+        unitsInStock = product.get_product_count(product, branch)
+        product.unitsInStock = unitsInStock
+
     purchaseOrders = PurchaseOrder.objects.filter().select_related("idSupplier")
 
 
@@ -452,18 +460,33 @@ def manageItems(request):
 
 
 def manageRawMaterials(request):
+    b = Branch.objects.get(idBranch=request.session['branchID'])
     r = RawMaterials.objects.all()
     s = Supplier.objects.all()
+
+    for rawMaterial in r:
+        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
+        rawMaterial.unitsInStock = unitsInStock
 
     context = {
         "rawmaterials":r,
         "suppliers":s,
+        "branch":b,
     }
 
     if request.method == 'POST':
-        r = RawMaterials(name=request.POST['rawMaterialName'], unitsInStock=request.POST['startStock'],
-                         unitOfMeasure=request.POST['unitsOfMeasure'], idSupplier_id=request.POST['supplier'])
+        r = RawMaterials(name=request.POST['rawMaterialName'], unitOfMeasure=request.POST['unitsOfMeasure'], idSupplier_id=request.POST['supplier'])
         r.save()
+
+        branches = Branch.objects.all()
+
+        for branch in branches:
+            if branch == b:
+                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=request.POST['startStock'])
+            else:
+                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=0)
+
+            rr.save()
 
         Notifs.write("New Raw Material -" +r.name+"- has been added.")
         return HttpResponseRedirect(reverse('manageRawMaterials'))
@@ -472,9 +495,14 @@ def manageRawMaterials(request):
 
 
 def manageIngredients(request, id):
+    b = Branch.objects.get(idBranch=request.session['branchID'])
     r = RawMaterials.objects.all()
     c = Category.objects.all()
     i = Product.objects.all()
+
+    for rawMaterial in r:
+        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
+        rawMaterial.unitsInStock = unitsInStock
 
     context = {
         "rawmaterials": r,
@@ -493,6 +521,32 @@ def manageIngredients(request, id):
         Notifs.write("New Item -" + c.name + "- has been added.")
         return HttpResponseRedirect(reverse('manageIngredients'))
     return render(request, 'salikneta/manageIngredients.html', context)
+
+
+def produceItems(request, id):
+    r = RawMaterials.objects.all()
+    c = Category.objects.all()
+    i = Product.objects.all()
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+
+    context = {
+        "rawmaterials": r,
+        "categories": c,
+        "products": i,
+        "branch": b,
+        "productID": id
+    }
+    if request.method == 'POST':
+        c = Product(name=request.POST['itemName'], description=request.POST['description'],
+                    suggestedUnitPrice=request.POST['price'], unitsInStock=request.POST['startStock'],
+                    img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],
+                    unitOfMeasure=request.POST['unitsOfMeasure'],
+                    SKU=request.POST['SKU'], idCategory_id=request.POST['category'])
+        c.save()
+
+        Notifs.write("New Item -" + c.name + "- has been added.")
+        return HttpResponseRedirect(reverse('manageIngredients'))
+    return render(request, 'salikneta/produceItems.html', context)
 
 
 def backload(request):
@@ -614,12 +668,12 @@ def ajaxGetUpdatedItems(request):
 
 
 def ajaxGetInStock(request):
-
     pk = request.GET.get('idProduct')
     c = Product.objects.get(pk=pk)
+    b = Branch.objects.get(pk=request.session['branchID'])
     products = []
 
-    products.append({"idProduct":c.pk,"unitsInStock":c.unitsInStock,"incoming":c.get_num_incoming})
+    products.append({"idProduct":c.pk,"unitsInStock":c.get_product_count(c, b),"incoming":c.get_num_incoming})
         
 
     return JsonResponse(products, safe=False)
@@ -801,10 +855,25 @@ def ajaxCancelTO(request):
 def ajaxGetIngredients(request):
     pk = request.GET.get('productPk')
     i = IngredientsList.objects.filter(idProduct=pk)
+    b = Branch.objects.get(idBranch=request.session['branchID'])
     ingredients = []
 
     for ingredient in i:
-        ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
+        ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
+                            "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure,
+                            "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, b)})
+
+    return JsonResponse(ingredients, safe=False)
+
+
+def ajaxGetAmountCanProduce(request):
+    pk = request.GET.get('productPk')
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+    ingredients = []
+
+    p = Product.objects.get(idProduct=pk)
+
+    ingredients.append({"amount":p.get_amount_can_produce(p, b), "unitsInStock":ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock})
 
     return JsonResponse(ingredients, safe=False)
 
@@ -838,9 +907,10 @@ def ajaxAddIngredient(request):
 
     for ingredient in i:
         ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded,
-                            "uom": ingredient.idProduct.unitOfMeasure})
+                            "uom": ingredient.idProduct.unitOfMeasure, "pk": ingredient.ingredientslistid})
 
     return JsonResponse(ingredients, safe=False)
+
 
 def ajaxRemoveIngredient(request):
     ingredientID = request.GET.get('ingredientID')
@@ -859,5 +929,31 @@ def ajaxRemoveIngredient(request):
     for ingredient in i:
         ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name, "qtyneeded": ingredient.qtyneeded,
                             "uom": ingredient.idProduct.unitOfMeasure})
+
+    return JsonResponse(ingredients, safe=False)
+
+
+def ajaxProduceItems(request):
+    pk = request.GET.get('productPK')
+    amount = request.GET.get('amount')
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+
+    p = Product.objects.get(idProduct=pk)
+    pc = ProductCount.objects.get(idProduct=p, idBranch=b)
+
+    pc.add_stocks(pc, amount)
+
+    i = IngredientsList.objects.filter(idProduct=p)
+    ingredients = []
+
+    for ingredient in i:
+        ingredients.append({"rawMaterialName": ingredient.idrawmaterials.name,
+                            "qtyneeded": ingredient.qtyneeded,
+                            "uom": ingredient.idProduct.unitOfMeasure,
+                            "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, b),
+                            "unitsInStockProduct": pc.unitsInStock,
+                            "amount":p.get_amount_can_produce(p, b)})
+
+    Notifs.write("Produced " + amount + " stocks for product: " + p.name)
 
     return JsonResponse(ingredients, safe=False)

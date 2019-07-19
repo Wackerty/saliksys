@@ -357,7 +357,6 @@ s
     var items = new Array()
     {% for p in products %}
       items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock}}","{{p.get_num_incoming}}"));
-
     {% endfor %}
 
     var tbl = document.getElementById("tableData");

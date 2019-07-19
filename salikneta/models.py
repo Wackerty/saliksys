@@ -3,6 +3,7 @@ from django.db import models
 from dateutil.relativedelta import relativedelta
 
 from datetime import datetime,timedelta
+from django.db.models import Avg, Max, Min, Sum
 import pytz
 # Create your models here.
 
@@ -114,6 +115,10 @@ class Product(models.Model):
         return self.idProduct + 1000
 
     @property
+    def get_ingredients(self):
+        return IngredientsList.objects.filter(idProduct=self)
+
+    @property
     def get_num_incoming(self):
         incoming = 0;
         objs = OrderLines.objects.filter(idProduct_id=self.idProduct)
@@ -125,6 +130,19 @@ class Product(models.Model):
     def get_product_count(self, branchID):
         productCount = ProductCount.objects.get(idProduct=self.idProduct, idBranch=branchID).unitsInStock
         return productCount
+
+    @staticmethod
+    def get_amount_can_produce(self, branchID):
+        i = IngredientsList.objects.filter(idProduct=self)
+
+        for ingredient in i:
+            ingredient.unitsInStock = ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, branchID)
+            ingredient.canProduce = ingredient.unitsInStock // ingredient.qtyneeded
+
+        i.order_by('-canProduce')
+        print(i[0].canProduce)
+
+        return i[0].canProduce
 
     @staticmethod
     def get_end_inventory(self, ed):
@@ -175,6 +193,20 @@ class ProductCount(models.Model):
                 ct += 1
         return ct
 
+    @staticmethod
+    def add_stocks(self, amount):
+        i = IngredientsList.objects.filter(idProduct=self.idProduct)
+
+        for ingredient in i:
+            rc = RawMaterialCount.objects.get(idrawmaterial=ingredient.idrawmaterials, idBranch=self.idBranch)
+            rc.deduct_stock(rc, ingredient.qtyneeded*int(amount))
+
+        self.unitsInStock = self.unitsInStock + int(amount)
+
+        self.save()
+
+        print("added: "+str(amount)+" stocks to " + str(self.idProduct.name))
+
 
 class PurchaseOrder(models.Model):
     idPurchaseOrder = models.AutoField(primary_key=True)
@@ -208,8 +240,6 @@ class OrderLines(models.Model):
             qty += d.qty
         return qty
 
-    
-        
 
 class Delivery(models.Model):
     idDelivery = models.AutoField(primary_key=True)
@@ -218,6 +248,7 @@ class Delivery(models.Model):
     @property
     def get_delivered_products(self):
         return DeliveredProducts.objects.filter(idDelivery=self)
+
 
 class DeliveredProducts(models.Model):
     idDeliveredProducts = models.AutoField(primary_key=True)
@@ -338,7 +369,6 @@ class TransferLines(models.Model):
 class RawMaterials(models.Model):
     idrawmaterials = models.AutoField(db_column='idRawMaterials', primary_key=True)  # Field name made lowercase.
     name = models.CharField(max_length=45)
-    unitsInStock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
     unitOfMeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
     idSupplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,db_column='idSupplier_id')
 
@@ -350,6 +380,30 @@ class RawMaterials(models.Model):
     @property
     def get_material_code(self):
         return self.idrawmaterials + 1000
+
+    @staticmethod
+    def get_product_count(self, branchID):
+        rawMaterialCount = RawMaterialCount.objects.get(idrawmaterial=self.idrawmaterials, idBranch=branchID).unitsinstock
+        return rawMaterialCount
+
+
+class RawMaterialCount(models.Model):
+    rawmaterialcountid = models.AutoField(db_column='rawmaterialCountID', primary_key=True)  # Field name made lowercase.
+    idrawmaterial = models.ForeignKey(RawMaterials, models.CASCADE, db_column='idRawmaterial_id')  # Field name made lowercase.
+    idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
+    unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterialcount'
+
+    @staticmethod
+    def deduct_stock(self, amount):
+        self.unitsinstock = self.unitsinstock - amount
+
+        self.save()
+
+        print("deducted: " + str(amount) + " stocks to " + str(self.idrawmaterial.name))
 
 
 class IngredientsList(models.Model):
