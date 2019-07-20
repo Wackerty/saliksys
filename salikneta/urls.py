@@ -31,11 +31,13 @@ urlpatterns = [
     path('manageSuppliers/', views.manageSuppliers, name='manageSuppliers'),
     path('manageItems/', views.manageItems, name='manageItems'),
     path('manageRawMaterials/', views.manageRawMaterials, name='manageRawMaterials'),
-    path('manageIngredients/<int:id>', views.manageIngredients, name='manageIngredients'),
+    path('manageIngredients/<str:id>', views.manageIngredients, name='manageIngredients'),
     path('editItemPrice/', views.editItemPrice, name='editItemPrice'),
+    path('editMaterialStock/', views.editMaterialStock, name='editMaterialStock'),
     path('purchaseOrder/', views.purchaseOrder, name='purchaseOrder'),
     path('backload/', views.backload, name='backload'),
     path('transferOrder/', views.transferOrder, name='transferOrder'),
+    path('produceItems/<str:id>', views.produceItems, name='produceItems'),
     path('pos/', views.pos, name='pos'),
     path('sales/', views.sales, name='sales'),
     path('sales_report/', views.sales_report, name='sales_report'),
@@ -67,6 +69,8 @@ urlpatterns = [
     path('ajax/ajaxGetUOM/', views.ajaxGetUOM, name='ajaxGetUOM'),
     path('ajax/ajaxAddIngredient/', views.ajaxAddIngredient, name='ajaxAddIngredient'),
     path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),
+    path('ajax/ajaxGetAmountCanProduce/', views.ajaxGetAmountCanProduce, name='ajaxGetAmountCanProduce'),
+    path('ajax/ajaxProduceItems/', views.ajaxProduceItems, name='ajaxProduceItems'),
 
 ]
 

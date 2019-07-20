@@ -28,9 +28,10 @@
                               <label class="control-label">Raw Material</label>
                              <select  class="form-control" name="category" id="rawMaterial">
                                 {% for rawmaterial in rawmaterials %}
-                                  <option value="{{rawmaterial.pk}}">{{rawmaterial.name}}</option>
+                                  <option value="{{rawmaterial.idrawmaterials}}">{{rawmaterial.name}}</option>
                                 {% endfor %}
                               </select>
+                           <a href="{% url 'manageRawMaterials' %}">Add new Raw Material</a>
                            </div>
                            <div class= "col-md-6">
                               <label class="control-label">UOM</label>
@@ -136,6 +137,11 @@
 <script>
     $(document).ready(function(){
         var productPk = $("#products").val({{ productID }});
+
+        if(productPk.val() != 0){
+            $("#ingredientsButton").attr("disabled", false);
+        }
+
         getIngredients(productPk.val());
     });
 
