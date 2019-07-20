@@ -308,7 +308,7 @@ CREATE TABLE `notifs` (
   `timestamp` datetime DEFAULT NULL,
   `viewed` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`notif_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -317,7 +317,7 @@ CREATE TABLE `notifs` (
 
 LOCK TABLES `notifs` WRITE;
 /*!40000 ALTER TABLE `notifs` DISABLE KEYS */;
-INSERT INTO `notifs` VALUES (26,'New Item -Apple- has been added.','2018-12-12 19:23:24',1),(27,'New Item -Tomato- has been added.','2018-12-12 19:24:05',1),(28,'New Item -Buko Shake- has been added.','2018-12-12 19:24:56',1),(29,'New Item -Rice Meal- has been added.','2018-12-12 19:25:44',1),(30,'New Item -Pork Liempo- has been added.','2018-12-12 19:26:29',1),(31,'New Item -Eggs- has been added.','2018-12-12 19:27:07',1),(32,'New Item -Eggplant- has been added.','2018-12-12 19:27:56',1),(33,'New PO37 has been added.','2018-12-12 19:56:00',1),(34,'New PO38 has been added.','2018-12-12 19:56:46',1),(35,'New PO39 has been added.','2018-12-12 19:57:49',1),(36,'New PO40 has been added.','2018-12-12 19:58:13',1),(37,'Products have been backloaded.','2018-12-12 19:59:34',1),(38,'Products have been delivered.','2018-12-12 20:00:03',1),(39,'Products have been delivered.','2018-12-12 20:00:46',1),(40,'Products have been delivered.','2018-12-12 20:01:21',1),(41,'Products have been delivered.','2018-12-12 20:01:38',1),(42,'Products have been backloaded.','2018-12-12 20:07:21',1),(43,'Products have been backloaded.','2018-12-12 20:07:45',1),(44,'New Item -Jemuel Tit- has been added.','2019-01-16 10:01:38',1),(45,'New Item -Testing- has been added.','2019-07-06 15:54:10',1),(46,'New Raw Material -Rice- has been added.','2019-07-06 16:47:29',1),(47,'Price for Testing has been updated.','2019-07-07 20:04:10',1),(48,'New Raw Material -Apple- has been added.','2019-07-07 20:35:01',NULL),(49,'New Ingredient -Egg- for -Rice Meal- has been added.','2019-07-08 19:25:41',NULL),(50,'New Ingredient -Rice- for -Rice Meal- has been added.','2019-07-08 19:25:52',NULL),(51,'Price for Testing has been updated.','2019-07-08 19:32:04',NULL),(52,'New Item -Melon- has been added.','2019-07-16 21:47:51',NULL),(53,'New Item -Melon- has been added.','2019-07-16 21:50:04',NULL),(54,'New Item -Melon- has been added.','2019-07-16 21:59:28',NULL);
+INSERT INTO `notifs` VALUES (26,'New Item -Apple- has been added.','2018-12-12 19:23:24',1),(27,'New Item -Tomato- has been added.','2018-12-12 19:24:05',1),(28,'New Item -Buko Shake- has been added.','2018-12-12 19:24:56',1),(29,'New Item -Rice Meal- has been added.','2018-12-12 19:25:44',1),(30,'New Item -Pork Liempo- has been added.','2018-12-12 19:26:29',1),(31,'New Item -Eggs- has been added.','2018-12-12 19:27:07',1),(32,'New Item -Eggplant- has been added.','2018-12-12 19:27:56',1),(33,'New PO37 has been added.','2018-12-12 19:56:00',1),(34,'New PO38 has been added.','2018-12-12 19:56:46',1),(35,'New PO39 has been added.','2018-12-12 19:57:49',1),(36,'New PO40 has been added.','2018-12-12 19:58:13',1),(37,'Products have been backloaded.','2018-12-12 19:59:34',1),(38,'Products have been delivered.','2018-12-12 20:00:03',1),(39,'Products have been delivered.','2018-12-12 20:00:46',1),(40,'Products have been delivered.','2018-12-12 20:01:21',1),(41,'Products have been delivered.','2018-12-12 20:01:38',1),(42,'Products have been backloaded.','2018-12-12 20:07:21',1),(43,'Products have been backloaded.','2018-12-12 20:07:45',1),(44,'New Item -Jemuel Tit- has been added.','2019-01-16 10:01:38',1),(45,'New Item -Testing- has been added.','2019-07-06 15:54:10',1),(46,'New Raw Material -Rice- has been added.','2019-07-06 16:47:29',1),(47,'Price for Testing has been updated.','2019-07-07 20:04:10',1),(48,'New Raw Material -Apple- has been added.','2019-07-07 20:35:01',1),(49,'New Ingredient -Egg- for -Rice Meal- has been added.','2019-07-08 19:25:41',1),(50,'New Ingredient -Rice- for -Rice Meal- has been added.','2019-07-08 19:25:52',1),(51,'Price for Testing has been updated.','2019-07-08 19:32:04',1),(52,'New Item -Melon- has been added.','2019-07-16 21:47:51',1),(53,'New Item -Melon- has been added.','2019-07-16 21:50:04',1),(54,'New Item -Melon- has been added.','2019-07-16 21:59:28',1),(55,'New Raw Material -Chicken- has been added.','2019-07-17 22:38:41',1),(56,'New Raw Material -Water- has been added.','2019-07-17 22:41:24',1),(57,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:36:27',1),(58,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:37:01',1),(59,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:19:49',1),(60,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 20:29:39',NULL),(61,'Produced 5 stocks for product: Apple','2019-07-19 20:29:47',NULL),(62,'Raw Material Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:34:23',NULL),(63,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:43:13',NULL),(64,'Ingredient -Egg- for -Eggs- has been removed.','2019-07-19 20:48:39',NULL),(65,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:48:44',NULL),(66,'Produced 20 stocks for product: Eggs','2019-07-19 20:49:17',NULL),(67,'New Raw Material -Tomato- has been added.','2019-07-19 21:01:45',NULL),(68,'New Ingredient -Tomato- for -Tomato- has been added.','2019-07-19 21:02:05',NULL),(69,'Produced 5 stocks for product: Tomato','2019-07-19 21:02:17',NULL),(70,'Produced 1 stocks for product: Tomato','2019-07-19 21:03:44',NULL),(71,'Produced 1 stocks for product: Tomato','2019-07-19 21:05:28',NULL),(72,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 21:05:59',NULL),(73,'Produced 1 stocks for product: Apple','2019-07-19 21:06:09',NULL),(74,'New Raw Material -Eggplant- has been added.','2019-07-19 21:16:01',NULL),(75,'New Ingredient -Eggplant- for -Eggplant- has been added.','2019-07-19 21:16:19',NULL),(76,'Produced 5 stocks for product: Eggplant','2019-07-19 21:16:28',NULL);
 /*!40000 ALTER TABLE `notifs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -532,7 +532,7 @@ CREATE TABLE `salikneta_ingredientlist` (
   KEY `fk_salikneta_ingredientlist_salikneta_rawmaterials_idx` (`idRawMaterials_id`),
   CONSTRAINT `fk_salikneta_ingredientlist_salikneta_product` FOREIGN KEY (`idProduct_id`) REFERENCES `salikneta_product` (`idProduct`),
   CONSTRAINT `fk_salikneta_ingredientlist_salikneta_rawmaterials` FOREIGN KEY (`idRawMaterials_id`) REFERENCES `salikneta_rawmaterials` (`idRawMaterials`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -541,7 +541,7 @@ CREATE TABLE `salikneta_ingredientlist` (
 
 LOCK TABLES `salikneta_ingredientlist` WRITE;
 /*!40000 ALTER TABLE `salikneta_ingredientlist` DISABLE KEYS */;
-INSERT INTO `salikneta_ingredientlist` VALUES (1,4,3,1),(2,7,1,1),(3,7,2,100);
+INSERT INTO `salikneta_ingredientlist` VALUES (1,4,3,1),(2,7,1,1),(3,7,2,100),(5,9,1,1),(6,5,9,1),(7,10,10,1);
 /*!40000 ALTER TABLE `salikneta_ingredientlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -698,7 +698,7 @@ CREATE TABLE `salikneta_productcount` (
 
 LOCK TABLES `salikneta_productcount` WRITE;
 /*!40000 ALTER TABLE `salikneta_productcount` DISABLE KEYS */;
-INSERT INTO `salikneta_productcount` VALUES (1,4,1,14,5),(2,5,1,54,0),(3,6,1,7,0),(4,7,1,115,0),(5,8,1,29,5),(6,9,1,15,0),(7,10,1,13,0),(8,12,1,10,0),(9,4,2,14,5),(10,5,2,54,0),(11,6,2,7,0),(12,7,2,115,0),(13,8,2,29,5),(14,9,2,15,0),(15,10,2,13,0),(16,12,2,10,0),(17,4,3,14,5),(18,5,3,54,0),(19,6,3,7,0),(20,7,3,115,0),(21,8,3,29,5),(22,9,3,15,0),(23,10,3,13,0),(24,12,3,10,0),(25,4,4,14,5),(26,5,4,54,0),(27,6,4,7,0),(28,7,4,115,0),(29,8,4,29,5),(30,9,4,15,0),(31,10,4,13,0),(32,12,4,10,0),(33,4,5,14,5),(34,5,5,54,0),(35,6,5,7,0),(36,7,5,115,0),(37,8,5,29,5),(38,9,5,15,0),(39,10,5,13,0),(40,12,5,10,0),(41,4,6,14,5),(42,5,6,54,0),(43,6,6,7,0),(44,7,6,115,0),(45,8,6,29,5),(46,9,6,15,0),(47,10,6,13,0),(48,12,6,10,0),(49,16,1,20,0),(50,16,2,0,0),(51,16,3,0,0),(52,16,4,0,0),(53,16,5,0,0),(54,16,6,0,0);
+INSERT INTO `salikneta_productcount` VALUES (1,4,1,40,5),(2,5,1,61,0),(3,6,1,7,0),(4,7,1,118,0),(5,8,1,29,5),(6,9,1,35,0),(7,10,1,18,0),(8,12,1,10,0),(9,4,2,14,5),(10,5,2,54,0),(11,6,2,7,0),(12,7,2,115,0),(13,8,2,29,5),(14,9,2,15,0),(15,10,2,13,0),(16,12,2,10,0),(17,4,3,14,5),(18,5,3,54,0),(19,6,3,7,0),(20,7,3,115,0),(21,8,3,29,5),(22,9,3,15,0),(23,10,3,13,0),(24,12,3,10,0),(25,4,4,14,5),(26,5,4,54,0),(27,6,4,7,0),(28,7,4,115,0),(29,8,4,29,5),(30,9,4,15,0),(31,10,4,13,0),(32,12,4,10,0),(33,4,5,14,5),(34,5,5,54,0),(35,6,5,7,0),(36,7,5,115,0),(37,8,5,29,5),(38,9,5,15,0),(39,10,5,13,0),(40,12,5,10,0),(41,4,6,14,5),(42,5,6,54,0),(43,6,6,7,0),(44,7,6,115,0),(45,8,6,29,5),(46,9,6,15,0),(47,10,6,13,0),(48,12,6,10,0),(49,16,1,20,0),(50,16,2,0,0),(51,16,3,0,0),(52,16,4,0,0),(53,16,5,0,0),(54,16,6,0,0);
 /*!40000 ALTER TABLE `salikneta_productcount` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -735,6 +735,36 @@ INSERT INTO `salikneta_purchaseorder` VALUES (37,'2018-01-01','2014-01-01',2,2,'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `salikneta_rawmaterialcount`
+--
+
+DROP TABLE IF EXISTS `salikneta_rawmaterialcount`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `salikneta_rawmaterialcount` (
+  `rawmaterialCountID` int(11) NOT NULL AUTO_INCREMENT,
+  `idRawmaterial_id` int(11) NOT NULL,
+  `idBranch_id` int(11) NOT NULL,
+  `unitsInStock` float DEFAULT NULL,
+  PRIMARY KEY (`rawmaterialCountID`),
+  KEY `branchID_rawmaterialCount_idx` (`idBranch_id`),
+  KEY `rawmaterialID_rawmaterialCount_idx` (`idRawmaterial_id`),
+  CONSTRAINT `branchID_rawmaterialCount` FOREIGN KEY (`idBranch_id`) REFERENCES `salikneta_branch` (`idBranch`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `rawmaterialID_rawmaterialCount` FOREIGN KEY (`idRawmaterial_id`) REFERENCES `salikneta_rawmaterials` (`idRawMaterials`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `salikneta_rawmaterialcount`
+--
+
+LOCK TABLES `salikneta_rawmaterialcount` WRITE;
+/*!40000 ALTER TABLE `salikneta_rawmaterialcount` DISABLE KEYS */;
+INSERT INTO `salikneta_rawmaterialcount` VALUES (1,1,1,0),(2,2,1,700),(3,3,1,4),(4,1,2,0),(5,2,2,0),(6,3,2,0),(7,1,3,0),(8,2,3,0),(9,3,3,0),(10,1,4,0),(11,2,4,0),(12,3,4,0),(13,8,1,100),(14,8,2,0),(15,8,3,0),(16,8,4,0),(17,8,5,0),(18,8,6,0),(19,9,1,3),(20,9,2,0),(21,9,3,0),(22,9,4,0),(23,9,5,0),(24,9,6,0),(25,10,1,0),(26,10,2,0),(27,10,3,0),(28,10,4,0),(29,10,5,0),(30,10,6,0);
+/*!40000 ALTER TABLE `salikneta_rawmaterialcount` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `salikneta_rawmaterials`
 --
 
@@ -744,11 +774,10 @@ DROP TABLE IF EXISTS `salikneta_rawmaterials`;
 CREATE TABLE `salikneta_rawmaterials` (
   `idRawMaterials` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
-  `unitsInStock` float NOT NULL,
   `unitOfMeasure` varchar(45) NOT NULL,
   `idSupplier_id` int(11) NOT NULL,
   PRIMARY KEY (`idRawMaterials`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -757,7 +786,7 @@ CREATE TABLE `salikneta_rawmaterials` (
 
 LOCK TABLES `salikneta_rawmaterials` WRITE;
 /*!40000 ALTER TABLE `salikneta_rawmaterials` DISABLE KEYS */;
-INSERT INTO `salikneta_rawmaterials` VALUES (1,'Egg',0,'PCS',2),(2,'Rice',1000,'G',3),(3,'Apple',20,'PCS',2);
+INSERT INTO `salikneta_rawmaterials` VALUES (1,'Egg','PCS',2),(2,'Rice','G',3),(3,'Apple','PCS',2),(8,'Water','L',3),(9,'Tomato','PCS',2),(10,'Eggplant','LBS',2);
 /*!40000 ALTER TABLE `salikneta_rawmaterials` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -904,4 +933,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-16 22:01:00
+-- Dump completed on 2019-07-20  9:11:26
