@@ -77,9 +77,7 @@
               <span>Inventory</span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'purchaseOrder'%}active{% endif %}"><a href="{% url 'purchaseOrder' %}">Purchase Orders</a></li>
               <li class="{% if request.resolver_match.view_name ==  'transferOrder'%}active{% endif %}"><a href="{% url 'transferOrder'%}">Transfer Orders</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'backload'%}active{% endif %}"><a href="{% url 'backload'%}">Backloads</a></li>
               <li class="{% if request.resolver_match.view_name ==  'produceItems'%}active{% endif %}"><a href="{% url 'produceItems' 0%}">Produce Items</a></li>
             </ul>
           </li>
@@ -91,33 +89,9 @@
               </a>
             <ul class="sub">
               <li class="{% if request.resolver_match.view_name ==  'manageItems'%}active{% endif %}"><a href="{% url 'manageItems' %}">Products</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'manageSuppliers'%}active{% endif %}"><a href="{% url 'manageSuppliers' %}">Supplier</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'manageCategories'%}active{% endif %}"><a href="{% url 'manageCategories'%}">Categories</a></li>
               <li class="{% if request.resolver_match.view_name ==  'manageRawMaterials'%}active{% endif %}"><a href="{% url 'manageRawMaterials'%}">Raw Materials</a></li>
               <li class="{% if request.resolver_match.view_name ==  'manageIngredients'%}active{% endif %}"><a href="{% url 'manageIngredients' 0 %}">Ingredients</a></li>
             </ul>
-          </li>
-          <li class="mt">
-            <a class="{% if request.resolver_match.view_name ==  'sales' %}active{% endif %}" href="{% url 'sales' %}">
-              <i class="fa fa-money"></i>
-              <span>Sales</span>
-            </a>
-          </li>
-          <li class="sub-menu">
-            <a class="{% if request.resolver_match.view_name ==  'sales_report' or request.resolver_match.view_name == 'inventory_report' %}active{% endif %}" href="javascript:;">
-              <i class="fa fa-line-chart"></i>
-              <span>Reports</span>
-              </a>
-            <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'sales_report'%}active{% endif %}"><a href="{% url 'sales_report' %}">Sales</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'inventory_report'%}active{% endif %}"><a href="{% url 'inventory_report' %}">Inventory</a></li>
-            </ul>
-          </li>
-          <li class="sub">
-            <a href="">
-              <i class="fa fa-area-chart"></i>
-              <span>Forecasting</span>
-            </a>
           </li>
         </ul>
         <!-- sidebar menu end-->
