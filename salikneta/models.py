@@ -145,8 +145,7 @@ class Product(models.Model):
         return i[0].canProduce
 
     @staticmethod
-    def get_end_inventory(self, ed):
-
+    def get_end_inventory(self, ed, branch):
         deliveries = 0
         sales = 0
         backloads = 0
@@ -154,7 +153,7 @@ class Product(models.Model):
         deliv = Delivery.objects.filter(deliveryDate__gt=ed)
         sals = SalesInvoice.objects.filter(invoiceDate__gt=ed)
         bload = BackLoad.objects.filter(backloadDate__gt=ed)
-        to = TransferOrder.objects.filter(transferDate__gt=ed)
+        to = TransferOrderProduct.objects.filter(transferDate__gt=ed)
         for d in deliv:
             for del_prods in d.get_delivered_products:
                 if del_prods.product == self:
@@ -170,7 +169,8 @@ class Product(models.Model):
               if tl.idProduct_id == self.idProduct:
                   tos += tl.qty
 
-        ct = (self.unitsInStock + deliveries)-(sales+backloads+tos)
+        pc = ProductCount.objects.get(idProduct=self, idBranch=branch)
+        ct = (pc.unitsInStock + deliveries)-(sales+backloads+tos)
         return ct
 
 
@@ -206,6 +206,14 @@ class ProductCount(models.Model):
         self.save()
 
         print("added: "+str(amount)+" stocks to " + str(self.idProduct.name))
+
+    @staticmethod
+    def receive_stocks(self, amount):
+        self.unitsInStock = self.unitsInStock + int(amount)
+
+        self.save()
+
+        print("added: " + str(amount) + " stocks to " + str(self.idProduct.name))
 
 
 class PurchaseOrder(models.Model):
@@ -342,24 +350,27 @@ class BackloadLines(models.Model):
     idBackload = models.ForeignKey(BackLoad, models.DO_NOTHING, db_column='idBackload', null=True)
     qty = models.FloatField()
     reason = models.CharField(max_length=45, default="Expired")
-   
-class TransferOrder(models.Model):
-    idTransferOrder = models.AutoField(primary_key=True)
-    idCashier = models.ForeignKey(Cashier, on_delete=models.CASCADE)
+
+
+class TransferOrderProduct(models.Model):
+    idTransferOrderProduct = models.AutoField(primary_key=True)
+    idManager = models.ForeignKey(Manager, models.DO_NOTHING, db_column='idManager_id')  # Field name made lowercase.
     transferDate = models.DateField()
     expectedDate = models.DateField()
     source = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="source")
     destination = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="destination")
     status = models.CharField(max_length=50)
+
     @property
     def get_transfer_lines(self):
-        return TransferLines.objects.filter(idTransferOrder=self.pk)
+        return TransferLinesProduct.objects.filter(idTransferOrderProduct=self.pk)
 
-class TransferLines(models.Model):
-    idTransferLines = models.AutoField(primary_key=True)
+
+class TransferLinesProduct(models.Model):
+    idTransferLinesProduct = models.AutoField(primary_key=True)
     idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.FloatField()
-    idTransferOrder = models.ForeignKey(TransferOrder, on_delete=models.CASCADE)
+    idTransferOrderProduct = models.ForeignKey(TransferOrderProduct, on_delete=models.CASCADE)
 
     @property
     def get_product(self):
@@ -383,6 +394,7 @@ class RawMaterials(models.Model):
 
     @staticmethod
     def get_product_count(self, branchID):
+        print(self)
         rawMaterialCount = RawMaterialCount.objects.get(idrawmaterial=self.idrawmaterials, idBranch=branchID).unitsinstock
         return rawMaterialCount
 

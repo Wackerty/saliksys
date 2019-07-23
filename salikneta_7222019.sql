@@ -291,7 +291,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('6bgknscc5z43wm7gh2j1qn9yeulyhb99','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-06-12 13:21:36.575537'),('6nhr5yiou8zbsr57semiadvkecbk86ji','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-02-09 15:00:35.083223'),('dpi72r63l1bppqmijnw0t1qtq1kf49fq','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-01-30 09:57:46.273221'),('hllrzo78iaru57tmdvd0q6ebcq59alhb','NDZkN2MyMGUyM2I4MDAyZTg2OTA0ODIxM2Q1MzFmZTkyNmYwYTQ0ZTp7InVzZXJuYW1lIjoibWFya2V0aW5nQGdtYWlsLmNvbSIsInVzZXJ0eXBlIjoibWFuYWdlciIsImxvZ2dlZCI6dHJ1ZSwidXNlcklEIjo3LCJmaXJzdG5hbWUiOiJNYWUiLCJsYXN0bmFtZSI6Ik1hcmtldGluZyIsImJyYW5jaElEIjoxfQ==','2019-07-30 21:59:49.236656'),('ij3i30ztkd8hmu1omuilo4fgxdhhm0f3','NTU5ZjgxY2YyYmU5NTMwOTdkMjgxNzRhMTkwMGI0NzQ2YjI1NDY3ODp7InVzZXJuYW1lIjoibWFuYWdlckBnbWFpbC5jb20iLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MywiZmlyc3RuYW1lIjoiTWFuYWdpbmciLCJsYXN0bmFtZSI6Ik1hbmFyb3QiLCJ1c2VydHlwZSI6Im1hbmFnZXIifQ==','2019-04-07 22:05:23.485096'),('iog12eywxkcttp8bq18ugjzr02bt7xjt','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2018-12-26 19:37:45.569007'),('ndhb3kvzfgbge272jpvk8y8k77scuydr','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-02-05 10:49:59.950988'),('qdg3ngulualdvjcbq1j5du19xa4ddrht','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-03-09 13:25:47.524474');
+INSERT INTO `django_session` VALUES ('6bgknscc5z43wm7gh2j1qn9yeulyhb99','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-06-12 13:21:36.575537'),('6nhr5yiou8zbsr57semiadvkecbk86ji','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-02-09 15:00:35.083223'),('dpi72r63l1bppqmijnw0t1qtq1kf49fq','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-01-30 09:57:46.273221'),('hllrzo78iaru57tmdvd0q6ebcq59alhb','ZmI1ZGJkZTBlMDQ2NWExY2FlMWRhNjA1YTU1Y2YxMDVjMDU2MWQ5ODp7InVzZXJuYW1lIjoidmVnZXRhYmxlQGdtYWlsLmNvbSIsInVzZXJ0eXBlIjoiZmFybSIsImxvZ2dlZCI6dHJ1ZSwidXNlcklEIjo2LCJmaXJzdG5hbWUiOiJNYW5ueSIsImxhc3RuYW1lIjoiVmVnZXRhYmxlIiwiYnJhbmNoSUQiOjMsImhlYWRlciI6InNhbGlrbmV0YS9pbmNsdWRlcy9hbmltYWxfdmVnZXRhYmxlX2hlYWRlci5odG1sIn0=','2019-08-05 23:28:54.347421'),('ij3i30ztkd8hmu1omuilo4fgxdhhm0f3','NTU5ZjgxY2YyYmU5NTMwOTdkMjgxNzRhMTkwMGI0NzQ2YjI1NDY3ODp7InVzZXJuYW1lIjoibWFuYWdlckBnbWFpbC5jb20iLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MywiZmlyc3RuYW1lIjoiTWFuYWdpbmciLCJsYXN0bmFtZSI6Ik1hbmFyb3QiLCJ1c2VydHlwZSI6Im1hbmFnZXIifQ==','2019-04-07 22:05:23.485096'),('iog12eywxkcttp8bq18ugjzr02bt7xjt','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2018-12-26 19:37:45.569007'),('ndhb3kvzfgbge272jpvk8y8k77scuydr','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-02-05 10:49:59.950988'),('qdg3ngulualdvjcbq1j5du19xa4ddrht','MDM4ODkxYTM0MjNjNzA3Y2YyOWFhMGU0NDRlYjY2YzNmNDkxZmEyMjp7InVzZXJuYW1lIjoiY2FzaGllckBnbWFpbC5jb20iLCJ1c2VydHlwZSI6ImNhc2hpZXIiLCJsb2dnZWQiOnRydWUsInVzZXJJRCI6MiwiZmlyc3RuYW1lIjoiQ2hpbmdvbmEiLCJsYXN0bmFtZSI6IkNoYXNoaWVyIn0=','2019-03-09 13:25:47.524474');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -308,7 +308,7 @@ CREATE TABLE `notifs` (
   `timestamp` datetime DEFAULT NULL,
   `viewed` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`notif_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -317,7 +317,7 @@ CREATE TABLE `notifs` (
 
 LOCK TABLES `notifs` WRITE;
 /*!40000 ALTER TABLE `notifs` DISABLE KEYS */;
-INSERT INTO `notifs` VALUES (26,'New Item -Apple- has been added.','2018-12-12 19:23:24',1),(27,'New Item -Tomato- has been added.','2018-12-12 19:24:05',1),(28,'New Item -Buko Shake- has been added.','2018-12-12 19:24:56',1),(29,'New Item -Rice Meal- has been added.','2018-12-12 19:25:44',1),(30,'New Item -Pork Liempo- has been added.','2018-12-12 19:26:29',1),(31,'New Item -Eggs- has been added.','2018-12-12 19:27:07',1),(32,'New Item -Eggplant- has been added.','2018-12-12 19:27:56',1),(33,'New PO37 has been added.','2018-12-12 19:56:00',1),(34,'New PO38 has been added.','2018-12-12 19:56:46',1),(35,'New PO39 has been added.','2018-12-12 19:57:49',1),(36,'New PO40 has been added.','2018-12-12 19:58:13',1),(37,'Products have been backloaded.','2018-12-12 19:59:34',1),(38,'Products have been delivered.','2018-12-12 20:00:03',1),(39,'Products have been delivered.','2018-12-12 20:00:46',1),(40,'Products have been delivered.','2018-12-12 20:01:21',1),(41,'Products have been delivered.','2018-12-12 20:01:38',1),(42,'Products have been backloaded.','2018-12-12 20:07:21',1),(43,'Products have been backloaded.','2018-12-12 20:07:45',1),(44,'New Item -Jemuel Tit- has been added.','2019-01-16 10:01:38',1),(45,'New Item -Testing- has been added.','2019-07-06 15:54:10',1),(46,'New Raw Material -Rice- has been added.','2019-07-06 16:47:29',1),(47,'Price for Testing has been updated.','2019-07-07 20:04:10',1),(48,'New Raw Material -Apple- has been added.','2019-07-07 20:35:01',1),(49,'New Ingredient -Egg- for -Rice Meal- has been added.','2019-07-08 19:25:41',1),(50,'New Ingredient -Rice- for -Rice Meal- has been added.','2019-07-08 19:25:52',1),(51,'Price for Testing has been updated.','2019-07-08 19:32:04',1),(52,'New Item -Melon- has been added.','2019-07-16 21:47:51',1),(53,'New Item -Melon- has been added.','2019-07-16 21:50:04',1),(54,'New Item -Melon- has been added.','2019-07-16 21:59:28',1),(55,'New Raw Material -Chicken- has been added.','2019-07-17 22:38:41',1),(56,'New Raw Material -Water- has been added.','2019-07-17 22:41:24',1),(57,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:36:27',1),(58,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:37:01',1),(59,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:19:49',1),(60,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 20:29:39',NULL),(61,'Produced 5 stocks for product: Apple','2019-07-19 20:29:47',NULL),(62,'Raw Material Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:34:23',NULL),(63,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:43:13',NULL),(64,'Ingredient -Egg- for -Eggs- has been removed.','2019-07-19 20:48:39',NULL),(65,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:48:44',NULL),(66,'Produced 20 stocks for product: Eggs','2019-07-19 20:49:17',NULL),(67,'New Raw Material -Tomato- has been added.','2019-07-19 21:01:45',NULL),(68,'New Ingredient -Tomato- for -Tomato- has been added.','2019-07-19 21:02:05',NULL),(69,'Produced 5 stocks for product: Tomato','2019-07-19 21:02:17',NULL),(70,'Produced 1 stocks for product: Tomato','2019-07-19 21:03:44',NULL),(71,'Produced 1 stocks for product: Tomato','2019-07-19 21:05:28',NULL),(72,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 21:05:59',NULL),(73,'Produced 1 stocks for product: Apple','2019-07-19 21:06:09',NULL),(74,'New Raw Material -Eggplant- has been added.','2019-07-19 21:16:01',NULL),(75,'New Ingredient -Eggplant- for -Eggplant- has been added.','2019-07-19 21:16:19',NULL),(76,'Produced 5 stocks for product: Eggplant','2019-07-19 21:16:28',NULL);
+INSERT INTO `notifs` VALUES (26,'New Item -Apple- has been added.','2018-12-12 19:23:24',1),(27,'New Item -Tomato- has been added.','2018-12-12 19:24:05',1),(28,'New Item -Buko Shake- has been added.','2018-12-12 19:24:56',1),(29,'New Item -Rice Meal- has been added.','2018-12-12 19:25:44',1),(30,'New Item -Pork Liempo- has been added.','2018-12-12 19:26:29',1),(31,'New Item -Eggs- has been added.','2018-12-12 19:27:07',1),(32,'New Item -Eggplant- has been added.','2018-12-12 19:27:56',1),(33,'New PO37 has been added.','2018-12-12 19:56:00',1),(34,'New PO38 has been added.','2018-12-12 19:56:46',1),(35,'New PO39 has been added.','2018-12-12 19:57:49',1),(36,'New PO40 has been added.','2018-12-12 19:58:13',1),(37,'Products have been backloaded.','2018-12-12 19:59:34',1),(38,'Products have been delivered.','2018-12-12 20:00:03',1),(39,'Products have been delivered.','2018-12-12 20:00:46',1),(40,'Products have been delivered.','2018-12-12 20:01:21',1),(41,'Products have been delivered.','2018-12-12 20:01:38',1),(42,'Products have been backloaded.','2018-12-12 20:07:21',1),(43,'Products have been backloaded.','2018-12-12 20:07:45',1),(44,'New Item -Jemuel Tit- has been added.','2019-01-16 10:01:38',1),(45,'New Item -Testing- has been added.','2019-07-06 15:54:10',1),(46,'New Raw Material -Rice- has been added.','2019-07-06 16:47:29',1),(47,'Price for Testing has been updated.','2019-07-07 20:04:10',1),(48,'New Raw Material -Apple- has been added.','2019-07-07 20:35:01',1),(49,'New Ingredient -Egg- for -Rice Meal- has been added.','2019-07-08 19:25:41',1),(50,'New Ingredient -Rice- for -Rice Meal- has been added.','2019-07-08 19:25:52',1),(51,'Price for Testing has been updated.','2019-07-08 19:32:04',1),(52,'New Item -Melon- has been added.','2019-07-16 21:47:51',1),(53,'New Item -Melon- has been added.','2019-07-16 21:50:04',1),(54,'New Item -Melon- has been added.','2019-07-16 21:59:28',1),(55,'New Raw Material -Chicken- has been added.','2019-07-17 22:38:41',1),(56,'New Raw Material -Water- has been added.','2019-07-17 22:41:24',1),(57,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:36:27',1),(58,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 08:37:01',1),(59,'Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:19:49',1),(60,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 20:29:39',1),(61,'Produced 5 stocks for product: Apple','2019-07-19 20:29:47',1),(62,'Raw Material Stocks for Egg in Marketing branch has been updated.','2019-07-19 20:34:23',1),(63,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:43:13',1),(64,'Ingredient -Egg- for -Eggs- has been removed.','2019-07-19 20:48:39',1),(65,'New Ingredient -Egg- for -Eggs- has been added.','2019-07-19 20:48:44',1),(66,'Produced 20 stocks for product: Eggs','2019-07-19 20:49:17',1),(67,'New Raw Material -Tomato- has been added.','2019-07-19 21:01:45',1),(68,'New Ingredient -Tomato- for -Tomato- has been added.','2019-07-19 21:02:05',1),(69,'Produced 5 stocks for product: Tomato','2019-07-19 21:02:17',1),(70,'Produced 1 stocks for product: Tomato','2019-07-19 21:03:44',1),(71,'Produced 1 stocks for product: Tomato','2019-07-19 21:05:28',1),(72,'Raw Material Stocks for Apple in Marketing branch has been updated.','2019-07-19 21:05:59',1),(73,'Produced 1 stocks for product: Apple','2019-07-19 21:06:09',1),(74,'New Raw Material -Eggplant- has been added.','2019-07-19 21:16:01',1),(75,'New Ingredient -Eggplant- for -Eggplant- has been added.','2019-07-19 21:16:19',1),(76,'Produced 5 stocks for product: Eggplant','2019-07-19 21:16:28',1),(77,'Raw Material Stocks for Egg in Marketing branch has been updated.','2019-07-20 14:16:16',1),(78,'New PO41 has been added.','2019-07-20 14:24:53',1),(79,'Raw Material Stocks for Rice in Production branch has been updated.','2019-07-20 14:25:53',1),(80,'Raw Material Stocks for Egg in Production branch has been updated.','2019-07-20 14:25:59',1),(81,'Produced 5 stocks for product: Rice Meal','2019-07-20 14:26:56',1),(82,'Products have been delivered.','2019-07-20 15:37:49',1),(83,'Products have been delivered.','2019-07-20 16:35:13',1);
 /*!40000 ALTER TABLE `notifs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -399,7 +399,7 @@ CREATE TABLE `salikneta_branch` (
 
 LOCK TABLES `salikneta_branch` WRITE;
 /*!40000 ALTER TABLE `salikneta_branch` DISABLE KEYS */;
-INSERT INTO `salikneta_branch` VALUES (1,'Marketing'),(2,'Production'),(3,'Animal'),(4,'Vegetable '),(5,'Taft'),(6,'Malabon');
+INSERT INTO `salikneta_branch` VALUES (1,'Marketing'),(2,'Production'),(3,'Farm'),(5,'Taft'),(6,'Malabon');
 /*!40000 ALTER TABLE `salikneta_branch` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -420,7 +420,7 @@ CREATE TABLE `salikneta_cashier` (
   PRIMARY KEY (`idCashier`),
   KEY `salikneta_cashier_idBranch_id_9067f2ad_fk_salikneta` (`idBranch_id`),
   CONSTRAINT `salikneta_cashier_idBranch_id_9067f2ad_fk_salikneta` FOREIGN KEY (`idBranch_id`) REFERENCES `salikneta_branch` (`idBranch`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -429,7 +429,7 @@ CREATE TABLE `salikneta_cashier` (
 
 LOCK TABLES `salikneta_cashier` WRITE;
 /*!40000 ALTER TABLE `salikneta_cashier` DISABLE KEYS */;
-INSERT INTO `salikneta_cashier` VALUES (2,'Chingona','Chashier','cashier@gmail.com','123',1),(3,'Manaloto','Managing','cashier2@gmail.com','123',1);
+INSERT INTO `salikneta_cashier` VALUES (2,'Chingona','Chashier','cashier@gmail.com','123',1),(3,'Manaloto','Managing','cashier2@gmail.com','123',1),(4,'Cashier','Taft','cashiertaft@gmail.com','123',5),(5,'Cashier','Malabon','cashiermalabon@gmail.com','123',6);
 /*!40000 ALTER TABLE `salikneta_cashier` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -475,7 +475,7 @@ CREATE TABLE `salikneta_deliveredproducts` (
   KEY `salikneta_deliveredp_idOrderLines_id_a6877487_fk_salikneta` (`idOrderLines_id`),
   CONSTRAINT `salikneta_deliveredp_idDelivery_id_f95a6dc8_fk_salikneta` FOREIGN KEY (`idDelivery_id`) REFERENCES `salikneta_delivery` (`idDelivery`),
   CONSTRAINT `salikneta_deliveredp_idOrderLines_id_a6877487_fk_salikneta` FOREIGN KEY (`idOrderLines_id`) REFERENCES `salikneta_orderlines` (`idOrderLines`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -484,7 +484,7 @@ CREATE TABLE `salikneta_deliveredproducts` (
 
 LOCK TABLES `salikneta_deliveredproducts` WRITE;
 /*!40000 ALTER TABLE `salikneta_deliveredproducts` DISABLE KEYS */;
-INSERT INTO `salikneta_deliveredproducts` VALUES (44,25,48,37),(45,50,49,38),(46,1,49,39),(47,100,50,41);
+INSERT INTO `salikneta_deliveredproducts` VALUES (44,25,48,37),(45,50,49,38),(46,1,49,39),(47,100,50,41),(48,1,51,37),(49,1,52,37),(50,25,53,37),(51,0,54,38),(52,49,54,39),(53,51,55,40);
 /*!40000 ALTER TABLE `salikneta_deliveredproducts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -502,7 +502,7 @@ CREATE TABLE `salikneta_delivery` (
   PRIMARY KEY (`idDelivery`),
   KEY `salikneta_delivery_idPurchaseOrder_id_80bf84f2_fk_salikneta` (`idPurchaseOrder_id`),
   CONSTRAINT `salikneta_delivery_idPurchaseOrder_id_80bf84f2_fk_salikneta` FOREIGN KEY (`idPurchaseOrder_id`) REFERENCES `salikneta_purchaseorder` (`idPurchaseOrder`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -511,7 +511,7 @@ CREATE TABLE `salikneta_delivery` (
 
 LOCK TABLES `salikneta_delivery` WRITE;
 /*!40000 ALTER TABLE `salikneta_delivery` DISABLE KEYS */;
-INSERT INTO `salikneta_delivery` VALUES (48,'2018-12-12',37),(49,'2018-12-12',38),(50,'2018-12-12',40);
+INSERT INTO `salikneta_delivery` VALUES (48,'2018-12-12',37),(49,'2018-12-12',38),(50,'2018-12-12',40),(51,'2019-07-20',37),(52,'2019-07-20',37),(53,'2019-07-20',37),(54,'2019-07-20',38),(55,'2019-07-20',39);
 /*!40000 ALTER TABLE `salikneta_delivery` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -594,7 +594,7 @@ CREATE TABLE `salikneta_manager` (
   PRIMARY KEY (`idManager`),
   KEY `salikneta_manager_idBranch_id_73d50c80_fk_salikneta` (`idBranch_id`),
   CONSTRAINT `salikneta_manager_idBranch_id_73d50c80_fk_salikneta` FOREIGN KEY (`idBranch_id`) REFERENCES `salikneta_branch` (`idBranch`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -603,7 +603,7 @@ CREATE TABLE `salikneta_manager` (
 
 LOCK TABLES `salikneta_manager` WRITE;
 /*!40000 ALTER TABLE `salikneta_manager` DISABLE KEYS */;
-INSERT INTO `salikneta_manager` VALUES (3,'Managing','Manarot','manager@gmail.com','123',1),(4,'Rose','Produciton','production@gmail.com','123',2),(5,'Christohper','Animal','animal@gmail.com','123',3),(6,'Manny','Vegetable','vegetable@gmail.com','123',4),(7,'Mae','Marketing','marketing@gmail.com','123',1);
+INSERT INTO `salikneta_manager` VALUES (3,'Managing','Taft','managertaft@gmail.com','123',5),(4,'Rose','Produciton','production@gmail.com','123',2),(5,'Christohper','Animal','animal@gmail.com','123',3),(6,'Manny','Vegetable','vegetable@gmail.com','123',3),(7,'Mae','Marketing','marketing@gmail.com','123',1),(8,'Managing','Malabon','managermalabon@gmail.com','123',6);
 /*!40000 ALTER TABLE `salikneta_manager` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -624,7 +624,7 @@ CREATE TABLE `salikneta_orderlines` (
   KEY `salikneta_orderlines_idPurchaseOrder_id_e0150586_fk_salikneta` (`idPurchaseOrder_id`),
   CONSTRAINT `salikneta_orderlines_idProduct_id_669c2cc2_fk_salikneta` FOREIGN KEY (`idProduct_id`) REFERENCES `salikneta_product` (`idProduct`),
   CONSTRAINT `salikneta_orderlines_idPurchaseOrder_id_e0150586_fk_salikneta` FOREIGN KEY (`idPurchaseOrder_id`) REFERENCES `salikneta_purchaseorder` (`idPurchaseOrder`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -633,7 +633,7 @@ CREATE TABLE `salikneta_orderlines` (
 
 LOCK TABLES `salikneta_orderlines` WRITE;
 /*!40000 ALTER TABLE `salikneta_orderlines` DISABLE KEYS */;
-INSERT INTO `salikneta_orderlines` VALUES (37,50,4,37),(38,50,5,38),(39,50,6,38),(40,50,10,39),(41,100,7,40);
+INSERT INTO `salikneta_orderlines` VALUES (37,50,4,37),(38,50,5,38),(39,50,6,38),(40,50,10,39),(41,100,7,40),(42,16,6,41);
 /*!40000 ALTER TABLE `salikneta_orderlines` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -698,7 +698,7 @@ CREATE TABLE `salikneta_productcount` (
 
 LOCK TABLES `salikneta_productcount` WRITE;
 /*!40000 ALTER TABLE `salikneta_productcount` DISABLE KEYS */;
-INSERT INTO `salikneta_productcount` VALUES (1,4,1,40,5),(2,5,1,61,0),(3,6,1,7,0),(4,7,1,118,0),(5,8,1,29,5),(6,9,1,35,0),(7,10,1,18,0),(8,12,1,10,0),(9,4,2,14,5),(10,5,2,54,0),(11,6,2,7,0),(12,7,2,115,0),(13,8,2,29,5),(14,9,2,15,0),(15,10,2,13,0),(16,12,2,10,0),(17,4,3,14,5),(18,5,3,54,0),(19,6,3,7,0),(20,7,3,115,0),(21,8,3,29,5),(22,9,3,15,0),(23,10,3,13,0),(24,12,3,10,0),(25,4,4,14,5),(26,5,4,54,0),(27,6,4,7,0),(28,7,4,115,0),(29,8,4,29,5),(30,9,4,15,0),(31,10,4,13,0),(32,12,4,10,0),(33,4,5,14,5),(34,5,5,54,0),(35,6,5,7,0),(36,7,5,115,0),(37,8,5,29,5),(38,9,5,15,0),(39,10,5,13,0),(40,12,5,10,0),(41,4,6,14,5),(42,5,6,54,0),(43,6,6,7,0),(44,7,6,115,0),(45,8,6,29,5),(46,9,6,15,0),(47,10,6,13,0),(48,12,6,10,0),(49,16,1,20,0),(50,16,2,0,0),(51,16,3,0,0),(52,16,4,0,0),(53,16,5,0,0),(54,16,6,0,0);
+INSERT INTO `salikneta_productcount` VALUES (1,4,1,66,5),(2,5,1,61,0),(3,6,1,56,0),(4,7,1,118,0),(5,8,1,29,5),(6,9,1,35,0),(7,10,1,69,0),(8,12,1,10,0),(9,4,2,4,15),(10,5,2,54,0),(11,6,2,7,0),(12,7,2,120,0),(13,8,2,29,5),(14,9,2,15,0),(15,10,2,13,0),(16,12,2,10,0),(17,4,3,14,5),(18,5,3,54,0),(19,6,3,7,0),(20,7,3,115,0),(21,8,3,29,5),(22,9,3,15,0),(23,10,3,13,0),(24,12,3,10,0),(33,4,5,14,5),(34,5,5,54,0),(35,6,5,7,0),(36,7,5,115,0),(37,8,5,29,5),(38,9,5,15,0),(39,10,5,13,0),(40,12,5,10,0),(41,4,6,14,5),(42,5,6,54,0),(43,6,6,7,0),(44,7,6,115,0),(45,8,6,29,5),(46,9,6,15,0),(47,10,6,13,0),(48,12,6,10,0),(49,16,1,40,-20),(50,16,2,0,0),(51,16,3,0,0),(53,16,5,0,0),(54,16,6,0,0);
 /*!40000 ALTER TABLE `salikneta_productcount` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -721,7 +721,7 @@ CREATE TABLE `salikneta_purchaseorder` (
   KEY `salikneta_purchaseor_idSupplier_id_f69c233c_fk_salikneta` (`idSupplier_id`),
   CONSTRAINT `salikneta_purchaseor_idCashier_id_eb9363f7_fk_salikneta` FOREIGN KEY (`idCashier_id`) REFERENCES `salikneta_cashier` (`idCashier`),
   CONSTRAINT `salikneta_purchaseor_idSupplier_id_f69c233c_fk_salikneta` FOREIGN KEY (`idSupplier_id`) REFERENCES `salikneta_supplier` (`idSupplier`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -730,7 +730,7 @@ CREATE TABLE `salikneta_purchaseorder` (
 
 LOCK TABLES `salikneta_purchaseorder` WRITE;
 /*!40000 ALTER TABLE `salikneta_purchaseorder` DISABLE KEYS */;
-INSERT INTO `salikneta_purchaseorder` VALUES (37,'2018-01-01','2014-01-01',2,2,'PARTIALLY RECEIVED'),(38,'2014-01-01','2014-01-01',2,2,'PARTIALLY RECEIVED'),(39,'2014-01-01','2014-01-01',2,3,'In Transit'),(40,'2014-01-01','2014-01-01',2,3,'RECEIVED');
+INSERT INTO `salikneta_purchaseorder` VALUES (37,'2018-01-01','2014-01-01',2,2,'RECEIVED WITH EXCESS'),(38,'2014-01-01','2014-01-01',2,2,'RECEIVED'),(39,'2014-01-01','2014-01-01',2,3,'RECEIVED WITH EXCESS'),(40,'2014-01-01','2014-01-01',2,3,'RECEIVED'),(41,'2014-01-01','2014-01-01',4,2,'In Transit');
 /*!40000 ALTER TABLE `salikneta_purchaseorder` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -760,7 +760,7 @@ CREATE TABLE `salikneta_rawmaterialcount` (
 
 LOCK TABLES `salikneta_rawmaterialcount` WRITE;
 /*!40000 ALTER TABLE `salikneta_rawmaterialcount` DISABLE KEYS */;
-INSERT INTO `salikneta_rawmaterialcount` VALUES (1,1,1,0),(2,2,1,700),(3,3,1,4),(4,1,2,0),(5,2,2,0),(6,3,2,0),(7,1,3,0),(8,2,3,0),(9,3,3,0),(10,1,4,0),(11,2,4,0),(12,3,4,0),(13,8,1,100),(14,8,2,0),(15,8,3,0),(16,8,4,0),(17,8,5,0),(18,8,6,0),(19,9,1,3),(20,9,2,0),(21,9,3,0),(22,9,4,0),(23,9,5,0),(24,9,6,0),(25,10,1,0),(26,10,2,0),(27,10,3,0),(28,10,4,0),(29,10,5,0),(30,10,6,0);
+INSERT INTO `salikneta_rawmaterialcount` VALUES (1,1,1,10),(2,2,1,700),(3,3,1,4),(4,1,2,0),(5,2,2,500),(6,3,2,0),(7,1,3,0),(8,2,3,0),(9,3,3,0),(13,8,1,100),(14,8,2,0),(15,8,3,0),(17,8,5,0),(18,8,6,0),(19,9,1,3),(20,9,2,0),(21,9,3,0),(23,9,5,0),(24,9,6,0),(25,10,1,0),(26,10,2,0),(27,10,3,0),(29,10,5,0),(30,10,6,0);
 /*!40000 ALTER TABLE `salikneta_rawmaterialcount` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -852,68 +852,91 @@ INSERT INTO `salikneta_supplier` VALUES (2,'Salikneta Farm','123','a@gmail.com',
 UNLOCK TABLES;
 
 --
--- Table structure for table `salikneta_transferlines`
+-- Table structure for table `salikneta_transferlinesproduct`
 --
 
-DROP TABLE IF EXISTS `salikneta_transferlines`;
+DROP TABLE IF EXISTS `salikneta_transferlinesproduct`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `salikneta_transferlines` (
-  `idTransferLines` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `salikneta_transferlinesproduct` (
+  `idTransferLinesProduct` int(11) NOT NULL AUTO_INCREMENT,
   `qty` double NOT NULL,
   `idProduct_id` int(11) NOT NULL,
-  `idTransferOrder_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`idTransferLines`),
+  `idTransferOrderProduct_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`idTransferLinesProduct`),
   KEY `salikneta_transferli_idProduct_id_7e465771_fk_salikneta` (`idProduct_id`),
-  KEY `idTransferOrder_idx` (`idTransferOrder_id`),
-  CONSTRAINT `idTransferOrder` FOREIGN KEY (`idTransferOrder_id`) REFERENCES `salikneta_transferorder` (`idTransferOrder`),
+  KEY `idTransferOrder_idx` (`idTransferOrderProduct_id`),
+  CONSTRAINT `idTransferOrderProduct` FOREIGN KEY (`idTransferOrderProduct_id`) REFERENCES `salikneta_transferorderproduct` (`idTransferOrderProduct`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `salikneta_transferli_idProduct_id_7e465771_fk_salikneta` FOREIGN KEY (`idProduct_id`) REFERENCES `salikneta_product` (`idProduct`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `salikneta_transferlines`
+-- Dumping data for table `salikneta_transferlinesproduct`
 --
 
-LOCK TABLES `salikneta_transferlines` WRITE;
-/*!40000 ALTER TABLE `salikneta_transferlines` DISABLE KEYS */;
-INSERT INTO `salikneta_transferlines` VALUES (13,10,4,16),(14,5,5,17),(15,5,9,17),(16,2,10,17),(17,5,4,18),(18,5,8,18),(19,5,9,18),(20,5,4,19),(21,5,8,19);
-/*!40000 ALTER TABLE `salikneta_transferlines` ENABLE KEYS */;
+LOCK TABLES `salikneta_transferlinesproduct` WRITE;
+/*!40000 ALTER TABLE `salikneta_transferlinesproduct` DISABLE KEYS */;
+INSERT INTO `salikneta_transferlinesproduct` VALUES (13,10,4,16),(14,5,5,17),(15,5,9,17),(16,2,10,17),(17,5,4,18),(18,5,8,18),(19,5,9,18),(20,5,4,19),(21,5,8,19),(22,10,16,24),(23,10,16,25),(24,10,16,26),(25,10,4,27);
+/*!40000 ALTER TABLE `salikneta_transferlinesproduct` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `salikneta_transferorder`
+-- Table structure for table `salikneta_transferorderproduct`
 --
 
-DROP TABLE IF EXISTS `salikneta_transferorder`;
+DROP TABLE IF EXISTS `salikneta_transferorderproduct`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `salikneta_transferorder` (
-  `idTransferOrder` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `salikneta_transferorderproduct` (
+  `idTransferOrderProduct` int(11) NOT NULL AUTO_INCREMENT,
   `transferDate` date NOT NULL,
   `expectedDate` date NOT NULL,
-  `idCashier_id` int(11) NOT NULL,
+  `idManager_id` int(11) NOT NULL,
   `source_id` int(11) DEFAULT NULL,
   `destination_id` int(11) DEFAULT NULL,
   `status` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`idTransferOrder`),
-  KEY `salikneta_transferor_idCashier_id_f3b5c182_fk_salikneta` (`idCashier_id`),
+  PRIMARY KEY (`idTransferOrderProduct`),
   KEY `source_idx` (`source_id`),
   KEY `destination_idx` (`destination_id`),
+  KEY `manager_idx` (`idManager_id`),
   CONSTRAINT `destination` FOREIGN KEY (`destination_id`) REFERENCES `salikneta_branch` (`idBranch`),
-  CONSTRAINT `salikneta_transferor_idCashier_id_f3b5c182_fk_salikneta` FOREIGN KEY (`idCashier_id`) REFERENCES `salikneta_cashier` (`idCashier`),
+  CONSTRAINT `manager_id` FOREIGN KEY (`idManager_id`) REFERENCES `salikneta_manager` (`idManager`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `source` FOREIGN KEY (`source_id`) REFERENCES `salikneta_branch` (`idBranch`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `salikneta_transferorder`
+-- Dumping data for table `salikneta_transferorderproduct`
 --
 
-LOCK TABLES `salikneta_transferorder` WRITE;
-/*!40000 ALTER TABLE `salikneta_transferorder` DISABLE KEYS */;
-INSERT INTO `salikneta_transferorder` VALUES (16,'2018-01-01','2018-01-01',2,1,2,'Finished'),(17,'2018-01-01','2018-01-01',2,1,2,'In Transit'),(18,'2018-01-01','2018-01-01',2,1,2,'Cancelled'),(19,'2018-01-01','2018-01-01',2,1,2,'Draft');
-/*!40000 ALTER TABLE `salikneta_transferorder` ENABLE KEYS */;
+LOCK TABLES `salikneta_transferorderproduct` WRITE;
+/*!40000 ALTER TABLE `salikneta_transferorderproduct` DISABLE KEYS */;
+INSERT INTO `salikneta_transferorderproduct` VALUES (16,'2018-01-01','2018-01-01',3,1,2,'Finished'),(17,'2018-01-01','2018-01-01',3,1,2,'Finished'),(18,'2018-01-01','2018-01-01',3,1,2,'Cancelled'),(19,'2018-01-01','2018-01-01',3,1,2,'Draft'),(24,'2018-01-01','2018-01-01',7,1,2,'Cancelled'),(25,'2018-01-01','2018-01-01',7,1,5,'Cancelled'),(26,'2018-01-01','2018-01-01',7,1,6,'Finished'),(27,'2018-01-01','2018-01-01',4,2,1,'Draft');
+/*!40000 ALTER TABLE `salikneta_transferorderproduct` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `salikneta_usertype`
+--
+
+DROP TABLE IF EXISTS `salikneta_usertype`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `salikneta_usertype` (
+  `userTypeID` int(11) NOT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`userTypeID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `salikneta_usertype`
+--
+
+LOCK TABLES `salikneta_usertype` WRITE;
+/*!40000 ALTER TABLE `salikneta_usertype` DISABLE KEYS */;
+/*!40000 ALTER TABLE `salikneta_usertype` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -933,4 +956,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-20  9:11:26
+-- Dump completed on 2019-07-22 23:40:42

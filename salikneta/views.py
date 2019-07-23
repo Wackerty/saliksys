@@ -31,26 +31,45 @@ def log_in_validate(request):
             request.session['firstname'] = Cashier.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Cashier.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Cashier.objects.get(username=user, password=password).idBranch.idBranch
+            request.session['header'] = "salikneta/includes/cashier_header.html"
             return redirect('home')
         elif try2: 
             request.session['username'] = user
-            request.session['usertype'] = "manager"
+
             request.session['logged'] = True
 
             request.session['userID'] = Manager.objects.get(username=user, password=password).idManager
             request.session['firstname'] = Manager.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Manager.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Manager.objects.get(username=user, password=password).idBranch.idBranch
+
+            if request.session['branchID'] == 1:
+                request.session['header'] = "salikneta/includes/marketing_header.html"
+                request.session['usertype'] = "marketing"
+            elif request.session['branchID'] == 2:
+                request.session['header'] = "salikneta/includes/production_header.html"
+                request.session['usertype'] = "production"
+            elif request.session['branchID'] == 3 or request.session['branchID'] == 4:
+                request.session['header'] = "salikneta/includes/animal_vegetable_header.html"
+                request.session['usertype'] = "farm"
+            elif request.session['branchID'] == 5 or request.session['branchID'] == 6:
+                request.session['header'] = "salikneta/includes/manager_header.html"
+                request.session['usertype'] = "manager"
+
             return redirect('home')
         else:
             messages.warning(request, 'Wrong credentials, please try again.')
    
     return render(request, 'salikneta/login.html')
+
+
 def home(request):
-    return render(request, 'salikneta/home.html',{"notifs":Notifs.objects.all()})
+    return render(request, 'salikneta/home.html', {"notifs": Notifs.objects.all().order_by("-notif_id")})
+
 
 def get_num_lowstock(request):
     return JsonResponse({"numb":ProductCount.get_num_lowstock_items(Branch.objects.get(idBranch=request.session['branchID']))})
+
 
 def get_invoice_by_id(request, idSales):
     data = []
@@ -62,16 +81,21 @@ def get_invoice_by_id(request, idSales):
                      "productName":il.idProduct.name,
                      "uom":il.idProduct.unitOfMeasure})
     return JsonResponse({"data":data})
+
+
 def sales(request):
-    return render(request, 'salikneta/sales.html',{"sales_invoices":SalesInvoice.objects.all()})
+    return render(request, 'salikneta/sales.html', {"sales_invoices":SalesInvoice.objects.all()})
+
 
 def sales_report(request):
     return render(request, 'salikneta/reports/sales_report.html')
+
+
 def sales_report_detail(request):
     if request.method == 'POST':
         report_data = []
         new_rd = []
-        gen_info ={"message":"","total_qty":0,"total_sales":0}
+        gen_info ={"message": "", "total_qty": 0, "total_sales":0}
         products = Product.objects.all()
         for p in products:
             report_data.append({"id":p.idProduct,
@@ -154,6 +178,7 @@ def inventory_report_detail(request):
                    "total_backloads":0,
                    "transfer_out": 0}
         products = Product.objects.all()
+        branch = Branch.objects.get(pk=request.session['branchID'])
         for p in products:
             report_data.append({"id":p.idProduct,
                                 "product": p.name,
@@ -175,13 +200,13 @@ def inventory_report_detail(request):
             si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
             bload = BackLoad.objects.filter(backloadDate__gte=sd, backloadDate__lte=ed)
             deliv = Delivery.objects.filter(deliveryDate__gte=sd, deliveryDate__lte=ed)
-            to = TransferOrder.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
+            to = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
             for r in report_data:
                 sl = 0
                 backloads = 0
                 deliveries = 0
                 tos = 0
-                r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed)
+                r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed, branch)
                 for d in deliv:
                     for del_prods in d.get_delivered_products:
                         if del_prods.product.idProduct == r["id"]:
@@ -217,14 +242,14 @@ def inventory_report_detail(request):
             bload = BackLoad.objects.filter(backloadDate__gte=sd, backloadDate__lte=ed)
             deliv = Delivery.objects.filter(deliveryDate__gte=sd, deliveryDate__lte=ed)
 
-            to = TransferOrder.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
+            to = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
             gen_info["message"] = "For the month of " + m.strftime('%B') + " " + str(m.year)
             for r in report_data:
                 sl = 0
                 backloads = 0
                 deliveries = 0
                 tos = 0
-                r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed)
+                r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed, branch)
                 for d in deliv:
                     for del_prods in d.get_delivered_products:
                         if del_prods.product.idProduct == r["id"]:
@@ -338,7 +363,13 @@ def pos(request):
                 i.save()
         return HttpResponseRedirect(reverse('pos'))
         #loop the arrays
-    return render(request, 'salikneta/pos/pos.html',{'products': Product.objects.all(),
+    p = Product.objects.all()
+    b = Branch.objects.get(pk=request.session['branchID'])
+
+    for product in p:
+        unitsInStock = product.get_product_count(product, b)
+        product.unitsInStock = unitsInStock
+    return render(request, 'salikneta/pos/pos.html',{'products': p,
                                                      'si_num':SalesInvoice.get_latest_invoice_num(),
                                                      'date':datetime.now(),
                                                      'categories':Category.objects.all()})
@@ -346,25 +377,19 @@ def signout(request):
     return redirect('index')
 def purchaseOrder(request):
     s = Supplier.objects.all()
-    usertype = request.session['usertype']
-    if usertype == "manager":
-        m = Manager.objects.filter(username=request.session['username']).select_related("idBranch")
-        branch = m[0].idBranch
-    if usertype == "cashier":
-        m = Cashier.objects.filter(username=request.session['username']).select_related("idBranch")
-        branch = m[0].idBranch
-
     i = Product.objects.all()
 
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+
     for product in i:
-        unitsInStock = product.get_product_count(product, branch)
+        unitsInStock = product.get_product_count(product, b)
         product.unitsInStock = unitsInStock
 
     purchaseOrders = PurchaseOrder.objects.filter().select_related("idSupplier")
 
 
     context = {
-        "suppliers":s,"branch":branch,"products":i,"purchaseOrders":purchaseOrders,
+        "suppliers":s,"branch":b,"products":i,"purchaseOrders":purchaseOrders,
     }
     return render(request, 'salikneta/purchaseOrder.html',context)
 
@@ -500,9 +525,9 @@ def manageIngredients(request, id):
     c = Category.objects.all()
     i = Product.objects.all()
 
-    for rawMaterial in r:
-        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
-        rawMaterial.unitsInStock = unitsInStock
+#    for rawMaterial in r:
+#        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
+#        rawMaterial.unitsInStock = unitsInStock
 
     context = {
         "rawmaterials": r,
@@ -550,38 +575,50 @@ def produceItems(request, id):
 
 
 def backload(request):
-
+    branch = Branch.objects.get(pk=request.session['branchID'])
     b = BackLoad.objects.all()
 
     i = Product.objects.all()
+    for product in i:
+        unitsInStock = product.get_product_count(product, branch)
+        product.unitsInStock = unitsInStock
+
     context = {
         "products":i,"backloads":b,
     }
     return render(request, 'salikneta/backloads.html',context)
 
-def transferOrder(request):
 
+def transferOrder(request):
     idUser = request.session['userID']
     usertype = request.session['usertype']
+    branch = Branch.objects.get(pk=request.session['branchID'])
 
-    if usertype == "cashier":
-        c = Cashier.objects.filter(pk=idUser).select_related('idBranch')
-        source = c[0].idBranch
-    if usertype == "manager":
-        c = Manager.objects.filter(pk=idUser).select_related('idBranch')
-        source = c[0].idBranch
-
-    destination = Branch.objects.filter(~Q(pk=source.pk))
+    destination = Branch.objects.filter(~Q(pk=branch.pk))
 
     p = Product.objects.all()
+    r = RawMaterials.objects.all()
 
-    to = TransferOrder.objects.all()
+    for product in p:
+        unitsInStock = product.get_product_count(product, branch)
+        product.unitsInStock = unitsInStock
+
+    if branch.pk == 1 or branch.pk == 2 or branch.pk == 3:
+        for rawMaterial in r:
+            unitsInStock = rawMaterial.get_product_count(rawMaterial, branch)
+            rawMaterial.unitsInStock = unitsInStock
+
+    if branch.idBranch != 1:
+        to = TransferOrderProduct.objects.filter(Q(source=branch) | Q(destination=branch))
+    else:
+        to = TransferOrderProduct.objects.all()
 
     context = {
-        "source":source,
+        "source":branch,
         "destination":destination,
         "products":p,
         "transferOrders":to,
+        "rawMaterials":r,
     }
 
 
@@ -740,6 +777,7 @@ def ajaxSaveDelivery(request):
     ordered = request.GET.getlist('ordered[]')
     lines = request.GET.getlist('lines[]')
     idPurchaseOrder = request.GET.get('idPurchaseOrder')
+    b = Branch.objects.get(pk=request.session['branchID'])
 
     deliveryDate =datetime.now().strftime("%Y-%m-%d")
 
@@ -755,14 +793,14 @@ def ajaxSaveDelivery(request):
         d1 = DeliveredProducts(qty=quantity[x],idDelivery_id=d.pk,idOrderLines_id=lines[x])
         d1.save()
         p = Product.objects.get(pk=products[x])
+        pc = ProductCount.objects.get(idProduct=p, idBranch=b)
         if float(ordered[x]) != float(quantity[x]) and float(ordered[x]) > float(quantity[x]):
             #print(float(p.unitsInStock))
             #print(float(quantity[x]))
             isOkay = False
 
-        p.unitsInStock = int(p.unitsInStock) + int(quantity[x])
-        p.save()
-
+        pc.unitsInStock = int(pc.unitsInStock) + int(quantity[x])
+        pc.save()
 
     qwe = PurchaseOrder.objects.get(pk=idPurchaseOrder)
 
@@ -786,8 +824,6 @@ def ajaxSaveDelivery(request):
 
 
 def ajaxTransferOrder(request):
-
-
     products = request.GET.getlist('products[]')
     quantity = request.GET.getlist('quantity[]')
 
@@ -796,39 +832,45 @@ def ajaxTransferOrder(request):
     transferDate = request.GET.get('transferDate')
     expectedDate = request.GET.get('expectedDate')
 
+    b = Branch.objects.get(pk=request.session['branchID'])
 
-    to = TransferOrder(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'),expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'),idCashier_id=request.session['userID'],source_id=source,destination_id=destination,status="Draft")
+    to = TransferOrderProduct(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Draft")
     to.save()
 
 
     for x in range(0, len(products)):
-        tl = TransferLines(qty=quantity[x],idProduct_id=products[x],idTransferOrder_id=to.pk)
+        tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrder_id=to.pk)
         tl.save()
         p = Product.objects.get(pk=products[x])
-        p.unitsInStock = int(p.unitsInStock) - int(quantity[x])
-        p.unitsReserved = int(p.unitsReserved) + int(quantity[x])
-        p.save()
+        pc = ProductCount.objects.get(idProduct=p, idBranch=b)
+        pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
+        pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
+        pc.save()
 
     Notifs.write("Products have been delivered.")
     return JsonResponse([],safe=False)
 
 def ajaxInTransitTO(request):
     idTO = request.GET.get('idTransferOrder')
-    to = TransferOrder.objects.get(pk=int(idTO))
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderProduct.objects.get(pk=int(idTO))
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
-        aw.unitsReserved = aw.unitsReserved - int(wew[x].qty)
-        aw.save()
+        pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
+        pc.unitsReserved = pc.unitsReserved - int(wew[x].qty)
+        print(pc.unitsInStock)
+        pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
+        print(pc.unitsInStock)
+        pc.save()
 
     to.status = "In Transit"
     to.save()
     return JsonResponse([],safe=False)
 
 def ajaxFinishedTO(request):
-
     idTO = request.GET.get('idTransferOrder')
-    to = TransferOrder.objects.get(pk=int(idTO))
+    to = TransferOrderProduct.objects.get(pk=int(idTO))
     
     to.status = "Finished"
     to.save()
@@ -836,24 +878,25 @@ def ajaxFinishedTO(request):
 
 
 def ajaxCancelTO(request):
-
     idTO = request.GET.get('idTransferOrder')
-    to = TransferOrder.objects.get(pk=int(idTO))
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderProduct.objects.get(pk=int(idTO))
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
-        aw.unitsReserved = aw.unitsReserved - int(wew[x].qty)
-        print(aw.unitsInStock)
-        aw.unitsInStock = aw.unitsInStock + int(wew[x].qty)
-        print(aw.unitsInStock)
-        aw.save()
+        pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
+        pc.unitsReserved = pc.unitsReserved - int(wew[x].qty)
+        print(pc.unitsInStock)
+        pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
+        print(pc.unitsInStock)
+        pc.save()
     to.status = "Cancelled"
     to.save()
     return JsonResponse([],safe=False)
 
-
 def ajaxGetIngredients(request):
     pk = request.GET.get('productPk')
+    print(pk)
     i = IngredientsList.objects.filter(idProduct=pk)
     b = Branch.objects.get(idBranch=request.session['branchID'])
     ingredients = []

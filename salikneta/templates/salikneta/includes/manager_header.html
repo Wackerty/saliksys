@@ -77,10 +77,7 @@
               <span>Inventory</span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'purchaseOrder'%}active{% endif %}"><a href="{% url 'purchaseOrder' %}">Purchase Orders</a></li>
               <li class="{% if request.resolver_match.view_name ==  'transferOrder'%}active{% endif %}"><a href="{% url 'transferOrder'%}">Transfer Orders</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'backload'%}active{% endif %}"><a href="{% url 'backload'%}">Backloads</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'produceItems'%}active{% endif %}"><a href="{% url 'produceItems' 0%}">Produce Items</a></li>
             </ul>
           </li>
           <li class="sub-menu">
@@ -90,10 +87,6 @@
               <span class="label label-danger pull-right mail-danger" id="warn" style="display: none"></span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'manageItems'%}active{% endif %}"><a href="{% url 'manageItems' %}">Products</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'manageSuppliers'%}active{% endif %}"><a href="{% url 'manageSuppliers' %}">Supplier</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'manageCategories'%}active{% endif %}"><a href="{% url 'manageCategories'%}">Categories</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'manageRawMaterials'%}active{% endif %}"><a href="{% url 'manageRawMaterials'%}">Raw Materials</a></li>
               <li class="{% if request.resolver_match.view_name ==  'manageIngredients'%}active{% endif %}"><a href="{% url 'manageIngredients' 0 %}">Ingredients</a></li>
             </ul>
           </li>
