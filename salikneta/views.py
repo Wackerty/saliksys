@@ -376,6 +376,8 @@ def pos(request):
                                                      'categories':Category.objects.all()})
 def signout(request):
     return redirect('index')
+
+
 def purchaseOrder(request):
     s = Supplier.objects.all()
     i = Product.objects.all()
@@ -752,6 +754,7 @@ def ajaxGetInStockRawMaterials(request):
 
     return JsonResponse(rawmaterials, safe=False)
 
+
 def ajaxAddPurchaseOrder(request):
     products = request.GET.getlist('products[]')
     quantity = request.GET.getlist('quantity[]')
@@ -760,10 +763,9 @@ def ajaxAddPurchaseOrder(request):
     orderDate = request.GET.get('orderDate')
     expectedDate = request.GET.get('expectedDate')
 
-
     po = PurchaseOrder(orderDate=datetime.strptime(orderDate, '%d-%m-%Y').strftime('%Y-%m-%d')
     ,expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d')
-    , idCashier_id=request.session['userID'], idSupplier_id = supplier,status="In Transit")
+    , idManager_id=request.session['userID'], idSupplier_id = supplier,status="In Transit")
     po.save()
 
 

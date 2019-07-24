@@ -259,7 +259,7 @@ class RawMaterialCount(models.Model):
 
 class PurchaseOrder(models.Model):
     idPurchaseOrder = models.AutoField(primary_key=True)
-    idCashier = models.ForeignKey(Cashier, on_delete=models.CASCADE)
+    idManager = models.ForeignKey(Manager, models.CASCADE, db_column='idManager_id')
     idSupplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     orderDate = models.DateField()
     expectedDate = models.DateField()
