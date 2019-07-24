@@ -78,12 +78,12 @@
             </a>
           </li>
           <li class="sub-menu">
-            <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrder' or request.resolver_match.view_name == 'backload' or request.resolver_match.view_name == 'purchaseOrder' or request.resolver_match.view_name == 'produceItems' %}active{% endif %}">
+            <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrderProducts' or request.resolver_match.view_name == 'backload' or request.resolver_match.view_name == 'purchaseOrder' or request.resolver_match.view_name == 'produceItems' %}active{% endif %}">
               <i class="fa fa-shopping-basket"></i>
               <span>Inventory</span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'transferOrder'%}active{% endif %}"><a href="{% url 'transferOrder'%}">Transfer Orders</a></li>
+              <li class="{% if request.resolver_match.view_name ==  'transferOrderProducts'%}active{% endif %}"><a href="{% url 'transferOrderProducts' %}">Transfer Orders</a></li>
               <li class="{% if request.resolver_match.view_name ==  'backload'%}active{% endif %}"><a href="{% url 'backload'%}">Backloads</a></li>
             </ul>
           </li>

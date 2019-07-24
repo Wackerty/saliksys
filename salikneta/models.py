@@ -120,7 +120,7 @@ class Product(models.Model):
 
     @property
     def get_num_incoming(self):
-        incoming = 0;
+        incoming = 0
         objs = OrderLines.objects.filter(idProduct_id=self.idProduct)
         for o in objs:
            incoming += o.qty - o.get_delivered_products_num
@@ -214,6 +214,47 @@ class ProductCount(models.Model):
         self.save()
 
         print("added: " + str(amount) + " stocks to " + str(self.idProduct.name))
+
+
+class RawMaterials(models.Model):
+    idrawmaterials = models.AutoField(db_column='idRawMaterials', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    unitOfMeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
+    idSupplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,db_column='idSupplier_id')
+
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterials'
+
+    @property
+    def get_material_code(self):
+        return self.idrawmaterials + 1000
+
+    @staticmethod
+    def get_product_count(self, branchID):
+        print(self)
+        rawMaterialCount = RawMaterialCount.objects.get(idrawmaterial=self.idrawmaterials, idBranch=branchID).unitsinstock
+        return rawMaterialCount
+
+
+class RawMaterialCount(models.Model):
+    rawmaterialcountid = models.AutoField(db_column='rawmaterialCountID', primary_key=True)  # Field name made lowercase.
+    idrawmaterial = models.ForeignKey(RawMaterials, models.CASCADE, db_column='idRawmaterial_id')  # Field name made lowercase.
+    idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
+    unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterialcount'
+
+    @staticmethod
+    def deduct_stock(self, amount):
+        self.unitsinstock = self.unitsinstock - amount
+
+        self.save()
+
+        print("deducted: " + str(amount) + " stocks to " + str(self.idrawmaterial.name))
 
 
 class PurchaseOrder(models.Model):
@@ -357,8 +398,8 @@ class TransferOrderProduct(models.Model):
     idManager = models.ForeignKey(Manager, models.DO_NOTHING, db_column='idManager_id')  # Field name made lowercase.
     transferDate = models.DateField()
     expectedDate = models.DateField()
-    source = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="source")
-    destination = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="destination")
+    source = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="sourceProduct")
+    destination = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="destinationProduct")
     status = models.CharField(max_length=50)
 
     @property
@@ -377,45 +418,29 @@ class TransferLinesProduct(models.Model):
         return Product.objects.get(pk=int(self.idProduct.pk))
 
 
-class RawMaterials(models.Model):
-    idrawmaterials = models.AutoField(db_column='idRawMaterials', primary_key=True)  # Field name made lowercase.
-    name = models.CharField(max_length=45)
-    unitOfMeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
-    idSupplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,db_column='idSupplier_id')
-
-
-    class Meta:
-        managed = False
-        db_table = 'salikneta_rawmaterials'
-
-    @property
-    def get_material_code(self):
-        return self.idrawmaterials + 1000
-
-    @staticmethod
-    def get_product_count(self, branchID):
-        print(self)
-        rawMaterialCount = RawMaterialCount.objects.get(idrawmaterial=self.idrawmaterials, idBranch=branchID).unitsinstock
-        return rawMaterialCount
-
-
-class RawMaterialCount(models.Model):
-    rawmaterialcountid = models.AutoField(db_column='rawmaterialCountID', primary_key=True)  # Field name made lowercase.
-    idrawmaterial = models.ForeignKey(RawMaterials, models.CASCADE, db_column='idRawmaterial_id')  # Field name made lowercase.
-    idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
-    unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
+class TransferOrderRawMaterial(models.Model):
+    idTransferOrderRawMaterial = models.AutoField(db_column='idTransferOrderRawMaterial', primary_key=True)  # Field name made lowercase.
+    idManager = models.ForeignKey(Manager, models.CASCADE, db_column='idManager_id', blank=True, null=True)  # Field name made lowercase.
+    transferDate = models.DateField(db_column='transferDate', blank=True, null=True)  # Field name made lowercase.
+    expectedDate = models.DateField(db_column='expectedDate', blank=True, null=True)  # Field name made lowercase.
+    source = models.ForeignKey(Branch, models.CASCADE, related_name="sourceRawMaterial")
+    destination = models.ForeignKey(Branch, models.CASCADE, related_name="destinationRawMaterial")
+    status = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'salikneta_rawmaterialcount'
+        db_table = 'salikneta_transferorderrawmaterial'
 
-    @staticmethod
-    def deduct_stock(self, amount):
-        self.unitsinstock = self.unitsinstock - amount
 
-        self.save()
+class TransferLinesRawMaterial(models.Model):
+    idTransferLinesRawMaterial = models.AutoField(db_column='idTransferLinesRawMaterial', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField(blank=True, null=True)
+    idRawMaterial = models.ForeignKey(RawMaterials, models.DO_NOTHING, db_column='idRawMaterial_id', blank=True, null=True)  # Field name made lowercase.
+    idTransferOrderRawMaterial = models.ForeignKey(TransferOrderRawMaterial, models.DO_NOTHING, db_column='idTransferOrderRawMaterial_id', blank=True, null=True)  # Field name made lowercase.
 
-        print("deducted: " + str(amount) + " stocks to " + str(self.idrawmaterial.name))
+    class Meta:
+        managed = False
+        db_table = '\x7fsalikneta_transferlinesrawmaterial'
 
 
 class IngredientsList(models.Model):
