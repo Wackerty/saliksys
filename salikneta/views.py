@@ -323,6 +323,7 @@ def check_notif(request):
 
 def pos(request):
     if request.method == 'POST':
+        b = Branch.objects.get(idBranch=request.session['branchID'])
         #create Sales invoice
         si = SalesInvoice(invoiceDate=datetime.now(),
                           customer="WALK-IN",
@@ -348,13 +349,13 @@ def pos(request):
             itms_dict[item] += float(qtys[i])
             ils.append(il)
         for i in itms_dict:
-            prod = Product.objects.get(idProduct=i)
+            prod = ProductCount.objects.get(idProduct=i, idBranch=b)
             if prod.unitsInStock - itms_dict[i] < 0:
                 pazucc = False
                 messages.warning(request, 'Account Created.')
         if pazucc:
             for i in itms_dict:
-                prod = Product.objects.get(idProduct=i)
+                prod = ProductCount.objects.get(idProduct=i, idBranch=b)
                 prod.unitsInStock = prod.unitsInStock - itms_dict[i]
                 prod.save()
             si.save()
@@ -589,12 +590,41 @@ def backload(request):
     return render(request, 'salikneta/backloads.html',context)
 
 
-def transferOrder(request):
+def transferOrderProducts(request):
     idUser = request.session['userID']
     usertype = request.session['usertype']
     branch = Branch.objects.get(pk=request.session['branchID'])
 
-    destination = Branch.objects.filter(~Q(pk=branch.pk))
+    destination = Branch.objects.filter(~Q(pk=branch.pk) & ~Q(pk=3))
+
+    p = Product.objects.all()
+    r = RawMaterials.objects.all()
+
+    for product in p:
+        unitsInStock = product.get_product_count(product, branch)
+        product.unitsInStock = unitsInStock
+
+    if branch.idBranch != 1:
+        to = TransferOrderProduct.objects.filter(Q(source=branch) | Q(destination=branch))
+    else:
+        to = TransferOrderProduct.objects.all()
+
+    context = {
+        "source":branch,
+        "destination":destination,
+        "products":p,
+        "transferOrders":to,
+    }
+
+    return render(request, 'salikneta/transferOrderProducts.html', context)
+
+
+def transferOrderRawMaterials(request):
+    idUser = request.session['userID']
+    usertype = request.session['usertype']
+    branch = Branch.objects.get(pk=request.session['branchID'])
+
+    destination = Branch.objects.filter(~Q(pk=branch.pk) & ~Q(pk=5) & ~Q(pk=6))
 
     p = Product.objects.all()
     r = RawMaterials.objects.all()
@@ -609,9 +639,9 @@ def transferOrder(request):
             rawMaterial.unitsInStock = unitsInStock
 
     if branch.idBranch != 1:
-        to = TransferOrderProduct.objects.filter(Q(source=branch) | Q(destination=branch))
+        to = TransferOrderRawMaterial.objects.filter(Q(source=branch) | Q(destination=branch))
     else:
-        to = TransferOrderProduct.objects.all()
+        to = TransferOrderRawMaterial.objects.all()
 
     context = {
         "source":branch,
@@ -621,10 +651,7 @@ def transferOrder(request):
         "rawMaterials":r,
     }
 
-
-
-
-    return render(request, 'salikneta/transferOrder.html',context)
+    return render(request, 'salikneta/transferOrderRawMaterials.html', context)
 
 def ajaxAddCategory(request):
     print("AW")
@@ -711,9 +738,19 @@ def ajaxGetInStock(request):
     products = []
 
     products.append({"idProduct":c.pk,"unitsInStock":c.get_product_count(c, b),"incoming":c.get_num_incoming})
-        
 
     return JsonResponse(products, safe=False)
+
+
+def ajaxGetInStockRawMaterials(request):
+    pk = request.GET.get('idRawMaterial')
+    c = RawMaterials.objects.get(pk=pk)
+    b = Branch.objects.get(pk=request.session['branchID'])
+    rawmaterials = []
+
+    rawmaterials.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b)})
+
+    return JsonResponse(rawmaterials, safe=False)
 
 def ajaxAddPurchaseOrder(request):
     products = request.GET.getlist('products[]')
