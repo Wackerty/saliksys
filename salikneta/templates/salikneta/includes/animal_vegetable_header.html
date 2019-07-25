@@ -72,12 +72,12 @@
             </a>
           </li>
           <li class="sub-menu">
-            <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrder' or request.resolver_match.view_name == 'backload' or request.resolver_match.view_name == 'purchaseOrder' or request.resolver_match.view_name == 'produceItems' %}active{% endif %}">
+            <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrderRawMaterials' or request.resolver_match.view_name == 'backload' or request.resolver_match.view_name == 'purchaseOrder' or request.resolver_match.view_name == 'produceItems' %}active{% endif %}">
               <i class="fa fa-shopping-basket"></i>
               <span>Inventory</span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'transferOrderRawMaterials'%}active{% endif %}"><a href="{% url 'transferOrderRawMaterials' %}">Transfer Orders Raw Materials</a></li>
+              <li class="{% if request.resolver_match.view_name ==  'transferOrderRawMaterials'%}active{% endif %}"><a href="{% url 'transferOrderRawMaterials' %}">Transfer Order Raw Materials</a></li>
             </ul>
           </li>
           <li class="sub-menu">
@@ -118,11 +118,5 @@
 
         });
     }
-    let stock_d =  $.get("{% url 'get_num_lowstock' %}");
-    stock_d.done(function(results){
-        if(results.numb > 0){
-            $("#warn").html(results.numb).show();
-        }
-    });
 </script>
     <!--sidebar end-->

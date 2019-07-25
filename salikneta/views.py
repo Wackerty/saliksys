@@ -878,7 +878,7 @@ def ajaxTransferOrder(request):
 
 
     for x in range(0, len(products)):
-        tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrder_id=to.pk)
+        tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
         tl.save()
         p = Product.objects.get(pk=products[x])
         pc = ProductCount.objects.get(idProduct=p, idBranch=b)
@@ -886,8 +886,36 @@ def ajaxTransferOrder(request):
         pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
         pc.save()
 
-    Notifs.write("Products have been delivered.")
+    Notifs.write("Transfer Order for Products from " + to.source.name + " to " + to.destination.name +" has been made.")
     return JsonResponse([],safe=False)
+
+
+def ajaxTransferOrderRawMaterials(request):
+    products = request.GET.getlist('products[]')
+    quantity = request.GET.getlist('quantity[]')
+
+    source = request.GET.get('source')
+    destination = request.GET.get('destination')
+    transferDate = request.GET.get('transferDate')
+    expectedDate = request.GET.get('expectedDate')
+
+    b = Branch.objects.get(pk=request.session['branchID'])
+
+    to = TransferOrderRawMaterial(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Draft")
+    to.save()
+
+    for x in range(0, len(products)):
+        tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x], idTransferOrderRawMaterial_id=to.pk)
+        tl.save()
+        p = RawMaterials.objects.get(pk=products[x])
+        pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
+        pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
+        pc.unitsreserved = int(pc.unitsreserved) + int(quantity[x])
+        pc.save()
+
+    Notifs.write("Transfer Order for Raw Materials from " + to.source.name + " to " + to.destination.name +" has been made.")
+    return JsonResponse([],safe=False)
+
 
 def ajaxInTransitTO(request):
     idTO = request.GET.get('idTransferOrder')
@@ -898,22 +926,73 @@ def ajaxInTransitTO(request):
         aw = wew[x].idProduct
         pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
         pc.unitsReserved = pc.unitsReserved - int(wew[x].qty)
+        pc.save()
+
+    to.status = "In Transit"
+    to.save()
+    Notifs.write(
+        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+    return JsonResponse([],safe=False)
+
+
+def ajaxInTransitTORawMaterial(request):
+    idTO = request.GET.get('idTransferOrder')
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    wew = to.get_transfer_lines
+    for x in range(0, len(wew)):
+        aw = wew[x].idRawMaterial
+        pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
+        pc.unitsreserved = pc.unitsreserved - int(wew[x].qty)
+        pc.save()
+
+    to.status = "In Transit"
+    to.save()
+    Notifs.write(
+        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+    return JsonResponse([],safe=False)
+
+
+def ajaxFinishedTO(request):
+    idTO = request.GET.get('idTransferOrder')
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderProduct.objects.get(pk=int(idTO))
+    wew = to.get_transfer_lines
+
+    for x in range(0, len(wew)):
+        aw = wew[x].idProduct
+        pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
         print(pc.unitsInStock)
         pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
         print(pc.unitsInStock)
         pc.save()
 
-    to.status = "In Transit"
-    to.save()
-    return JsonResponse([],safe=False)
-
-def ajaxFinishedTO(request):
-    idTO = request.GET.get('idTransferOrder')
-    to = TransferOrderProduct.objects.get(pk=int(idTO))
-    
     to.status = "Finished"
     to.save()
+    Notifs.write(
+        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is finished.")
     return JsonResponse([],safe=False)
+
+
+def ajaxFinishedTORawMaterial(request):
+    idTO = request.GET.get('idTransferOrder')
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    wew = to.get_transfer_lines
+
+    for x in range(0, len(wew)):
+        aw = wew[x].idRawMaterial
+        pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
+        print(pc.unitsinstock)
+        pc.unitsinstock = pc.unitsinstock + int(wew[x].qty)
+        print(pc.unitsinstock)
+        pc.save()
+
+    to.status = "Finished"
+    to.save()
+    Notifs.write(
+        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is finished.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxCancelTO(request):
@@ -931,7 +1010,30 @@ def ajaxCancelTO(request):
         pc.save()
     to.status = "Cancelled"
     to.save()
+    Notifs.write(
+        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
     return JsonResponse([],safe=False)
+
+
+def ajaxCancelTORawMaterial(request):
+    idTO = request.GET.get('idTransferOrder')
+    b = Branch.objects.get(pk=request.session['branchID'])
+    to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    wew = to.get_transfer_lines
+    for x in range(0, len(wew)):
+        aw = wew[x].idRawMaterial
+        pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
+        pc.unitsreserved = pc.unitsreserved - int(wew[x].qty)
+        print(pc.unitsinstock)
+        pc.unitsinstock = pc.unitsinstock + int(wew[x].qty)
+        print(pc.unitsinstock)
+        pc.save()
+    to.status = "Cancelled"
+    to.save()
+    Notifs.write(
+        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
+    return JsonResponse([],safe=False)
+
 
 def ajaxGetIngredients(request):
     pk = request.GET.get('productPk')
@@ -941,9 +1043,14 @@ def ajaxGetIngredients(request):
     ingredients = []
 
     for ingredient in i:
-        ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
-                            "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure,
-                            "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, b)})
+        if b.idBranch == 5 or b.idBranch == 6:
+            ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
+                                "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
+        else:
+            ingredients.append({"pk": ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
+                                "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure,
+                                "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials,
+                                                                                            b)})
 
     return JsonResponse(ingredients, safe=False)
 
