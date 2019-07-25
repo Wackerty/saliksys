@@ -77,8 +77,15 @@
               <span>Inventory</span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'transferOrderProducts'%}active{% endif %}"><a href="{% url 'transferOrderProducts' %}">Transfer Orders Products</a></li>
-              <li class="{% if request.resolver_match.view_name ==  'transferOrderRawMaterials'%}active{% endif %}"><a href="{% url 'transferOrderRawMaterials' %}">Transfer Orders Raw Materials</a></li>
+              <li class="sub-menu">
+                  <a href="javascript:;" class="{% if request.resolver_match.view_name ==  'transferOrderProducts' or request.resolver_match.view_name ==  'transferOrderRawMaterials' %}active{% endif %}">
+                    Transfer Order
+                  </a>
+                  <ul class="sub">
+                      <li class="{% if request.resolver_match.view_name ==  'transferOrderProducts'%}active{% endif %}"><a href="{% url 'transferOrderProducts' %}">Products</a></li>
+                      <li class="{% if request.resolver_match.view_name ==  'transferOrderRawMaterials'%}active{% endif %}"><a href="{% url 'transferOrderRawMaterials' %}">Raw Materials</a></li>
+                  </ul>
+              </li>
               <li class="{% if request.resolver_match.view_name ==  'produceItems'%}active{% endif %}"><a href="{% url 'produceItems' 0%}">Produce Items</a></li>
             </ul>
           </li>

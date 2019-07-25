@@ -127,7 +127,7 @@
                                       <tbody id="deliveryForm{{po.pk}}">
                                         {% for o in to.get_transfer_lines %}
                                           <tr>
-                                            <td>{{ o.get_product.name }}</td>
+                                            <td>{{ o.get_raw_material.name }}</td>
                                             <td>{{ o.qty }}</td>
 
                                           </tr>
@@ -148,7 +148,7 @@
                                   <button type="button" id="transferBtn{{to.pk}}" onclick="updateStatus('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Transfer</button>
                                   <button type="button" id="cancelBtn{{to.pk}}" onclick="cancelTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Delete</button>
                                   {% endif %}
-                                  {% if to.status == "In Transit" %}
+                                  {% if to.status == "In Transit" and to.destination == source %}
                                   <button type="button" id="finishBtn{{to.pk}}" onclick="finishTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Finish</button>
                                   {% endif %}
 
@@ -170,6 +170,13 @@
                 <script>
                     $(document).ready(function() {
                         $('#cat_tbl').DataTable();
+                        var today = new Date();
+                        var dd = String(today.getDate()).padStart(2, '0');
+                        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        var yyyy = today.getFullYear();
+
+                        $('#transferDate').val(dd+'-'+mm+'-'+yyyy);
+                        $('#expectedDate').val(dd+'-'+mm+'-'+yyyy);
                     } );
                 </script>
             </div>
@@ -326,7 +333,7 @@ function itemObject(idProduct, productName, unitsInStock){
 function updateStatus(id){
 
     $.ajax({
-      url: '{% url "ajaxInTransitTO" %}',
+      url: '{% url "ajaxInTransitTORawMaterial" %}',
       data: {
         "idTransferOrder":id,
       },
@@ -334,7 +341,7 @@ function updateStatus(id){
       success: function(data){  
 
         alert("Transfer order in transit!");
-        window.location.href = "{% url 'transferOrderProducts'%}";
+        window.location.href = "{% url 'transferOrderRawMaterials'%}";
 
       },
       error: function () {
@@ -347,7 +354,7 @@ function updateStatus(id){
 function cancelTO(id){
 
     $.ajax({
-      url: '{% url "ajaxCancelTO" %}',
+      url: '{% url "ajaxCancelTORawMaterial" %}',
       data: {
         "idTransferOrder":id,
       },
@@ -355,7 +362,7 @@ function cancelTO(id){
       success: function(data){  
 
         alert("Transfer order cancelled!");
-        window.location.href = "{% url 'transferOrderProducts'%}";
+        window.location.href = "{% url 'transferOrderRawMaterials'%}";
 
       },
       error: function () {
@@ -368,7 +375,7 @@ function cancelTO(id){
 function finishTO(id){
 
     $.ajax({
-      url: '{% url "ajaxFinishedTO" %}',
+      url: '{% url "ajaxFinishedTORawMaterial" %}',
       data: {
         "idTransferOrder":id,
       },
@@ -376,7 +383,7 @@ function finishTO(id){
       success: function(data){  
 
         alert("Transfer order is done!");
-        window.location.href = "{% url 'transferOrderProducts'%}";
+        window.location.href = "{% url 'transferOrderRawMaterials'%}";
 
       },
       error: function () {
@@ -432,7 +439,7 @@ function finishTO(id){
     }
 
     $.ajax({
-      url: '{% url "ajaxTransferOrder" %}',
+      url: '{% url "ajaxTransferOrderRawMaterials" %}',
       data: {
         "source":source,
         "destination":destination,
@@ -446,7 +453,7 @@ function finishTO(id){
       success: function(data){  
 
         alert("New transfer order is successfully added!");
-        window.location.href = "{% url 'transferOrderProducts'%}";
+        window.location.href = "{% url 'transferOrderRawMaterials'%}";
       },
       error: function () {
         alert("error");

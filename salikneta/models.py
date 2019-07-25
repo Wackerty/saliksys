@@ -134,15 +134,15 @@ class Product(models.Model):
     @staticmethod
     def get_amount_can_produce(self, branchID):
         i = IngredientsList.objects.filter(idProduct=self)
-
+        canProduce = []
         for ingredient in i:
             ingredient.unitsInStock = ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, branchID)
             ingredient.canProduce = ingredient.unitsInStock // ingredient.qtyneeded
+            canProduce.append(ingredient.canProduce)
 
-        i.order_by('-canProduce')
-        print(i[0].canProduce)
+        print(min(canProduce))
 
-        return i[0].canProduce
+        return min(canProduce)
 
     @staticmethod
     def get_end_inventory(self, ed, branch):
@@ -243,6 +243,7 @@ class RawMaterialCount(models.Model):
     idrawmaterial = models.ForeignKey(RawMaterials, models.CASCADE, db_column='idRawmaterial_id')  # Field name made lowercase.
     idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
     unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
+    unitsreserved = models.IntegerField(db_column='unitsReserved', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -432,6 +433,11 @@ class TransferOrderRawMaterial(models.Model):
         db_table = 'salikneta_transferorderrawmaterial'
 
 
+    @property
+    def get_transfer_lines(self):
+        return TransferLinesRawMaterial.objects.filter(idTransferOrderRawMaterial=self.pk)
+
+
 class TransferLinesRawMaterial(models.Model):
     idTransferLinesRawMaterial = models.AutoField(db_column='idTransferLinesRawMaterial', primary_key=True)  # Field name made lowercase.
     qty = models.FloatField(blank=True, null=True)
@@ -441,6 +447,10 @@ class TransferLinesRawMaterial(models.Model):
     class Meta:
         managed = False
         db_table = '\x7fsalikneta_transferlinesrawmaterial'
+
+    @property
+    def get_raw_material(self):
+        return RawMaterials.objects.get(pk=int(self.idRawMaterial.pk))
 
 
 class IngredientsList(models.Model):
