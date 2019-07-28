@@ -1,0 +1,231 @@
+
+{% load staticfiles %}
+{% include 'salikneta/includes/head.html' %}
+<body>
+  <section id="container">
+
+{% include request.session.header %}
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_material);
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+// Create chart instance
+var chart = am4core.create("chartdiv", am4charts.XYChart);
+
+// Increase contrast by taking evey second color
+chart.colors.step = 2;
+
+// Add data
+chart.data = generateChartData();
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 50;
+
+// Create series
+function createAxisAndSeries(field, name, opposite, bullet) {
+  var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = field;
+  series.dataFields.dateX = "date";
+  series.strokeWidth = 2;
+  series.yAxis = valueAxis;
+  series.name = name;
+  series.tooltipText = "{name}: [bold]{valueY}[/]";
+  series.tensionX = 1;
+
+  var interfaceColors = new am4core.InterfaceColorSet();
+
+  switch(bullet) {
+    case "triangle":
+      var bullet = series.bullets.push(new am4charts.Bullet());
+      bullet.width = 12;
+      bullet.height = 12;
+      bullet.horizontalCenter = "middle";
+      bullet.verticalCenter = "middle";
+
+      var triangle = bullet.createChild(am4core.Triangle);
+      triangle.stroke = interfaceColors.getFor("background");
+      triangle.strokeWidth = 2;
+      triangle.direction = "top";
+      triangle.width = 12;
+      triangle.height = 12;
+      break;
+    case "rectangle":
+      var bullet = series.bullets.push(new am4charts.Bullet());
+      bullet.width = 10;
+      bullet.height = 10;
+      bullet.horizontalCenter = "middle";
+      bullet.verticalCenter = "middle";
+
+      var rectangle = bullet.createChild(am4core.Rectangle);
+      rectangle.stroke = interfaceColors.getFor("background");
+      rectangle.strokeWidth = 2;
+      rectangle.width = 10;
+      rectangle.height = 10;
+      break;
+    default:
+      var bullet = series.bullets.push(new am4charts.CircleBullet());
+      bullet.circle.stroke = interfaceColors.getFor("background");
+      bullet.circle.strokeWidth = 2;
+      break;
+  }
+
+  valueAxis.renderer.line.strokeOpacity = 1;
+  valueAxis.renderer.line.strokeWidth = 2;
+  valueAxis.renderer.line.stroke = series.stroke;
+  valueAxis.renderer.labels.template.fill = series.stroke;
+  valueAxis.renderer.opposite = opposite;
+  valueAxis.renderer.grid.template.disabled = true;
+}
+
+createAxisAndSeries("sales_marketing", "Sales Marketing", true, "circle");
+createAxisAndSeries("sales_taft", "Sales Taft", true, "triangle");
+createAxisAndSeries("sales_malabon", "Sales Malabon", true, "rectangle");
+
+// Add legend
+chart.legend = new am4charts.Legend();
+
+// Add cursor
+chart.cursor = new am4charts.XYCursor();
+
+// generate some random data, quite different range
+function generateChartData() {
+  var chartData = [];
+
+    {% for f in productSales %}
+        chartData.push({
+          date: new Date('{{ f.date|date:"Y-m-d" }}'),
+          sales_marketing: {{ f.sales_marketing }},
+          sales_taft: {{ f.sales_taft }},
+          sales_malabon: {{ f.sales_malabon }}
+        });
+    {% endfor %}
+
+  return chartData;
+}
+
+}); // end am4core.ready()
+</script>
+ <!-- **********************************************************************************************************************************************************
+        MAIN CONTENT
+        *********************************************************************************************************************************************************** -->
+<section id="main-content">
+      <section class="wrapper">
+        <div class="row mt">
+          <div class="col-lg-12">
+            <div class="form-panel" style="padding: 50px">
+              <h3 class="mb"><i class="fa fa-angle-right"></i> Forecasting</h3>
+                <h5 class="mb">Select Product</h5>
+                <select  class="form-control" name="products" id="products">
+                    {% for product in products %}
+                      <option value="{{product.pk}}">{{product.name}}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <h5 class="mb">Select Forecasting Method</h5>
+                <select  class="form-control" name="method" id="method">
+                      <option value="ar">Autoregression </option>
+                      <option value="ma">Moving Average</option>
+                </select>
+                <hr>
+                <h5 class="mb">Product: <b>{{ productName }}</b> Sales</h5>
+                <h5 class="mb">Forecasting Method: <b>{{ forecastingMethod }}</b></h5>
+                <table id="sup_tbl" class="table table-bordered table-striped table-condensed" style="width: 100%;border-width: 1px" >
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Marketing Branch Sales</th>
+                      <th>Taft Branch Sales</th>
+                      <th>Malabon Branch Sales</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id ="sales_tbl">
+                    {% for f in productSales %}
+                      <tr>
+                        <td class="cell_bdr" style="border: 1px solid black">{{ f.when }}</td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ f.sales_marketing }}</td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ f.sales_taft }}</td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ f.sales_malabon }}</td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ f.total_sales }}</td>
+                      </tr>
+                    {% endfor %}
+                     <tr>
+                        <td class="cell_bdr" style="border: 1px solid black"><b>Forecast</b></td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ marketingProductForecast }}</b></td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ taftProductForecast }}</b></td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ malabonProductForecast }}</b></td>
+                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ totalForecast }}</b></td>
+                     </tr>
+                  </tbody>
+                </table>
+                <h5>Marketing Branch: {{ marketingProductForecast }}</h5>
+                <h5>Marketing Branch: {{ taftProductForecast }}</h5>
+                <h5>Marketing Branch: {{ malabonProductForecast }}</h5><br>
+                <h4 class="mb"><i class="fa fa-angle-right"></i> <b>Raw Materials Needed</b></h4>
+                <table class="table table-hover" id="ingredientTable">
+                  <thead>
+                    <tr>
+                      <th>Raw Material</th>
+                      <th>Quantity Needed (Marketing)</th>
+                      <th>Quantity Needed (Taft)</th>
+                      <th>Quantity Needed (Malabon)</th>
+                      <th>UOM</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ingredientTable_Body">
+                    {% for ingredient in ingredients %}
+                        <tr>
+                            <td>{{ ingredient.idrawmaterials.name }}</td>
+                            <td>{{ ingredient.qtyneededmarketing }}</td>
+                            <td>{{ ingredient.qtyneededtaft }}</td>
+                            <td>{{ ingredient.qtyneededmalabon }}</td>
+                            <td>{{ ingredient.idrawmaterials.unitOfMeasure }}</td>
+                        </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                {% for ingredient in ingredients %}
+                    <big>Total needed for {{ ingredient.idrawmaterials.name }}: <b>{{ ingredient.totalneeded }} {{ ingredient.idrawmaterials.unitOfMeasure }} </b></big><br>
+                {% endfor %}
+                <hr>
+                <div id="chartdiv"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+</section>
+</body>
+
+<script>
+    $(document).ready(function(){
+       $("#products").val({{ productID }});
+       $("#method").val('{{ method }}');
+    });
+
+    $( "#products" ).change(function() {
+        window.location.href = "/salikneta/forecasting/product="  + $(this).val() + "method=" + $("#method").val();
+    });
+
+    $( "#method" ).change(function() {
+        window.location.href = "/salikneta/forecasting/product="  + $("#products").val() + "method=" + $(this).val();
+    });
+</script>
+            <!--custom chart end-->

@@ -41,6 +41,7 @@ urlpatterns = [
     path('produceItems/<str:id>', views.produceItems, name='produceItems'),
     path('pos/', views.pos, name='pos'),
     path('sales/', views.sales, name='sales'),
+    path('forecasting/product=<int:id>method=<str:method>', views.forecasting, name='forecasting'),
     path('sales_report/', views.sales_report, name='sales_report'),
     path('sales_report_detail/', views.sales_report_detail, name='sales_report_detail'),
 
@@ -77,6 +78,9 @@ urlpatterns = [
     path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),
     path('ajax/ajaxGetAmountCanProduce/', views.ajaxGetAmountCanProduce, name='ajaxGetAmountCanProduce'),
     path('ajax/ajaxProduceItems/', views.ajaxProduceItems, name='ajaxProduceItems'),
+
+
+    path('get/', views.get, name='get'),
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,9 +7,13 @@ import calendar
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User,Group
 from django.contrib.auth.decorators import login_required
+from statsmodels.tsa.ar_model import AR
+from statsmodels.tsa.arima_model import ARMA
+from random import random, randint
 
 from django.db.models import Q
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta, date
+from dateutil.rrule import rrule, MONTHLY
 # Create your views here.
 
 def index(request):
@@ -170,6 +174,7 @@ def sales_report_detail(request):
 def inventory_report(request):
     return render(request, 'salikneta/reports/inventory_report.html')
 
+
 def inventory_report_detail(request):
     if request.method == 'POST':
         report_data = []
@@ -179,6 +184,9 @@ def inventory_report_detail(request):
                    "transfer_out": 0}
         products = Product.objects.all()
         branch = Branch.objects.get(pk=request.session['branchID'])
+
+        print(request.POST["month"])
+
         for p in products:
             report_data.append({"id":p.idProduct,
                                 "product": p.name,
@@ -190,6 +198,7 @@ def inventory_report_detail(request):
                                 "returns":0,
                                 "sales":0,
                                 "end_inv":0})
+
         if request.POST['type'] == "range":
             sd = request.POST["sd"].split("/")[2]+"-"+request.POST["sd"].split("/")[0]+"-"+request.POST["sd"].split("/")[1] + " 00:00:00"
             ed = request.POST["ed"].split("/")[2]+"-"+request.POST["ed"].split("/")[0]+"-"+request.POST["ed"].split("/")[1] + " 00:00:00"
@@ -1146,3 +1155,318 @@ def ajaxProduceItems(request):
     Notifs.write("Produced " + amount + " stocks for product: " + p.name)
 
     return JsonResponse(ingredients, safe=False)
+
+
+def get(request):
+    si = SalesInvoice.objects.earliest('invoiceDate')
+    bload = BackLoad.objects.earliest('backloadDate')
+    deliv = Delivery.objects.earliest('deliveryDate')
+    to = TransferOrderProduct.objects.earliest('transferDate')
+    earliestDate = min([si.invoiceDate.date(), bload.backloadDate, deliv.deliveryDate, to.transferDate])
+
+    monthYear = str(earliestDate.month) + "-" + str(earliestDate.year)
+
+    print(monthYear)
+
+    report_data = []
+    gen_info = {"message": "", "total_sales_ct": 0,
+                "total_deliveries": 0,
+                "total_backloads": 0,
+                "transfer_out": 0}
+    products = Product.objects.all()
+    branch = Branch.objects.get(pk=request.session['branchID'])
+
+    for p in products:
+        report_data.append({"id": p.idProduct,
+                            "product": p.name,
+                            "uom": p.unitOfMeasure,
+                            "unit_price": p.suggestedUnitPrice,
+                            "beg_inv": 0,
+                            "transfer_out": 0,
+                            "deliveries": 0,
+                            "returns": 0,
+                            "sales": 0,
+                            "end_inv": 0})
+
+    m = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01 00:00:00"
+    m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
+    sd = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01"
+    ed = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
+        calendar.monthrange(m.year, m.month)[1])
+
+    si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
+    bload = BackLoad.objects.filter(backloadDate__gte=sd, backloadDate__lte=ed)
+    deliv = Delivery.objects.filter(deliveryDate__gte=sd, deliveryDate__lte=ed)
+
+    to = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
+    gen_info["message"] = "For the month of " + m.strftime('%B') + " " + str(m.year)
+    for r in report_data:
+        sl = 0
+        backloads = 0
+        deliveries = 0
+        tos = 0
+        r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed, branch)
+        for d in deliv:
+            for del_prods in d.get_delivered_products:
+                if del_prods.product.idProduct == r["id"]:
+                    deliveries += del_prods.qty
+                    gen_info["total_deliveries"] += del_prods.qty
+        for t in to:
+            for tl in t.get_transfer_lines:
+                if tl.idProduct_id == r["id"]:
+                    gen_info["transfer_out"] += tl.qty
+                    tos += tl.qty
+
+        for s in si:
+            for il in InvoiceLines.objects.filter(idSales=s):
+                if il.idProduct_id == r["id"]:
+                    sl += il.qty
+                    gen_info["total_sales_ct"] += il.qty
+        for b in bload:
+            for bl in BackloadLines.objects.filter(idBackload=b):
+                if bl.idProduct_id == r["id"]:
+                    backloads += bl.qty
+                gen_info["total_backloads"] += bl.qty
+
+        r["beg_inv"] = (r["end_inv"] + sl + backloads + tos) - deliveries
+        r["deliveries"] = deliveries
+        r["returns"] = backloads
+        r["transfer_out"] = tos
+        r["sales"] = sl
+
+    return render(request, 'salikneta/reports/inventory_report_detail.html',
+                  {"report_data": report_data, "gen_info": gen_info})
+
+
+def inventory_report_per_month(dates, branchPK):
+    needed_info = []
+    for d in dates:
+        monthYear = str(d.month) + "-" + str(d.year)
+        report_data = []
+        gen_info = {"message": "",
+                    "total_sales_ct": 0,
+                    "total_deliveries": 0,
+                    "total_backloads": 0,
+                    "transfer_out": 0,
+                    "report_data": []}
+        products = Product.objects.all()
+        branch = Branch.objects.get(idBranch=branchPK)
+
+        m = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01 00:00:00"
+        m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
+        sd = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01"
+        ed = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
+            calendar.monthrange(m.year, m.month)[1])
+
+        for p in products:
+            report_data.append({"id": p.idProduct,
+                                "product": p.name,
+                                "uom": p.unitOfMeasure,
+                                "unit_price": p.suggestedUnitPrice,
+                                "beg_inv": 0,
+                                "transfer_out": 0,
+                                "deliveries": 0,
+                                "returns": 0,
+                                "sales": 0,
+                                "end_inv": 0,
+                                "when": m.strftime('%B') + " " + str(m.year)})
+
+        si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
+        bload = BackLoad.objects.filter(backloadDate__gte=sd, backloadDate__lte=ed)
+        deliv = Delivery.objects.filter(deliveryDate__gte=sd, deliveryDate__lte=ed)
+
+        to = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed)
+        gen_info["message"] = "For the month of " + m.strftime('%B') + " " + str(m.year)
+        for r in report_data:
+            sl = 0
+            backloads = 0
+            deliveries = 0
+            tos = 0
+            r["end_inv"] = Product.get_end_inventory(Product.objects.get(idProduct=r["id"]), ed, branch)
+            for d in deliv:
+                for del_prods in d.get_delivered_products:
+                    if del_prods.product.idProduct == r["id"]:
+                        deliveries += del_prods.qty
+                        gen_info["total_deliveries"] += del_prods.qty
+            for t in to:
+                for tl in t.get_transfer_lines:
+                    if tl.idProduct_id == r["id"]:
+                        gen_info["transfer_out"] += tl.qty
+                        tos += tl.qty
+
+            for s in si:
+                for il in InvoiceLines.objects.filter(idSales=s):
+                    if il.idProduct_id == r["id"]:
+                        sl += il.qty
+                        gen_info["total_sales_ct"] += il.qty
+            for b in bload:
+                for bl in BackloadLines.objects.filter(idBackload=b):
+                    if bl.idProduct_id == r["id"]:
+                        backloads += bl.qty
+                    gen_info["total_backloads"] += bl.qty
+
+            r["beg_inv"] = (r["end_inv"] + sl + backloads + tos) - deliveries
+            r["deliveries"] = deliveries
+            r["returns"] = backloads
+            r["transfer_out"] = tos
+            r["sales"] = randint(1,101)
+            #r["sales"] = sl
+
+        gen_info["report_data"] = report_data
+        needed_info.append(gen_info)
+
+    return needed_info
+
+
+def inventory_sales_per_month(dates, productPK):
+    needed_info = []
+    for d in dates:
+        monthYear = str(d.month) + "-" + str(d.year)
+        report_data = []
+        gen_info = {"report_data": []}
+        products = Product.objects.filter(idProduct=productPK)
+
+        m = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01 00:00:00"
+        m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
+        sd = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01"
+        ed = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
+            calendar.monthrange(m.year, m.month)[1])
+
+        endMonthDate = datetime.strptime(monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
+            calendar.monthrange(m.year, m.month)[1]) + " 00:00:00", '%Y-%m-%d %H:%M:%S').date()
+
+        for p in products:
+            report_data.append({"id": p.idProduct,
+                                "product": p.name,
+                                "uom": p.unitOfMeasure,
+                                "sales_marketing": 0,
+                                "sales_taft": 0,
+                                "sales_malabon": 0,
+                                "total_sales": 0,
+                                "end_inv": 0,
+                                "when": m.strftime('%B') + " " + str(m.year),
+                                "date": endMonthDate})
+
+        si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
+        for r in report_data:
+            sl = 0
+            sales_marketing = 0
+            sales_taft = 0
+            sales_malabon = 0
+            for s in si:
+                for il in InvoiceLines.objects.filter(idSales=s):
+                    if il.idProduct_id == r["id"]:
+                        if il.idSales.idCashier.idBranch.idBranch == 1:
+                            sales_marketing += il.qty
+                        elif il.idSales.idCashier.idBranch.idBranch == 5:
+                            sales_taft += il.qty
+                        else:
+                            sales_malabon += il.qty
+                        sl += il.qty
+
+            r["sales_marketing"] = randint(1,101)
+            r["sales_taft"] = randint(1,101)
+            r["sales_malabon"] = randint(1,101)
+
+            #r["sales_marketing"] = sales_marketing
+            #r["sales_taft"] = sales_taft
+            #r["sales_malabon"] = sales_malabon
+            r["total_sales"] = sl
+
+        gen_info["report_data"] = report_data
+        needed_info.append(gen_info)
+
+    return needed_info
+
+
+def forecasting(request, id, method):
+    si = SalesInvoice.objects.earliest('invoiceDate')
+    bload = BackLoad.objects.earliest('backloadDate')
+    deliv = Delivery.objects.earliest('deliveryDate')
+    to = TransferOrderProduct.objects.earliest('transferDate')
+    earliestDate = min([si.invoiceDate.date(), bload.backloadDate, deliv.deliveryDate, to.transferDate])
+    today = date.today()
+
+    dates = [dt for dt in rrule(MONTHLY, dtstart=earliestDate, until=today)]
+
+    if id == 0:
+        awit = inventory_sales_per_month(dates, Product.objects.first().pk)
+        productID = Product.objects.first().pk
+        productName = Product.objects.first().name
+        ingredients = IngredientsList.objects.filter(idProduct=productID)
+    else:
+        awit = inventory_sales_per_month(dates, Product.objects.get(idProduct=id).pk)
+        productID = Product.objects.get(idProduct=id).idProduct
+        productName = Product.objects.get(idProduct=id).name
+        ingredients = IngredientsList.objects.filter(idProduct=productID)
+
+    product_inventory_sales = []
+    for row in awit:
+        product_inventory_sales.append(row['report_data'][0])
+
+    productMarketingSales = []
+    productTaftSales = []
+    productMalabonSales = []
+    for row in product_inventory_sales:
+        productMarketingSales.append(row['sales_marketing'])
+        productTaftSales.append(row['sales_taft'])
+        productMalabonSales.append(row['sales_malabon'])
+
+    if method == "ar":
+        marketingProductForecast = forecast_autoregression(productMarketingSales)
+        taftProductForecast = forecast_autoregression(productTaftSales)
+        malabonProductForecast = forecast_autoregression(productMalabonSales)
+        forecastingMethod = "Autoregression"
+    elif method == "ma":
+        marketingProductForecast = forecast_moving_average(productMarketingSales)
+        taftProductForecast = forecast_moving_average(productTaftSales)
+        malabonProductForecast = forecast_moving_average(productMalabonSales)
+        forecastingMethod = "Moving Average"
+
+    for i in ingredients:
+        i.totalneeded = 0
+
+    for i in ingredients:
+        i.qtyneededmarketing = i.qtyneeded * abs(int(marketingProductForecast))
+        i.qtyneededtaft = i.qtyneeded * abs(int(taftProductForecast))
+        i.qtyneededmalabon = i.qtyneeded * abs(int(malabonProductForecast))
+        i.totalneeded += i.qtyneededmarketing + i.qtyneededtaft + i.qtyneededmalabon
+
+    products = Product.objects.all()
+
+    context = {
+        "marketingProductForecast": abs(int(marketingProductForecast)),
+        "taftProductForecast": abs(int(taftProductForecast)),
+        "malabonProductForecast": abs(int(malabonProductForecast)),
+        "totalForecast": abs(int(marketingProductForecast)) + abs(int(taftProductForecast)) + abs(int(malabonProductForecast)),
+        "productSales": product_inventory_sales,
+        "products": products,
+        "productID": productID,
+        "productName": productName,
+        "method": method,
+        "ingredients": ingredients,
+        "forecastingMethod": forecastingMethod
+    }
+
+    return render(request, 'salikneta/forecasting.html', context)
+
+
+def forecast_autoregression(data):
+    model = AR(data)
+    model_fit = model.fit()
+    # make prediction
+    yhat = model_fit.predict(len(data), len(data))
+
+    return yhat
+
+
+def forecast_moving_average(data):
+    try:
+        model = ARMA(data, order=(0, 1))
+        model_fit = model.fit(disp=False)
+        # make prediction
+        yhat = model_fit.predict(len(data), len(data))
+    except:
+        yhat = 0
+
+    return yhat

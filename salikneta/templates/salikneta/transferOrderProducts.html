@@ -170,6 +170,13 @@
                 <script>
                     $(document).ready(function() {
                         $('#cat_tbl').DataTable();
+                        var today = new Date();
+                        var dd = String(today.getDate()).padStart(2, '0');
+                        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        var yyyy = today.getFullYear();
+
+                        $('#transferDate').val(dd+'-'+mm+'-'+yyyy);
+                        $('#expectedDate').val(dd+'-'+mm+'-'+yyyy);
                     } );
                 </script>
             </div>

@@ -119,7 +119,7 @@
             </ul>
           </li>
           <li class="sub">
-            <a href="">
+            <a class="{% if request.resolver_match.view_name ==  'forecasting' %}active{% endif %}" href="{% url 'forecasting' 0 'ar' %}">
               <i class="fa fa-area-chart"></i>
               <span>Forecasting</span>
             </a>
