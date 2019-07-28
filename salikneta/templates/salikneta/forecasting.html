@@ -131,14 +131,14 @@ function generateChartData() {
           <div class="col-lg-12">
             <div class="form-panel" style="padding: 50px">
               <h3 class="mb"><i class="fa fa-angle-right"></i> Forecasting</h3>
-                <h5 class="mb">Select Product</h5>
+                Select Product
                 <select  class="form-control" name="products" id="products">
                     {% for product in products %}
                       <option value="{{product.pk}}">{{product.name}}</option>
                     {% endfor %}
                 </select>
                 <br>
-                <h5 class="mb">Select Forecasting Method</h5>
+                Select Forecasting Method
                 <select  class="form-control" name="method" id="method">
                       <option value="ar">Autoregression </option>
                       <option value="ma">Moving Average</option>

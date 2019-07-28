@@ -9,9 +9,6 @@
         MAIN CONTENT
         *********************************************************************************************************************************************************** -->
     <!--main content start-->
-
-
-
               <!-- Modal -->
               <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -181,6 +178,25 @@
           <div class="col-lg-12">
             <div class="form-panel">
               <h4 class="mb"><i class="fa fa-apple"></i> Current Inventory for Products in {{ branch.name }} Branch</h4>
+
+            {% if request.session.branchID == 1 %}
+                Select Branch
+                <select class="form-control" name="branch" id="branch">
+                      <option value="1">Marketing </option>
+                      <option value="2">Production</option>
+                      <option value="5">Taft</option>
+                      <option value="6">Malabon</option>
+                </select>
+                <br>
+            {% else %}
+                <select style="display:none" class="form-control" name="branch" id="branch">
+                      <option value="1">Marketing </option>
+                      <option value="2">Production</option>
+                      <option value="5">Taft</option>
+                      <option value="6">Malabon</option>
+                </select>
+            {% endif %}
+
               <button class="btn btn-success btn-md" data-toggle="modal" data-target="#myModal" style="margin-bottom: 1vh">Add Product</button>
 
                 <table id="itm_tbl" class="table table-bordered table-striped table-condensed">
@@ -241,6 +257,15 @@
 </body>
 
 <script>
+    $(document).ready(function(){
+       $("#branch").val({{ branch.idBranch }});
+    });
+
+
+    $( "#branch" ).change(function() {
+        window.location.href = "/salikneta/manageItems/"  + $(this).val();
+    });
+
     function editItem_Price(obj){
 
         $("#e_price").val($(obj).attr("item_price"));

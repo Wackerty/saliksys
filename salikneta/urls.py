@@ -29,7 +29,7 @@ urlpatterns = [
     path('register_validate/', views.register_validate, name='register_validate'),
     path('manageCategories/', views.manageCategories, name='manageCategories'),
     path('manageSuppliers/', views.manageSuppliers, name='manageSuppliers'),
-    path('manageItems/', views.manageItems, name='manageItems'),
+    path('manageItems/<int:id>', views.manageItems, name='manageItems'),
     path('manageRawMaterials/', views.manageRawMaterials, name='manageRawMaterials'),
     path('manageIngredients/<str:id>', views.manageIngredients, name='manageIngredients'),
     path('editItemPrice/', views.editItemPrice, name='editItemPrice'),
@@ -50,6 +50,7 @@ urlpatterns = [
 
     path('check_notifs/', views.check_notif, name='check_notifs'),
     path('open_notifs/', views.open_notif, name='open_notifs'),
+    path('notifications/', views.notifications, name='notifications'),
 
     path('get_num_low_items/', views.get_num_lowstock, name='get_num_lowstock'),
     path('ajax/get_invoicelines_by_salesid/<int:idSales>/', views.get_invoice_by_id, name='get_invoicelines_by_salesid'),
@@ -78,6 +79,7 @@ urlpatterns = [
     path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),
     path('ajax/ajaxGetAmountCanProduce/', views.ajaxGetAmountCanProduce, name='ajaxGetAmountCanProduce'),
     path('ajax/ajaxProduceItems/', views.ajaxProduceItems, name='ajaxProduceItems'),
+    path('ajax/ajaxGetRawMaterialCountLogs/', views.ajaxGetRawMaterialCountLogs, name='ajaxGetRawMaterialCountLogs'),
 
 
     path('get/', views.get, name='get'),

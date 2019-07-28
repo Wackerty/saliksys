@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+{% include 'salikneta/includes/head.html' %}
+
+<body>
+  <section id="container">
+
+{% include request.session.header %}
+ <!-- **********************************************************************************************************************************************************
+        MAIN CONTENT
+        *********************************************************************************************************************************************************** -->
+    <!--main content start-->
+    <section id="main-content">
+      <section class="wrapper">
+        <div class="row">
+          <div class="col-lg-9 main-chart">
+            <!--CUSTOM CHART START -->
+            <!-- /row -->
+          <h4 class="centered mt">Notifications</h4>
+            <!-- First Activity -->
+            {% for notif in notifs %}
+                <div class="desc">
+              <div class="thumb">
+                <span class="badge bg-theme"><i class="fa fa-clock-o"></i></span>
+              </div>
+              <div class="details">
+                <p>
+                  <muted>{{ notif.get_time_ago }}</muted>
+                  <br/>{{notif.msg }}<br/>
+                </p>
+              </div>
+            </div>
+            {% endfor %}
+
+          </div>
+          <!-- /col-lg-9 END SECTION MIDDLE -->
+          <!-- **********************************************************************************************************************************************************
+              RIGHT SIDEBAR CONTENT
+              *********************************************************************************************************************************************************** -->
+
+          <!-- /col-lg-3 -->
+        </div>
+        <!-- /row -->
+      </section>
+    </section>
+    <!--main content end-->
+    <!--footer start-->
+    <!--footer end-->
+  </section>
+  <!-- js placed at the end of the document so the pages load faster -->=
+</body>
+
+</html>

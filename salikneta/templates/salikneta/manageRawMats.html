@@ -117,6 +117,7 @@
                       <th>Current Stocks</th>
                       <th>UOM</th>
                       <th>Supplier</th>
+                      <th>Logs</th>
                     </tr>
                   </thead>
                   <tbody id ="itemsBody" >
@@ -126,6 +127,7 @@
                               <td>{{rawmaterial.unitsInStock}} <a href="#" data-toggle="modal" data-target="#modal_edit"  item_code="{{ rawmaterial.get_material_code }}" item_name="{{ rawmaterial.name }}" item_stock="{{ rawmaterial.unitsInStock }}" item_id="{{ rawmaterial.idrawmaterials }}" onclick="edit_Stock(this)"><i class="fa fa-edit"></i></a></td>
                               <td>{{rawmaterial.unitOfMeasure}}</td>
                               <td>{{rawmaterial.idSupplier.name }}</td>
+                              <td><button class="btn btn-round btn-primary" data-toggle="modal" data-target="#modal_ingredients" item_id="{{ rawmaterial.rawMaterialCountID }}" onclick="getLogs(this)">View</button>
                           </tr>
                       {% endfor %}
                       </tbody>
@@ -143,6 +145,36 @@
   </section>
 </body>
 
+            <div class="modal fade" id="modal_ingredients" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">Logs</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <table class="table table-hover" id="ingredientTable">
+                              <thead>
+                                <tr>
+                                  <th>Timestamp</th>
+                                  <th>From</th>
+                                  <th>To</th>
+                                  <th>Updated by</th>
+                                </tr>
+                              </thead>
+                              <tbody id="ingredientTable_Body">
+                              </tbody>
+                          </table>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
 <script>
     function edit_Stock(obj){
 
@@ -152,5 +184,36 @@
         $("#item_id").val($(obj).attr("item_id"));
 
     }
+
+    function getLogs(obj){
+        var productPK = $(obj).attr("item_id");
+
+        $("#addIngredientsLink").attr("href","/salikneta/manageIngredients/" + productPK);
+
+        $.ajax({
+          url: '{% url "ajaxGetRawMaterialCountLogs" %}',
+          data: {
+            "rawMaterialCountID":productPK,
+          },
+          dataType: 'json',
+          success: function(data){
+              var rows = "";
+              for(var i = 0; i < data.length; i++){
+                  rows += "<tr>";
+                  rows += "<td>" + data[i].timestamp + "</td>";
+                  rows += "<td>" + data[i].fromCount + "</td>";
+                  rows += "<td>" + data[i].toCount + "</td>";
+                  rows += "<td>" + data[i].manager + "</td>";
+                  rows += "</tr>";
+              }
+              $("#ingredientTable_Body").html(rows);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+    }
+
 </script>
             <!--custom chart end-->

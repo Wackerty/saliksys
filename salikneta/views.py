@@ -14,6 +14,8 @@ from random import random, randint
 from django.db.models import Q
 from datetime import datetime,timedelta, date
 from dateutil.rrule import rrule, MONTHLY
+import pandas as pd
+import math
 # Create your views here.
 
 def index(request):
@@ -36,7 +38,7 @@ def log_in_validate(request):
             request.session['lastname'] = Cashier.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Cashier.objects.get(username=user, password=password).idBranch.idBranch
             request.session['header'] = "salikneta/includes/cashier_header.html"
-            return redirect('home')
+            return redirect('pos')
         elif try2: 
             request.session['username'] = user
 
@@ -46,6 +48,7 @@ def log_in_validate(request):
             request.session['firstname'] = Manager.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Manager.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Manager.objects.get(username=user, password=password).idBranch.idBranch
+            request.session['managerID'] = Manager.objects.get(username=user, password=password).idManager
 
             if request.session['branchID'] == 1:
                 request.session['header'] = "salikneta/includes/marketing_header.html"
@@ -70,6 +73,9 @@ def log_in_validate(request):
 def home(request):
     return render(request, 'salikneta/home.html', {"notifs": Notifs.objects.all().order_by("-notif_id")})
 
+
+def notifications(request):
+    return render(request, 'salikneta/notifications.html', {"notifs": Notifs.objects.all().order_by("-notif_id")})
 
 def get_num_lowstock(request):
     return JsonResponse({"numb":ProductCount.get_num_lowstock_items(Branch.objects.get(idBranch=request.session['branchID']))})
@@ -308,8 +314,11 @@ def editMaterialStock(request):
         print("waaat",request.POST['item_id'])
         rc = RawMaterialCount.objects.get(idrawmaterial_id=request.POST['item_id'], idBranch__idBranch=request.session['branchID'])
         print("waaat",request.POST['e_stocks'])
+        rcl = RawMaterialCountLog(fromCount=rc.unitsinstock, toCount=float(request.POST['e_stocks']), timestamp=datetime.now(),
+                                  idManager=Manager.objects.get(pk=request.session['managerID']), idRawMaterialCount=rc)
         rc.unitsinstock = float(request.POST['e_stocks'])
         rc.save()
+        rcl.save()
         Notifs.write("Raw Material Stocks for " +rc.idrawmaterial.name+" in "+rc.idBranch.name+" branch has been updated.")
     return HttpResponseRedirect(reverse('manageRawMaterials'))
 
@@ -461,8 +470,9 @@ def manageSuppliers(request):
     }
     return render(request, 'salikneta/manageSuppliers.html',context)
 
-def manageItems(request):
-    b = Branch.objects.get(idBranch=request.session['branchID'])
+
+def manageItems(request, id):
+    b = Branch.objects.get(idBranch=id)
     c = Category.objects.all()
     i = Product.objects.all()
 
@@ -482,9 +492,9 @@ def manageItems(request):
         c.save()
 
         branches = Branch.objects.all()
-
+        currentBranch = Branch.objects.get(idBranch=request.session['branchID'])
         for branch in branches:
-            if branch == b:
+            if currentBranch == b:
                 cc = ProductCount(idProduct=c, idBranch=branch, unitsInStock=request.POST['startStock'])
             else:
                 cc = ProductCount(idProduct=c, idBranch=branch, unitsInStock=0)
@@ -504,6 +514,7 @@ def manageRawMaterials(request):
     for rawMaterial in r:
         unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
         rawMaterial.unitsInStock = unitsInStock
+        rawMaterial.rawMaterialCountID = RawMaterialCount.objects.get(idBranch=b, idrawmaterial=rawMaterial).rawmaterialcountid
 
     context = {
         "rawmaterials":r,
@@ -880,22 +891,35 @@ def ajaxTransferOrder(request):
     transferDate = request.GET.get('transferDate')
     expectedDate = request.GET.get('expectedDate')
 
-    b = Branch.objects.get(pk=request.session['branchID'])
-
-    to = TransferOrderProduct(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Draft")
+    to = TransferOrderProduct(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Pending for Request")
+    b = to.source
     to.save()
 
+    if to.destination.pk != 1:
+        for x in range(0, len(products)):
+            tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
+            tl.save()
+            p = Product.objects.get(pk=products[x])
+            pc = ProductCount.objects.get(idProduct=p, idBranch=b)
+            pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
+            pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
+            pc.save()
 
-    for x in range(0, len(products)):
-        tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
-        tl.save()
-        p = Product.objects.get(pk=products[x])
-        pc = ProductCount.objects.get(idProduct=p, idBranch=b)
-        pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
-        pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
-        pc.save()
+        Notifs.write("Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name +" has been made.")
+    else:
+        for x in range(0, len(products)):
+            tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
+            tl.save()
+            p = Product.objects.get(pk=products[x])
+            pc = ProductCount.objects.get(idProduct=p, idBranch=b)
+            pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
+            pc.save()
+            to.status = "In Transit"
+            to.save()
 
-    Notifs.write("Transfer Order for Products from " + to.source.name + " to " + to.destination.name +" has been made.")
+        Notifs.write("Transfer Order for Products (TO# " + str(
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
+
     return JsonResponse([],safe=False)
 
 
@@ -908,28 +932,43 @@ def ajaxTransferOrderRawMaterials(request):
     transferDate = request.GET.get('transferDate')
     expectedDate = request.GET.get('expectedDate')
 
-    b = Branch.objects.get(pk=request.session['branchID'])
-
-    to = TransferOrderRawMaterial(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Draft")
+    to = TransferOrderRawMaterial(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Pending for Request")
+    b = to.source
     to.save()
 
-    for x in range(0, len(products)):
-        tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x], idTransferOrderRawMaterial_id=to.pk)
-        tl.save()
-        p = RawMaterials.objects.get(pk=products[x])
-        pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
-        pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
-        pc.unitsreserved = int(pc.unitsreserved) + int(quantity[x])
-        pc.save()
+    if to.destination.pk != 1:
+        for x in range(0, len(products)):
+            tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x], idTransferOrderRawMaterial_id=to.pk)
+            tl.save()
+            p = RawMaterials.objects.get(pk=products[x])
+            pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
+            pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
+            pc.unitsreserved = int(pc.unitsreserved) + int(quantity[x])
+            pc.save()
 
-    Notifs.write("Transfer Order for Raw Materials from " + to.source.name + " to " + to.destination.name +" has been made.")
+        Notifs.write("Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name +" has been made.")
+    else:
+        for x in range(0, len(products)):
+            tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x],
+                                          idTransferOrderRawMaterial_id=to.pk)
+            tl.save()
+            p = RawMaterials.objects.get(pk=products[x])
+            pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
+            pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
+            pc.save()
+            to.status = "In Transit"
+            to.save()
+
+        Notifs.write("Transfer Order for Raw Materials (TO# " + str(
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
+
     return JsonResponse([],safe=False)
 
 
 def ajaxInTransitTO(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderProduct.objects.get(pk=int(idTO))
+    b = to.source
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
@@ -946,8 +985,8 @@ def ajaxInTransitTO(request):
 
 def ajaxInTransitTORawMaterial(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    b = to.source
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
@@ -964,8 +1003,8 @@ def ajaxInTransitTORawMaterial(request):
 
 def ajaxFinishedTO(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderProduct.objects.get(pk=int(idTO))
+    b = to.destination
     wew = to.get_transfer_lines
 
     for x in range(0, len(wew)):
@@ -976,17 +1015,17 @@ def ajaxFinishedTO(request):
         print(pc.unitsInStock)
         pc.save()
 
-    to.status = "Finished"
+    to.status = "Received"
     to.save()
     Notifs.write(
-        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is finished.")
+        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
     return JsonResponse([],safe=False)
 
 
 def ajaxFinishedTORawMaterial(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    b = to.destination
     wew = to.get_transfer_lines
 
     for x in range(0, len(wew)):
@@ -997,17 +1036,17 @@ def ajaxFinishedTORawMaterial(request):
         print(pc.unitsinstock)
         pc.save()
 
-    to.status = "Finished"
+    to.status = "Received"
     to.save()
     Notifs.write(
-        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is finished.")
+        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
     return JsonResponse([], safe=False)
 
 
 def ajaxCancelTO(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderProduct.objects.get(pk=int(idTO))
+    b = to.source
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
@@ -1026,8 +1065,8 @@ def ajaxCancelTO(request):
 
 def ajaxCancelTORawMaterial(request):
     idTO = request.GET.get('idTransferOrder')
-    b = Branch.objects.get(pk=request.session['branchID'])
     to = TransferOrderRawMaterial.objects.get(pk=int(idTO))
+    b = to.source
     wew = to.get_transfer_lines
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
@@ -1062,6 +1101,24 @@ def ajaxGetIngredients(request):
                                                                                             b)})
 
     return JsonResponse(ingredients, safe=False)
+
+
+def ajaxGetRawMaterialCountLogs(request):
+    pk = request.GET.get('rawMaterialCountID')
+    print(pk)
+
+    r = RawMaterialCountLog.objects.filter(idRawMaterialCount=pk).order_by('-timestamp')
+
+    logs = []
+
+    for log in r:
+        logs.append({"fromCount": log.fromCount,
+                     "toCount": log.toCount,
+                     "timestamp": log.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                     "manager": log.idManager.firstname + " " + log.idManager.lastname,
+                     })
+
+    return JsonResponse(logs, safe=False)
 
 
 def ajaxGetAmountCanProduce(request):
@@ -1461,6 +1518,17 @@ def forecast_autoregression(data):
 
 
 def forecast_moving_average(data):
+    dataFrame = {"data": data}
+    df = pd.DataFrame(dataFrame)
+    movingAverage = df.rolling(window=3).mean()
+    print(movingAverage["data"].iloc[0])
+
+    if math.isnan(movingAverage["data"].iloc[-1]):
+        forecast = df["data"].iloc[-1]
+        print('awit')
+    else:
+        forecast = round(movingAverage["data"].iloc[-1])
+    """
     try:
         model = ARMA(data, order=(0, 1))
         model_fit = model.fit(disp=False)
@@ -1468,5 +1536,5 @@ def forecast_moving_average(data):
         yhat = model_fit.predict(len(data), len(data))
     except:
         yhat = 0
-
-    return yhat
+    """
+    return forecast
