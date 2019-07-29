@@ -112,7 +112,7 @@
                                     <table class="table table-hover" id="forPO{{po.pk}}"> 
                                       <thead>
                                         <tr>
-                                          <th width="25%">Item name</th>
+                                          <th width="25%">Raw Material name</th>
                                           <th>Qty ordered</th>
                                           <th>Pending</th>
                                         </tr>
@@ -121,7 +121,7 @@
                                       <tbody>
                                         {% for o in po.get_orderLines %}
                                         <tr>
-                                          <td>{{ o.idProduct.name }}</td>
+                                          <td>{{ o.idRawMaterial.name }}</td>
                                           <td>{{ o.qty }}</td>
                                           <td>{{ o.get_pending }}</td>
 
@@ -138,7 +138,7 @@
                                       
                                       <thead>
                                         <tr>
-                                          <th width="25%">Item name</th>
+                                          <th width="25%">Raw Material name</th>
 
                                           <th>Qty ordered</th>
                                           <th>Pending</th>
@@ -148,10 +148,10 @@
                                       <tbody id="deliveryForm{{po.pk}}">
                                         {% for o in po.get_orderLines %}
                                         <tr>
-                                          <td class="{{o.pk}}">{{ o.idProduct.name }}</td>
+                                          <td class="{{o.pk}}">{{ o.idRawMaterial.name }}</td>
                                           <td>{{ o.qty}}</td>
                                           <td>{{ o.get_pending}}</td>
-                                          <td><input class="form-control" type="number" value="1" /><span class="i{{o.idProduct.pk}}"></span></td>
+                                          <td><input class="form-control" type="number" value="1" /><span class="i{{o.idRawMaterial.pk}}"></span></td>
                                         </tr>
                                         {% endfor %}
 
@@ -190,7 +190,7 @@
                         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
                         var yyyy = today.getFullYear();
 
-                        $('#transferDate').val(dd+'-'+mm+'-'+yyyy);
+                        $('#orderDate').val(dd+'-'+mm+'-'+yyyy);
                         $('#expectedDate').val(dd+'-'+mm+'-'+yyyy);
                     } );
                 </script>
@@ -275,7 +275,7 @@ s
                           <br>
                           <div class="row">
                             <div class="col-md-12">
-                              <h4>Items</h4>  
+                              <h4>Raw Material</h4>
                             </div>
 
                             
@@ -285,16 +285,13 @@ s
                               <table class="table table-hover"> 
                                 <thead>
                                   <tr>
-                                    <th>Item name</th>
+                                    <th>Raw Material name</th>
                                     <th>In stock</th>
                                     <th>Incoming</th>
                                     <th>Quantity</th>
                                   </tr>
                                 </thead>
                                 <tbody id="tableData">
-                                 
-                                 
-
                                 </tbody>
                               </table>
                             </div>
@@ -319,17 +316,6 @@ s
                 </div>
               </div>
             </div>
-
-
-
-             
-
-
-
-
-
-
-
   </section>
 </body>
 <script>
@@ -362,7 +348,7 @@ s
 
   function appendRow(){
     var items = new Array()
-    {% for p in products %}
+    {% for p in rawmaterials %}
       items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock}}","{{p.get_num_incoming}}"));
     {% endfor %}
 
@@ -428,10 +414,13 @@ s
       ordered.push(tbl.rows[i].cells[2].innerHTML);
       products.push((tbl.rows[i].cells[3].children[1].className).substr(1));
 
+      console.log((tbl.rows[i].cells[0].className));
+      console.log((tbl.rows[i].cells[2].innerHTML));
+      console.log((tbl.rows[i].cells[3].children[1].className).substr(1));
       qty.push(tbl.rows[i].cells[3].children[0].value);
     } 
 
-
+    console.log(products);
 
     $.ajax({
       url: '{% url "ajaxSaveDelivery" %}',
@@ -449,7 +438,7 @@ s
         alert("Items are successfully received");
         window.location.href = "{% url 'purchaseOrder'%}";
       }
-      
+
    });
 
   }
