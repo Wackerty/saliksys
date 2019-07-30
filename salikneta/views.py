@@ -509,7 +509,7 @@ def manageItems(request, id):
             cc.save()
 
         Notifs.write("New Item -" +c.name+"- has been added.")
-        return HttpResponseRedirect(reverse('manageItems'))
+        return HttpResponseRedirect(reverse('manageItems', kwargs={'id':b.idBranch}))
     return render(request, 'salikneta/manageItems.html',context)
 
 
