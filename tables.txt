@@ -1,0 +1,411 @@
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+# Feel free to rename the models, but don't rename db_table values or field names.
+from django.db import models
+
+
+class AuthGroup(models.Model):
+    name = models.CharField(unique=True, max_length=80)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group'
+
+
+class AuthGroupPermissions(models.Model):
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group_permissions'
+        unique_together = (('group', 'permission'),)
+
+
+class AuthPermission(models.Model):
+    name = models.CharField(max_length=255)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
+    codename = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_permission'
+        unique_together = (('content_type', 'codename'),)
+
+
+class AuthUser(models.Model):
+    password = models.CharField(max_length=128)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_superuser = models.IntegerField()
+    username = models.CharField(unique=True, max_length=150)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=150)
+    email = models.CharField(max_length=254)
+    is_staff = models.IntegerField()
+    is_active = models.IntegerField()
+    date_joined = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user'
+
+
+class AuthUserGroups(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_groups'
+        unique_together = (('user', 'group'),)
+
+
+class AuthUserUserPermissions(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_user_permissions'
+        unique_together = (('user', 'permission'),)
+
+
+class DjangoAdminLog(models.Model):
+    action_time = models.DateTimeField()
+    object_id = models.TextField(blank=True, null=True)
+    object_repr = models.CharField(max_length=200)
+    action_flag = models.PositiveSmallIntegerField()
+    change_message = models.TextField()
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'django_admin_log'
+
+
+class DjangoContentType(models.Model):
+    app_label = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'django_content_type'
+        unique_together = (('app_label', 'model'),)
+
+
+class DjangoMigrations(models.Model):
+    app = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    applied = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_migrations'
+
+
+class DjangoSession(models.Model):
+    session_key = models.CharField(primary_key=True, max_length=40)
+    session_data = models.TextField()
+    expire_date = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_session'
+
+
+class Notifs(models.Model):
+    notif_id = models.AutoField(primary_key=True)
+    msg = models.CharField(max_length=150, blank=True, null=True)
+    timestamp = models.DateTimeField(blank=True, null=True)
+    viewed = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'notifs'
+
+
+class SaliknetaBackload(models.Model):
+    idbackload = models.AutoField(db_column='idBackload', primary_key=True)  # Field name made lowercase.
+    backloaddate = models.DateField(db_column='backloadDate')  # Field name made lowercase.
+    idcashier = models.ForeignKey('SaliknetaCashier', models.DO_NOTHING, db_column='idCashier_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_backload'
+
+
+class SaliknetaBackloadlines(models.Model):
+    idbackloadlines = models.AutoField(db_column='idBackloadLines', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField()
+    idproduct = models.ForeignKey('SaliknetaProduct', models.DO_NOTHING, db_column='idProduct_id')  # Field name made lowercase.
+    reason = models.CharField(max_length=45, blank=True, null=True)
+    idbackload = models.ForeignKey(SaliknetaBackload, models.DO_NOTHING, db_column='idBackload', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_backloadlines'
+
+
+class SaliknetaBranch(models.Model):
+    idbranch = models.AutoField(db_column='idBranch', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_branch'
+
+
+class SaliknetaCashier(models.Model):
+    idcashier = models.AutoField(db_column='idCashier', primary_key=True)  # Field name made lowercase.
+    firstname = models.CharField(max_length=45)
+    lastname = models.CharField(max_length=45)
+    username = models.CharField(max_length=45)
+    password = models.CharField(max_length=45)
+    idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_cashier'
+
+
+class SaliknetaCategory(models.Model):
+    idcategory = models.AutoField(db_column='idCategory', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    description = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_category'
+
+
+class SaliknetaDeliveredproducts(models.Model):
+    iddeliveredproducts = models.AutoField(db_column='idDeliveredProducts', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField()
+    iddelivery = models.ForeignKey('SaliknetaDelivery', models.DO_NOTHING, db_column='idDelivery_id')  # Field name made lowercase.
+    idorderlines = models.ForeignKey('SaliknetaOrderlines', models.DO_NOTHING, db_column='idOrderLines_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_deliveredproducts'
+
+
+class SaliknetaDelivery(models.Model):
+    iddelivery = models.AutoField(db_column='idDelivery', primary_key=True)  # Field name made lowercase.
+    deliverydate = models.DateField(db_column='deliveryDate')  # Field name made lowercase.
+    idpurchaseorder = models.ForeignKey('SaliknetaPurchaseorder', models.DO_NOTHING, db_column='idPurchaseOrder_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_delivery'
+
+
+class SaliknetaIngredientlist(models.Model):
+    ingredientslistid = models.AutoField(db_column='ingredientslistId', primary_key=True)  # Field name made lowercase.
+    idproduct = models.ForeignKey('SaliknetaProduct', models.DO_NOTHING, db_column='idProduct_id')  # Field name made lowercase.
+    idrawmaterials = models.ForeignKey('SaliknetaRawmaterials', models.DO_NOTHING, db_column='idRawMaterials_id')  # Field name made lowercase.
+    qtyneeded = models.FloatField(db_column='qtyNeeded')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_ingredientlist'
+
+
+class SaliknetaInvoicelines(models.Model):
+    idinvoicelines = models.AutoField(db_column='idInvoiceLines', primary_key=True)  # Field name made lowercase.
+    unitprice = models.FloatField(db_column='unitPrice')  # Field name made lowercase.
+    qty = models.FloatField()
+    idproduct = models.ForeignKey('SaliknetaProduct', models.DO_NOTHING, db_column='idProduct_id')  # Field name made lowercase.
+    disc = models.FloatField(blank=True, null=True)
+    idsales = models.ForeignKey('SaliknetaSalesinvoice', models.DO_NOTHING, db_column='idSales', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_invoicelines'
+
+
+class SaliknetaManager(models.Model):
+    idmanager = models.AutoField(db_column='idManager', primary_key=True)  # Field name made lowercase.
+    firstname = models.CharField(max_length=45)
+    lastname = models.CharField(max_length=45)
+    username = models.CharField(max_length=45)
+    password = models.CharField(max_length=45)
+    idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_manager'
+
+
+class SaliknetaOrderlines(models.Model):
+    idorderlines = models.AutoField(db_column='idOrderLines', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField()
+    idrawmaterial = models.ForeignKey('SaliknetaRawmaterials', models.DO_NOTHING, db_column='idRawMaterial_id')  # Field name made lowercase.
+    idpurchaseorder = models.ForeignKey('SaliknetaPurchaseorder', models.DO_NOTHING, db_column='idPurchaseOrder_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_orderlines'
+
+
+class SaliknetaProduct(models.Model):
+    idproduct = models.AutoField(db_column='idProduct', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    description = models.CharField(max_length=45)
+    suggestedunitprice = models.FloatField(db_column='suggestedUnitPrice')  # Field name made lowercase.
+    reorderlevel = models.IntegerField(db_column='reorderLevel')  # Field name made lowercase.
+    unitofmeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
+    sku = models.IntegerField(db_column='SKU')  # Field name made lowercase.
+    barcode = models.CharField(max_length=45)
+    img_path = models.CharField(max_length=150, blank=True, null=True)
+    idcategory = models.ForeignKey(SaliknetaCategory, models.DO_NOTHING, db_column='idCategory_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_product'
+
+
+class SaliknetaProductcount(models.Model):
+    productcountid = models.AutoField(db_column='productCountID', primary_key=True)  # Field name made lowercase.
+    idproduct = models.ForeignKey(SaliknetaProduct, models.DO_NOTHING, db_column='idProduct_id')  # Field name made lowercase.
+    idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
+    unitsinstock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
+    unitsreserved = models.IntegerField(db_column='unitsReserved', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_productcount'
+
+
+class SaliknetaPurchaseorder(models.Model):
+    idpurchaseorder = models.AutoField(db_column='idPurchaseOrder', primary_key=True)  # Field name made lowercase.
+    orderdate = models.DateField(db_column='orderDate')  # Field name made lowercase.
+    expecteddate = models.DateField(db_column='expectedDate')  # Field name made lowercase.
+    idmanager = models.ForeignKey(SaliknetaManager, models.DO_NOTHING, db_column='idManager_id')  # Field name made lowercase.
+    idsupplier = models.ForeignKey('SaliknetaSupplier', models.DO_NOTHING, db_column='idSupplier_id')  # Field name made lowercase.
+    status = models.CharField(max_length=45, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_purchaseorder'
+
+
+class SaliknetaRawmaterialcount(models.Model):
+    rawmaterialcountid = models.AutoField(db_column='rawmaterialCountID', primary_key=True)  # Field name made lowercase.
+    idrawmaterial = models.ForeignKey('SaliknetaRawmaterials', models.DO_NOTHING, db_column='idRawmaterial_id')  # Field name made lowercase.
+    idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
+    unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
+    unitsreserved = models.IntegerField(db_column='unitsReserved', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterialcount'
+
+
+class SaliknetaRawmaterialcountlog(models.Model):
+    rawmaterialcountlogid = models.AutoField(db_column='rawMaterialCountLogID', primary_key=True)  # Field name made lowercase.
+    fromcount = models.FloatField(db_column='fromCount', blank=True, null=True)  # Field name made lowercase.
+    tocount = models.FloatField(db_column='toCount', blank=True, null=True)  # Field name made lowercase.
+    timestamp = models.DateTimeField(blank=True, null=True)
+    idmanager = models.ForeignKey(SaliknetaManager, models.DO_NOTHING, db_column='idManager_id', blank=True, null=True)  # Field name made lowercase.
+    idrawmaterialcount = models.ForeignKey(SaliknetaRawmaterialcount, models.DO_NOTHING, db_column='idRawMaterialCount_id', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterialcountlog'
+
+
+class SaliknetaRawmaterials(models.Model):
+    idrawmaterials = models.AutoField(db_column='idRawMaterials', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    unitofmeasure = models.CharField(db_column='unitOfMeasure', max_length=45)  # Field name made lowercase.
+    idsupplier_id = models.IntegerField(db_column='idSupplier_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterials'
+
+
+class SaliknetaSalesinvoice(models.Model):
+    idsales = models.AutoField(db_column='idSales', primary_key=True)  # Field name made lowercase.
+    invoicedate = models.DateTimeField(db_column='invoiceDate')  # Field name made lowercase.
+    customer = models.CharField(max_length=45)
+    idcashier = models.ForeignKey(SaliknetaCashier, models.DO_NOTHING, db_column='idCashier_id')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_salesinvoice'
+
+
+class SaliknetaSupplier(models.Model):
+    idsupplier = models.AutoField(db_column='idSupplier', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45)
+    contactnumber = models.CharField(db_column='contactNumber', max_length=45)  # Field name made lowercase.
+    emailaddress = models.CharField(db_column='emailAddress', max_length=45)  # Field name made lowercase.
+    website = models.CharField(max_length=45)
+    address1 = models.CharField(max_length=45)
+    address2 = models.CharField(max_length=45)
+    city = models.CharField(max_length=45)
+    province = models.CharField(max_length=45)
+    country = models.CharField(max_length=45)
+    postal = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_supplier'
+
+
+class SaliknetaTransferlinesproduct(models.Model):
+    idtransferlinesproduct = models.AutoField(db_column='idTransferLinesProduct', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField()
+    idproduct = models.ForeignKey(SaliknetaProduct, models.DO_NOTHING, db_column='idProduct_id')  # Field name made lowercase.
+    idtransferorderproduct = models.ForeignKey('SaliknetaTransferorderproduct', models.DO_NOTHING, db_column='idTransferOrderProduct_id', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_transferlinesproduct'
+
+
+class SaliknetaTransferorderproduct(models.Model):
+    idtransferorderproduct = models.AutoField(db_column='idTransferOrderProduct', primary_key=True)  # Field name made lowercase.
+    transferdate = models.DateField(db_column='transferDate')  # Field name made lowercase.
+    expecteddate = models.DateField(db_column='expectedDate')  # Field name made lowercase.
+    idmanager = models.ForeignKey(SaliknetaManager, models.DO_NOTHING, db_column='idManager_id')  # Field name made lowercase.
+    source = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, blank=True, null=True)
+    destination = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    receiveddate = models.DateField(db_column='receivedDate', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_transferorderproduct'
+
+
+class SaliknetaTransferorderrawmaterial(models.Model):
+    idtransferorderrawmaterial = models.AutoField(db_column='idTransferOrderRawMaterial', primary_key=True)  # Field name made lowercase.
+    transferdate = models.DateField(db_column='transferDate', blank=True, null=True)  # Field name made lowercase.
+    expecteddate = models.DateField(db_column='expectedDate', blank=True, null=True)  # Field name made lowercase.
+    idmanager = models.ForeignKey(SaliknetaManager, models.DO_NOTHING, db_column='idManager_id', blank=True, null=True)  # Field name made lowercase.
+    source = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, blank=True, null=True)
+    destination = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    receiveddate = models.DateField(db_column='receivedDate', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_transferorderrawmaterial'
+
+
+class SaliknetaTransferlinesrawmaterial(models.Model):
+    idtransferlinesrawmaterial = models.AutoField(db_column='idTransferLinesRawMaterial', primary_key=True)  # Field name made lowercase.
+    qty = models.FloatField(blank=True, null=True)
+    idrawmaterial = models.ForeignKey(SaliknetaRawmaterials, models.DO_NOTHING, db_column='idRawMaterial_id', blank=True, null=True)  # Field name made lowercase.
+    idtransferorderrawmaterial = models.ForeignKey(SaliknetaTransferorderrawmaterial, models.DO_NOTHING, db_column='idTransferOrderRawMaterial_id', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = '\x7fsalikneta_transferlinesrawmaterial'

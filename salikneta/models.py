@@ -150,14 +150,9 @@ class Product(models.Model):
         sales = 0
         backloads = 0
         tos = 0
-        deliv = Delivery.objects.filter(deliveryDate__gt=ed)
         sals = SalesInvoice.objects.filter(invoiceDate__gt=ed)
         bload = BackLoad.objects.filter(backloadDate__gt=ed)
         to = TransferOrderProduct.objects.filter(transferDate__gt=ed)
-        for d in deliv:
-            for del_prods in d.get_delivered_products:
-                if del_prods.product == self:
-                    deliveries += del_prods.qty
         for s in sals:
             for il in InvoiceLines.objects.filter(idSales=s,idProduct_id=self.idProduct):
                 sales += il.qty
@@ -237,6 +232,14 @@ class RawMaterials(models.Model):
         rawMaterialCount = RawMaterialCount.objects.get(idrawmaterial=self.idrawmaterials, idBranch=branchID).unitsinstock
         return rawMaterialCount
 
+    @property
+    def get_num_incoming(self):
+        incoming = 0
+        objs = OrderLines.objects.filter(idRawMaterial_id=self.idrawmaterials)
+        for o in objs:
+            incoming += o.qty - o.get_delivered_products_num
+        return incoming
+
 
 class RawMaterialCount(models.Model):
     rawmaterialcountid = models.AutoField(db_column='rawmaterialCountID', primary_key=True)  # Field name made lowercase.
@@ -270,18 +273,18 @@ class PurchaseOrder(models.Model):
         return Delivery.objects.get(idPurchaseOrder=self.idPurchaseOrder)
     @property
     def get_orderLines(self):
-        return OrderLines.objects.filter(idPurchaseOrder_id=self.pk).select_related('idProduct')
+        return OrderLines.objects.filter(idPurchaseOrder_id=self.pk).select_related('idRawMaterial')
 
 
 class OrderLines(models.Model):
     idOrderLines = models.AutoField(primary_key=True)
     idPurchaseOrder = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+    idRawMaterial = models.ForeignKey(RawMaterials, models.DO_NOTHING, db_column='idRawMaterial_id')  # Field name made lowercase.
     qty = models.FloatField()
 
     @property
     def get_pending(self):
-        return self.qty - self.get_delivered_products_num 
+        return self.qty - self.get_delivered_products_num
 
     @property
     def get_delivered_products_num(self):
@@ -402,6 +405,8 @@ class TransferOrderProduct(models.Model):
     source = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="sourceProduct")
     destination = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="destinationProduct")
     status = models.CharField(max_length=50)
+    receivedDate = models.DateField(db_column='receivedDate', blank=True, null=True)  # Field name made lowercase.
+
 
     @property
     def get_transfer_lines(self):
@@ -427,6 +432,7 @@ class TransferOrderRawMaterial(models.Model):
     source = models.ForeignKey(Branch, models.CASCADE, related_name="sourceRawMaterial")
     destination = models.ForeignKey(Branch, models.CASCADE, related_name="destinationRawMaterial")
     status = models.CharField(max_length=50, blank=True, null=True)
+    receivedDate = models.DateField(db_column='receivedDate', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
