@@ -462,3 +462,16 @@ class IngredientsList(models.Model):
     class Meta:
         managed = False
         db_table = 'salikneta_ingredientlist'
+
+
+class RawMaterialCountLog(models.Model):
+    idRawMaterialCountLog = models.AutoField(db_column='rawMaterialCountLogID', primary_key=True)  # Field name made lowercase.
+    fromCount = models.FloatField(db_column='fromCount', blank=True, null=True)  # Field name made lowercase.
+    toCount = models.FloatField(db_column='toCount', blank=True, null=True)  # Field name made lowercase.
+    timestamp = models.DateTimeField(blank=True, null=True)
+    idManager = models.ForeignKey(Manager, models.DO_NOTHING, db_column='idManager_id', blank=True, null=True)  # Field name made lowercase.
+    idRawMaterialCount = models.ForeignKey(RawMaterialCount, models.DO_NOTHING, db_column='idRawMaterialCount_id', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_rawmaterialcountlog'

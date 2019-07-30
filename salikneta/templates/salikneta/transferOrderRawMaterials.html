@@ -54,7 +54,7 @@
                                 <div class="modal-body" id="print_div_{{ to.pk }}">
                                       
                                   <h4>TRANSFER ORDER  #{{to.pk}}</h4>
-                                  {% if to.status == "Draft" %}
+                                  {% if to.status == "Pending for Request" %}
 
                                     <h5 style="color: black;">{{to.status}}</h5>
                                   {% endif %}
@@ -62,7 +62,7 @@
 
                                     <h5 style="color: blue;">{{to.status}}</h5>
                                   {% endif %}
-                                  {% if to.status == "Finished" %}
+                                  {% if to.status == "Received" %}
 
                                     <h5 style="color: green;">{{to.status}}</h5>
                                   {% endif %}
@@ -144,9 +144,9 @@
                             </div>
                                 <div class="modal-footer">
                                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                  {% if to.status == "Draft" %}
+                                  {% if to.status == "Pending for Request" and source.idBranch == 1 %}
                                   <button type="button" id="transferBtn{{to.pk}}" onclick="updateStatus('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Transfer</button>
-                                  <button type="button" id="cancelBtn{{to.pk}}" onclick="cancelTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Delete</button>
+                                  <button type="button" id="cancelBtn{{to.pk}}" onclick="cancelTO('{{to.pk}}')" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                                   {% endif %}
                                   {% if to.status == "In Transit" and to.destination == source %}
                                   <button type="button" id="finishBtn{{to.pk}}" onclick="finishTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Finish</button>

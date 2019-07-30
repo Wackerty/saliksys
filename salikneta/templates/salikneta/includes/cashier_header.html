@@ -94,7 +94,7 @@
               <span class="label label-danger pull-right mail-danger" id="warn" style="display: none"></span>
               </a>
             <ul class="sub">
-              <li class="{% if request.resolver_match.view_name ==  'manageItems'%}active{% endif %}"><a href="{% url 'manageItems' %}">Products</a></li>
+              <li class="{% if request.resolver_match.view_name ==  'manageItems'%}active{% endif %}"><a href="{% url 'manageItems' request.session.branchID %}">Products</a></li>
               <li class="{% if request.resolver_match.view_name ==  'manageCategories'%}active{% endif %}"><a href="{% url 'manageCategories'%}">Categories</a></li>
             </ul>
           </li>
@@ -113,12 +113,6 @@
               <li class="{% if request.resolver_match.view_name ==  'sales_report'%}active{% endif %}"><a href="{% url 'sales_report' %}">Sales</a></li>
               <li class="{% if request.resolver_match.view_name ==  'inventory_report'%}active{% endif %}"><a href="{% url 'inventory_report' %}">Inventory</a></li>
             </ul>
-          </li>
-          <li class="sub">
-            <a href="">
-              <i class="fa fa-area-chart"></i>
-              <span>Forecasting</span>
-            </a>
           </li>
         </ul>
         <!-- sidebar menu end-->
@@ -144,7 +138,7 @@
                item +='<br><span class="small italic">'+obj[i].timestamp+'</span></a></li>';
                $("#notif_list").append(item);
            }
-               $("#notif_list").append('<li><a href="index.html#">See all notifications</a></li>');
+               $("#notif_list").append('<li><a href="salikneta/notifications/">See all notifications</a></li>');
 
         });
     }
