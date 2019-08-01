@@ -117,6 +117,14 @@ function generateChartData() {
         });
     {% endfor %}
 
+  {% for data in forecast_next_three_months %}
+      chartData.push({
+          date: new Date('{{ data.date|date:"Y-m-d" }}'),
+          sales_marketing: {{ data.forecast_marketing }},
+          sales_taft: {{ data.forecast_taft }},
+          sales_malabon: {{ data.forecast_malabon }}
+        });
+  {% endfor %}
   return chartData;
 }
 
@@ -125,6 +133,9 @@ function generateChartData() {
  <!-- **********************************************************************************************************************************************************
         MAIN CONTENT
         *********************************************************************************************************************************************************** -->
+  {% for data in forecast_next_three_months %}
+      {{ data.date|date:"Y-m-d" }}: {{ data.forecast_marketing }}, {{ data.forecast_taft }}, {{ data.forecast_malabon }}
+  {% endfor %}
 <section id="main-content">
       <section class="wrapper">
         <div class="row mt">
@@ -146,6 +157,7 @@ function generateChartData() {
                 <hr>
                 <h5 class="mb">Product: <b>{{ productName }}</b> Sales</h5>
                 <h5 class="mb">Forecasting Method: <b>{{ forecastingMethod }}</b></h5>
+                <h5 class="mb">Unit of Measure: <b>{{ product.unitOfMeasure }}</b></h5>
                 <table id="sup_tbl" class="table table-bordered table-striped table-condensed" style="width: 100%;border-width: 1px" >
                   <thead>
                     <tr>
@@ -167,7 +179,7 @@ function generateChartData() {
                       </tr>
                     {% endfor %}
                      <tr>
-                        <td class="cell_bdr" style="border: 1px solid black"><b>Forecast</b></td>
+                        <td class="cell_bdr" style="border: 1px solid black"><b>Forecast for next month:</b></td>
                         <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ marketingProductForecast }}</b></td>
                         <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ taftProductForecast }}</b></td>
                         <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ malabonProductForecast }}</b></td>
@@ -191,7 +203,11 @@ function generateChartData() {
                                 <tr>
                                     <td>{{ marketingProductForecast }}</td>
                                     <td>{{ marketingProductInStock }}</td>
-                                    <td>{{ marketingActualNeed }}</td>
+                                    {% if marketingActualNeed >= 0 %}
+                                        <td>{{ marketingActualNeed }}</td>
+                                    {% else %}
+                                        <td>0</td>
+                                    {% endif %}
                                 </tr>
                           </tbody>
                         </table>
@@ -210,7 +226,11 @@ function generateChartData() {
                                 <tr>
                                     <td>{{ taftProductForecast }}</td>
                                     <td>{{ taftProductInStock }}</td>
-                                    <td>{{ taftActualNeed }}</td>
+                                    {% if taftActualNeed >= 0 %}
+                                        <td>{{ taftActualNeed }}</td>
+                                    {% else %}
+                                        <td>0</td>
+                                    {% endif %}
                                 </tr>
                           </tbody>
                         </table>
@@ -229,7 +249,11 @@ function generateChartData() {
                                 <tr>
                                     <td>{{ malabonProductForecast }}</td>
                                     <td>{{ malabonProductInStock }}</td>
-                                    <td>{{ malabonActualNeed }}</td>
+                                    {% if malabonActualNeed >= 0 %}
+                                        <td>{{ malabonActualNeed }}</td>
+                                    {% else %}
+                                        <td>0</td>
+                                    {% endif %}
                                 </tr>
                           </tbody>
                         </table>
@@ -250,18 +274,36 @@ function generateChartData() {
                     {% for ingredient in ingredients %}
                         <tr>
                             <td>{{ ingredient.idrawmaterials.name }}</td>
-                            <td>{{ ingredient.qtyneededmarketing }}</td>
-                            <td>{{ ingredient.qtyneededtaft }}</td>
-                            <td>{{ ingredient.qtyneededmalabon }}</td>
+                            {% if ingredient.qtyneededmarketing  >= 0 %}
+                                <td>{{ ingredient.qtyneededmarketing }}</td>
+                            {% else %}
+                                <td>0</td>
+                            {% endif %}
+                            {% if ingredient.qtyneededtaft  >= 0 %}
+                                <td>{{ ingredient.qtyneededtaft }}</td>
+                            {% else %}
+                                <td>0</td>
+                            {% endif %}
+                            {% if ingredient.qtyneededmalabon  >= 0 %}
+                                <td>{{ ingredient.qtyneededmalabon }}</td>
+                            {% else %}
+                                <td>0</td>
+                            {% endif %}
                             <td>{{ ingredient.idrawmaterials.unitOfMeasure }}</td>
                         </tr>
                     {% endfor %}
                   </tbody>
                 </table>
                 {% for ingredient in ingredients %}
-                    <big>Total needed for {{ ingredient.idrawmaterials.name }}: <b>{{ ingredient.totalneeded }} {{ ingredient.idrawmaterials.unitOfMeasure }} </b></big><br>
+                    <big>Total needed for {{ ingredient.idrawmaterials.name }}:
+                        {% if ingredient.totalneeded >= 0 %}
+                            <b>{{ ingredient.totalneeded }} {{ ingredient.idrawmaterials.unitOfMeasure }} </b></big><br>
+                        {% else %}
+                            <b>0</b></big><br>
+                        {% endif %}
                 {% endfor %}
                 <hr>
+                <h4 class="mb"><i class="fa fa-angle-right"></i> <b>Forecast for the next three months</b></h4>
                 <div id="chartdiv"></div>
             </div>
           </div>

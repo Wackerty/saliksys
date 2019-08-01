@@ -169,7 +169,9 @@
                 </table>
                 <script>
                     $(document).ready(function() {
-                        $('#cat_tbl').DataTable();
+                        $('#cat_tbl').DataTable({
+                            "order": [[ 0, "desc" ]]
+                        });
                         var today = new Date();
                         var dd = String(today.getDate()).padStart(2, '0');
                         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -270,7 +272,7 @@ s
                                 <thead>
                                   <tr>
                                     <th>Raw material name</th>
-                                    <th>In stock</th>
+                                    <th>Raw materials In stock</th>
 
                                     <th>Quantity</th>
                                   </tr>

@@ -62,6 +62,7 @@ urlpatterns = [
     path('ajax/ajaxAddItem/', views.ajaxAddItem, name='ajaxAddItem'),
     path('ajax/ajaxGetUpdatedItems/', views.ajaxGetUpdatedItems, name='ajaxGetUpdatedItems'),
     path('ajax/ajaxGetInStock/', views.ajaxGetInStock, name='ajaxGetInStock'),
+    path('ajax/ajaxGetInStockProduct/', views.ajaxGetInStockProduct, name='ajaxGetInStockProduct'),
     path('ajax/ajaxGetInStockRawMaterials/', views.ajaxGetInStockRawMaterials, name='ajaxGetInStockRawMaterials'),
     path('ajax/ajaxAddPurchaseOrder/', views.ajaxAddPurchaseOrder, name='ajaxAddPurchaseOrder'),
     path('ajax/ajaxAddBackload/', views.ajaxAddBackload, name='ajaxAddBackload'),

@@ -111,6 +111,7 @@ def sales_report_detail(request):
             report_data.append({"id":p.idProduct,
                                 "product": p.name,
                                 "description":p.description,
+                                "uom":p.unitOfMeasure,
                                 "total_qty":0,
                                 "total_value":0,
                                 "sold_value":0})
@@ -409,12 +410,12 @@ def purchaseOrder(request):
     i = RawMaterials.objects.all()
 
     b = Branch.objects.get(idBranch=request.session['branchID'])
-
+    i = i.order_by("name")
     for rawmaterial in i:
         unitsInStock = rawmaterial.get_product_count(rawmaterial, b)
         rawmaterial.unitsInStock = unitsInStock
 
-    purchaseOrders = PurchaseOrder.objects.filter().select_related("idSupplier")
+    purchaseOrders = PurchaseOrder.objects.filter().select_related("idSupplier").order_by('-idPurchaseOrder')
 
     context = {
         "suppliers":s,"branch":b,"rawmaterials":i,"purchaseOrders":purchaseOrders,
@@ -553,7 +554,7 @@ def manageIngredients(request, id):
     b = Branch.objects.get(idBranch=request.session['branchID'])
     r = RawMaterials.objects.all()
     c = Category.objects.all()
-    i = Product.objects.all()
+    i = Product.objects.all().order_by("name")
 
 #    for rawMaterial in r:
 #        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
@@ -581,7 +582,7 @@ def manageIngredients(request, id):
 def produceItems(request, id):
     r = RawMaterials.objects.all()
     c = Category.objects.all()
-    i = Product.objects.all()
+    i = Product.objects.all().order_by("name")
     b = Branch.objects.get(idBranch=request.session['branchID'])
 
     context = {
@@ -626,7 +627,7 @@ def transferOrderProducts(request):
 
     destination = Branch.objects.filter(~Q(pk=branch.pk) & ~Q(pk=3))
 
-    p = Product.objects.all()
+    p = Product.objects.all().order_by('name')
     r = RawMaterials.objects.all()
 
     for product in p:
@@ -637,6 +638,8 @@ def transferOrderProducts(request):
         to = TransferOrderProduct.objects.filter(Q(source=branch) | Q(destination=branch))
     else:
         to = TransferOrderProduct.objects.all()
+
+    to = to.order_by("-idTransferOrderProduct")
 
     context = {
         "source":branch,
@@ -655,8 +658,8 @@ def transferOrderRawMaterials(request):
 
     destination = Branch.objects.filter(~Q(pk=branch.pk) & ~Q(pk=5) & ~Q(pk=6))
 
-    p = Product.objects.all()
-    r = RawMaterials.objects.all()
+    p = Product.objects.all().order_by('name')
+    r = RawMaterials.objects.all().order_by('name')
 
     for product in p:
         unitsInStock = product.get_product_count(product, branch)
@@ -671,6 +674,8 @@ def transferOrderRawMaterials(request):
         to = TransferOrderRawMaterial.objects.filter(Q(source=branch) | Q(destination=branch))
     else:
         to = TransferOrderRawMaterial.objects.all()
+
+    to = to.order_by("-idTransferOrderRawMaterial")
 
     context = {
         "source":branch,
@@ -753,9 +758,17 @@ def ajaxGetUpdatedItems(request):
     products = []
     for x in range(0, len(c)):
         products.append({"name":c[x].name,"category":c[x].idCategory.name,"price":c[x].suggestedUnitPrice,"SKU":c[x].SKU,"reorder":c[x].reorderLevel})
-        
+
+    return JsonResponse(products, safe=False)
 
 
+def ajaxGetInStockProduct(request):
+    pk = request.GET.get('idProduct')
+    c = Product.objects.get(pk=pk)
+    b = Branch.objects.get(pk=request.session['branchID'])
+    products = []
+
+    products.append({"idProduct":c.pk,"unitsInStock":c.get_product_count(c, b)})
 
     return JsonResponse(products, safe=False)
 
@@ -1095,7 +1108,7 @@ def ajaxCancelTORawMaterial(request):
 def ajaxGetIngredients(request):
     pk = request.GET.get('productPk')
     print(pk)
-    i = IngredientsList.objects.filter(idProduct=pk)
+    i = IngredientsList.objects.filter(idProduct=pk).order_by('idProduct__name')
     b = Branch.objects.get(idBranch=request.session['branchID'])
     ingredients = []
 
@@ -1396,10 +1409,10 @@ def inventory_sales_per_month(dates, productPK):
         m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
         sd = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-01"
         ed = monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
-            calendar.monthrange(m.year, m.month)[1])
+            calendar.monthrange(m.year, m.month)[1]) + " 23:59:59"
 
         endMonthDate = datetime.strptime(monthYear.split("-")[1] + "-" + monthYear.split("-")[0] + "-" + str(
-            calendar.monthrange(m.year, m.month)[1]) + " 00:00:00", '%Y-%m-%d %H:%M:%S').date()
+            calendar.monthrange(m.year, m.month)[1]) + " 23:59:59", '%Y-%m-%d %H:%M:%S').date()
 
         for p in products:
             report_data.append({"id": p.idProduct,
@@ -1414,6 +1427,7 @@ def inventory_sales_per_month(dates, productPK):
                                 "date": endMonthDate})
 
         si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
+
         for r in report_data:
             sl = 0
             sales_marketing = 0
@@ -1430,13 +1444,13 @@ def inventory_sales_per_month(dates, productPK):
                             sales_malabon += il.qty
                         sl += il.qty
 
-            r["sales_marketing"] = randint(1,101)
-            r["sales_taft"] = randint(1,101)
-            r["sales_malabon"] = randint(1,101)
+            #r["sales_marketing"] = randint(1,101)
+            #r["sales_taft"] = randint(1,101)
+            #r["sales_malabon"] = randint(1,101)
 
-            #r["sales_marketing"] = sales_marketing
-            #r["sales_taft"] = sales_taft
-            #r["sales_malabon"] = sales_malabon
+            r["sales_marketing"] = sales_marketing
+            r["sales_taft"] = sales_taft
+            r["sales_malabon"] = sales_malabon
             r["total_sales"] = sl
 
         gen_info["report_data"] = report_data
@@ -1453,6 +1467,10 @@ def forecasting_detail(request, id, method):
     earliestDate = min([si.invoiceDate.date(), bload.backloadDate, deliv.deliveryDate, to.transferDate])
     today = date.today()
 
+    three_months = date.today() + relativedelta(months=+3)
+
+    next_three_month_dates = [dt for dt in rrule(MONTHLY, dtstart=today + relativedelta(months=+1), until=three_months)]
+
     dates = [dt for dt in rrule(MONTHLY, dtstart=earliestDate, until=today)]
 
     if id == 0:
@@ -1468,6 +1486,7 @@ def forecasting_detail(request, id, method):
         ingredients = IngredientsList.objects.filter(idProduct=productID)
         product = Product.objects.get(idProduct=id)
 
+
     product_inventory_sales = []
     for row in awit:
         product_inventory_sales.append(row['report_data'][0])
@@ -1480,15 +1499,60 @@ def forecasting_detail(request, id, method):
         productTaftSales.append(row['sales_taft'])
         productMalabonSales.append(row['sales_malabon'])
 
+
+    forecast_next_three_months = []
+
+    for x in next_three_month_dates:
+        forecast_next_three_months.append({
+            "date": x.date(),
+            "forecast_marketing": 0,
+            "forecast_taft": 0,
+            "forecast_malabon": 0,
+        })
+
+
+    temp1 = productMarketingSales
+    temp2 = productTaftSales
+    temp3 = productMalabonSales
+
     if method == "ar":
         marketingProductForecast = abs(int(forecast_autoregression(productMarketingSales)))
         taftProductForecast = abs(int(forecast_autoregression(productTaftSales)))
         malabonProductForecast = abs(int(forecast_autoregression(productMalabonSales)))
+
+        for y in forecast_next_three_months:
+            yes1 = abs(int(forecast_autoregression(temp1)))
+            yes2 = abs(int(forecast_autoregression(temp2)))
+            yes3 = abs(int(forecast_autoregression(temp3)))
+
+            y['forecast_marketing'] = yes1
+            y['forecast_taft'] = yes2
+            y['forecast_malabon'] = yes3
+
+            temp1.append(yes1)
+            temp2.append(yes2)
+            temp3.append(yes3)
+
         forecastingMethod = "Autoregression"
+
     elif method == "ma":
         marketingProductForecast = abs(int(forecast_moving_average(productMarketingSales)))
         taftProductForecast = abs(int(forecast_moving_average(productTaftSales)))
         malabonProductForecast = abs(int(forecast_moving_average(productMalabonSales)))
+
+        for y in forecast_next_three_months:
+            yes1 = abs(int(forecast_moving_average(temp1)))
+            yes2 = abs(int(forecast_moving_average(temp2)))
+            yes3 = abs(int(forecast_moving_average(temp3)))
+
+            y['forecast_marketing'] = yes1
+            y['forecast_taft'] = yes2
+            y['forecast_malabon'] = yes3
+
+            temp1.append(yes1)
+            temp2.append(yes2)
+            temp3.append(yes3)
+
         forecastingMethod = "Moving Average"
 
     marketingProductInStock = product.get_product_count(product, Branch.objects.get(idBranch=1))
@@ -1508,9 +1572,7 @@ def forecasting_detail(request, id, method):
         i.qtyneededmalabon = i.qtyneeded * malabonActualNeed
         i.totalneeded += i.qtyneededmarketing + i.qtyneededtaft + i.qtyneededmalabon
 
-
-
-    products = Product.objects.all()
+    products = Product.objects.all().order_by('name')
 
     context = {
         "marketingProductForecast": marketingProductForecast,
@@ -1521,6 +1583,7 @@ def forecasting_detail(request, id, method):
         "products": products,
         "productID": productID,
         "productName": productName,
+        "product": product,
         "method": method,
         "ingredients": ingredients,
         "marketingProductInStock": marketingProductInStock,
@@ -1529,7 +1592,8 @@ def forecasting_detail(request, id, method):
         "marketingActualNeed": marketingActualNeed,
         "taftActualNeed": taftActualNeed,
         "malabonActualNeed": malabonActualNeed,
-        "forecastingMethod": forecastingMethod
+        "forecastingMethod": forecastingMethod,
+        'forecast_next_three_months': forecast_next_three_months
     }
 
     return render(request, 'salikneta/forecasting_detail.html', context)
@@ -1573,6 +1637,7 @@ def forecasting(request, method):
         forecast.append({"id":p.idProduct,
                         "product": p.name,
                         "description":p.description,
+                        "uom":p.unitOfMeasure,
                         "marketing_branch":marketingProductForecast,
                         "taft_branch":taftProductForecast,
                         "malabon_branch":malabonProductForecast,
@@ -1594,10 +1659,13 @@ def forecasting(request, method):
 
 
 def forecast_autoregression(data):
-    model = AR(data)
-    model_fit = model.fit()
-    # make prediction
-    yhat = model_fit.predict(len(data), len(data))
+    try:
+        model = AR(data)
+        model_fit = model.fit()
+        # make prediction
+        yhat = model_fit.predict(len(data), len(data))
+    except:
+        yhat = forecast_moving_average(data)
 
     """
         try:

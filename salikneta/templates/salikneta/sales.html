@@ -101,7 +101,9 @@
                 </table>
                 <script>
                     $(document).ready(function() {
-                        $('#sup_tbl').DataTable();
+                        $('#sup_tbl').DataTable({
+                            "order": [[ 0, "desc" ]]
+                        });
                     });
                 </script>
             </div>
