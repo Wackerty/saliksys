@@ -1,27 +1,33 @@
-from django.shortcuts import render,redirect
-from django.http import HttpResponse, Http404,JsonResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, Http404, JsonResponse, HttpResponseRedirect
 from salikneta.models import *
 from django.urls import reverse
 from django.contrib import messages
 import calendar
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.models import User,Group
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from statsmodels.tsa.ar_model import AR
 from statsmodels.tsa.arima_model import ARMA, ARIMA
 from random import random, randint
 
 from django.db.models import Q
-from datetime import datetime,timedelta, date
+from datetime import datetime, timedelta, date
 from dateutil.rrule import rrule, MONTHLY
 import pandas as pd
 import math
+
+
 # Create your views here.
 
 def index(request):
-    return render(request,'salikneta/login.html')
+    return render(request, 'salikneta/login.html')
+
+
 def log_in(request):
     return render(request, 'salikneta/login.html')
+
+
 def log_in_validate(request):
     if request.method == "POST":
 
@@ -39,7 +45,7 @@ def log_in_validate(request):
             request.session['branchID'] = Cashier.objects.get(username=user, password=password).idBranch.idBranch
             request.session['header'] = "salikneta/includes/cashier_header.html"
             return redirect('pos')
-        elif try2: 
+        elif try2:
             request.session['username'] = user
 
             request.session['logged'] = True
@@ -66,7 +72,7 @@ def log_in_validate(request):
             return redirect('home')
         else:
             messages.warning(request, 'Wrong credentials, please try again.')
-   
+
     return render(request, 'salikneta/login.html')
 
 
@@ -77,24 +83,26 @@ def home(request):
 def notifications(request):
     return render(request, 'salikneta/notifications.html', {"notifs": Notifs.objects.all().order_by("-notif_id")})
 
+
 def get_num_lowstock(request):
-    return JsonResponse({"numb":ProductCount.get_num_lowstock_items(Branch.objects.get(idBranch=request.session['branchID']))})
+    return JsonResponse(
+        {"numb": ProductCount.get_num_lowstock_items(Branch.objects.get(idBranch=request.session['branchID']))})
 
 
 def get_invoice_by_id(request, idSales):
     data = []
     for il in SalesInvoice.objects.get(idSales=idSales).get_invoicelines:
-        data.append({"unitPrice":il.unitPrice,
-                     "qty":il.qty,
-                     "disc":il.disc,
-                     "net_price":il.get_net_price,
-                     "productName":il.idProduct.name,
-                     "uom":il.idProduct.unitOfMeasure})
-    return JsonResponse({"data":data})
+        data.append({"unitPrice": il.unitPrice,
+                     "qty": il.qty,
+                     "disc": il.disc,
+                     "net_price": il.get_net_price,
+                     "productName": il.idProduct.name,
+                     "uom": il.idProduct.unitOfMeasure})
+    return JsonResponse({"data": data})
 
 
 def sales(request):
-    return render(request, 'salikneta/sales.html', {"sales_invoices":SalesInvoice.objects.all()})
+    return render(request, 'salikneta/sales.html', {"sales_invoices": SalesInvoice.objects.all()})
 
 
 def sales_report(request):
@@ -105,20 +113,22 @@ def sales_report_detail(request):
     if request.method == 'POST':
         report_data = []
         new_rd = []
-        gen_info ={"message": "", "total_qty": 0, "total_sales":0}
+        gen_info = {"message": "", "total_qty": 0, "total_sales": 0}
         products = Product.objects.all()
         for p in products:
-            report_data.append({"id":p.idProduct,
+            report_data.append({"id": p.idProduct,
                                 "product": p.name,
-                                "description":p.description,
-                                "uom":p.unitOfMeasure,
-                                "total_qty":0,
-                                "total_value":0,
-                                "sold_value":0})
+                                "description": p.description,
+                                "uom": p.unitOfMeasure,
+                                "total_qty": 0,
+                                "total_value": 0,
+                                "sold_value": 0})
         if request.POST['type'] == "range":
-            sd = request.POST["sd"].split("/")[2]+"-"+request.POST["sd"].split("/")[0]+"-"+request.POST["sd"].split("/")[1] + " 00:00:00"
-            ed = request.POST["ed"].split("/")[2]+"-"+request.POST["ed"].split("/")[0]+"-"+request.POST["ed"].split("/")[1] + " 00:00:00"
-            gen_info["message"] = "From "+sd+" to "+ed
+            sd = request.POST["sd"].split("/")[2] + "-" + request.POST["sd"].split("/")[0] + "-" + \
+                 request.POST["sd"].split("/")[1] + " 00:00:00"
+            ed = request.POST["ed"].split("/")[2] + "-" + request.POST["ed"].split("/")[0] + "-" + \
+                 request.POST["ed"].split("/")[1] + " 00:00:00"
+            gen_info["message"] = "From " + sd + " to " + ed
             sd = datetime.strptime(sd, '%Y-%m-%d %H:%M:%S')
             ed = datetime.strptime(ed, '%Y-%m-%d %H:%M:%S')
             si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
@@ -130,15 +140,15 @@ def sales_report_detail(request):
                             r["total_value"] += il.unitPrice * il.qty
                             r["sold_value"] += il.get_net_price
 
-                            gen_info["total_sales"]+= il.get_net_price
+                            gen_info["total_sales"] += il.get_net_price
                             gen_info["total_qty"] += il.qty
             for r in report_data:
                 if r["total_qty"] != 0:
                     new_rd.append(r)
         elif request.POST['type'] == "month":
             print(request.POST["month"])
-            m = request.POST["month"].split("-")[1]+"-"+request.POST["month"].split("-")[0]+"-01 00:00:00"
-            m = datetime.strptime(m , '%Y-%m-%d %H:%M:%S')
+            m = request.POST["month"].split("-")[1] + "-" + request.POST["month"].split("-")[0] + "-01 00:00:00"
+            m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
             si = SalesInvoice.objects.filter(invoiceDate__year=m.year)
             gen_info["message"] = "For the month of " + m.strftime('%B') + " " + str(m.year)
             for r in report_data:
@@ -149,15 +159,17 @@ def sales_report_detail(request):
                                 r["total_qty"] += il.qty
                                 r["total_value"] += il.unitPrice * il.qty
                                 r["sold_value"] += il.get_net_price
-                                gen_info["total_sales"]+= il.get_net_price
+                                gen_info["total_sales"] += il.get_net_price
                                 gen_info["total_qty"] += il.qty
             for r in report_data:
                 if r["total_qty"] != 0:
                     new_rd.append(r)
         elif request.POST['type'] == "day":
-            sd = request.POST["date"].split("-")[2]+"-"+request.POST["date"].split("-")[0]+"-"+request.POST["date"].split("-")[1] + " 00:00:00"
-            ed = request.POST["date"].split("-")[2] + "-" + request.POST["date"].split("-")[0] + "-" + request.POST["date"].split("-")[1] + " 23:59:59"
-            gen_info["message"] = "For "+request.POST["date"]
+            sd = request.POST["date"].split("-")[2] + "-" + request.POST["date"].split("-")[0] + "-" + \
+                 request.POST["date"].split("-")[1] + " 00:00:00"
+            ed = request.POST["date"].split("-")[2] + "-" + request.POST["date"].split("-")[0] + "-" + \
+                 request.POST["date"].split("-")[1] + " 23:59:59"
+            gen_info["message"] = "For " + request.POST["date"]
             sd = datetime.strptime(sd, '%Y-%m-%d %H:%M:%S')
             ed = datetime.strptime(ed, '%Y-%m-%d %H:%M:%S')
             si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
@@ -169,14 +181,15 @@ def sales_report_detail(request):
                             r["total_value"] += il.unitPrice * il.qty
                             r["sold_value"] += il.get_net_price
 
-                            gen_info["total_sales"]+= il.get_net_price
+                            gen_info["total_sales"] += il.get_net_price
                             gen_info["total_qty"] += il.qty
             for r in report_data:
                 if r["total_qty"] != 0:
                     new_rd.append(r)
     else:
         return redirect('sales_report')
-    return render(request, 'salikneta/reports/sales_report_detail.html',{"report_data":new_rd,"gen_info":gen_info})
+    return render(request, 'salikneta/reports/sales_report_detail.html', {"report_data": new_rd, "gen_info": gen_info})
+
 
 def inventory_report(request):
     return render(request, 'salikneta/reports/inventory_report.html')
@@ -185,30 +198,32 @@ def inventory_report(request):
 def inventory_report_detail(request):
     if request.method == 'POST':
         report_data = []
-        gen_info ={"message":"","total_sales_ct":0,
-                   "total_deliveries":0,
-                   "total_backloads":0,
-                   "transfer_in":0,
-                   "transfer_out": 0}
+        gen_info = {"message": "", "total_sales_ct": 0,
+                    "total_deliveries": 0,
+                    "total_backloads": 0,
+                    "transfer_in": 0,
+                    "transfer_out": 0}
         products = Product.objects.all()
         branch = Branch.objects.get(pk=request.session['branchID'])
 
         for p in products:
-            report_data.append({"id":p.idProduct,
+            report_data.append({"id": p.idProduct,
                                 "product": p.name,
-                                "uom":p.unitOfMeasure,
-                                "unit_price":p.suggestedUnitPrice,
-                                "beg_inv":0,
-                                "transfer_in":0,
-                                "transfer_out":0,
-                                "returns":0,
-                                "sales":0,
-                                "end_inv":0})
+                                "uom": p.unitOfMeasure,
+                                "unit_price": p.suggestedUnitPrice,
+                                "beg_inv": 0,
+                                "transfer_in": 0,
+                                "transfer_out": 0,
+                                "returns": 0,
+                                "sales": 0,
+                                "end_inv": 0})
 
         if request.POST['type'] == "range":
-            sd = request.POST["sd"].split("/")[2]+"-"+request.POST["sd"].split("/")[0]+"-"+request.POST["sd"].split("/")[1] + " 00:00:00"
-            ed = request.POST["ed"].split("/")[2]+"-"+request.POST["ed"].split("/")[0]+"-"+request.POST["ed"].split("/")[1] + " 00:00:00"
-            gen_info["message"] = "From "+sd+" to "+ed
+            sd = request.POST["sd"].split("/")[2] + "-" + request.POST["sd"].split("/")[0] + "-" + \
+                 request.POST["sd"].split("/")[1] + " 00:00:00"
+            ed = request.POST["ed"].split("/")[2] + "-" + request.POST["ed"].split("/")[0] + "-" + \
+                 request.POST["ed"].split("/")[1] + " 00:00:00"
+            gen_info["message"] = "From " + sd + " to " + ed
             sd = datetime.strptime(sd, '%Y-%m-%d %H:%M:%S')
             ed = datetime.strptime(ed, '%Y-%m-%d %H:%M:%S')
 
@@ -253,18 +268,20 @@ def inventory_report_detail(request):
                 r["sales"] = sl
 
         elif request.POST['type'] == "month":
-            m = request.POST["month"].split("-")[1]+"-"+request.POST["month"].split("-")[0]+"-01 00:00:00"
-            m = datetime.strptime(m , '%Y-%m-%d %H:%M:%S')
-            sd = request.POST["month"].split("-")[1]+"-"+request.POST["month"].split("-")[0]+"-01"
-            ed = request.POST["month"].split("-")[1]+"-"+request.POST["month"].split("-")[0]+"-"+str(calendar.monthrange(m.year, m.month)[1])
+            m = request.POST["month"].split("-")[1] + "-" + request.POST["month"].split("-")[0] + "-01 00:00:00"
+            m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
+            sd = request.POST["month"].split("-")[1] + "-" + request.POST["month"].split("-")[0] + "-01"
+            ed = request.POST["month"].split("-")[1] + "-" + request.POST["month"].split("-")[0] + "-" + str(
+                calendar.monthrange(m.year, m.month)[1])
 
             si = SalesInvoice.objects.filter(invoiceDate__gte=sd, invoiceDate__lte=ed)
             bload = BackLoad.objects.filter(backloadDate__gte=sd, backloadDate__lte=ed)
             deliv = Delivery.objects.filter(deliveryDate__gte=sd, deliveryDate__lte=ed)
 
-
-            toTransferedIn = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed, destination=branch)
-            toTransferedOut = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed, source=branch)
+            toTransferedIn = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed,
+                                                                 destination=branch)
+            toTransferedOut = TransferOrderProduct.objects.filter(transferDate__gte=sd, transferDate__lte=ed,
+                                                                  source=branch)
 
             gen_info["message"] = "For the month of " + m.strftime('%B') + " " + str(m.year)
             for r in report_data:
@@ -303,32 +320,36 @@ def inventory_report_detail(request):
                 r["sales"] = sl
     else:
         return redirect('inventory_report')
-    return render(request, 'salikneta/reports/inventory_report_detail.html',{"report_data":report_data,"gen_info":gen_info})
+    return render(request, 'salikneta/reports/inventory_report_detail.html',
+                  {"report_data": report_data, "gen_info": gen_info})
 
 
 def editItemPrice(request):
     if request.method == 'POST':
-        print("waaat",request.POST['item_price'])
-        print("waaat",request.POST['item_id'])
+        print("waaat", request.POST['item_price'])
+        print("waaat", request.POST['item_id'])
         p = Product.objects.get(idProduct=request.POST['item_id'])
-        print("waaat",request.POST['item_price'])
+        print("waaat", request.POST['item_price'])
         p.suggestedUnitPrice = float(request.POST['item_price'])
         p.save()
-        Notifs.write("Price for " +p.name+" has been updated.")
+        Notifs.write("Price for " + p.name + " has been updated.")
     return HttpResponseRedirect(reverse('manageItems'))
 
 
 def editMaterialStock(request):
     if request.method == 'POST':
-        print("waaat",request.POST['item_id'])
-        rc = RawMaterialCount.objects.get(idrawmaterial_id=request.POST['item_id'], idBranch__idBranch=request.session['branchID'])
-        print("waaat",request.POST['e_stocks'])
-        rcl = RawMaterialCountLog(fromCount=rc.unitsinstock, toCount=float(request.POST['e_stocks']), timestamp=datetime.now(),
+        print("waaat", request.POST['item_id'])
+        rc = RawMaterialCount.objects.get(idrawmaterial_id=request.POST['item_id'],
+                                          idBranch__idBranch=request.session['branchID'])
+        print("waaat", request.POST['e_stocks'])
+        rcl = RawMaterialCountLog(fromCount=rc.unitsinstock, toCount=float(request.POST['e_stocks']),
+                                  timestamp=datetime.now(),
                                   idManager=Manager.objects.get(pk=request.session['managerID']), idRawMaterialCount=rc)
         rc.unitsinstock = float(request.POST['e_stocks'])
         rc.save()
         rcl.save()
-        Notifs.write("Raw Material Stocks for " +rc.idrawmaterial.name+" in "+rc.idBranch.name+" branch has been updated.")
+        Notifs.write(
+            "Raw Material Stocks for " + rc.idrawmaterial.name + " in " + rc.idBranch.name + " branch has been updated.")
     return HttpResponseRedirect(reverse('manageRawMaterials'))
 
 
@@ -338,34 +359,37 @@ def open_notif(request):
         n.viewed = 1
         n.save()
     return JsonResponse({"data": 'ok'})
+
+
 def check_notif(request):
     notifs = Notifs.objects.all().order_by("-timestamp")[0:5]
     chk = Notifs.check_num_new_notif()
-    data=[]
+    data = []
     for n in notifs:
-        data.append({"num_notif":chk,
-                     "msg":n.msg
-                        ,"timestamp":n.get_time_ago})
+        data.append({"num_notif": chk,
+                     "msg": n.msg
+                        , "timestamp": n.get_time_ago})
     return JsonResponse({"data": data})
+
 
 def pos(request):
     if request.method == 'POST':
         b = Branch.objects.get(idBranch=request.session['branchID'])
-        #create Sales invoice
+        # create Sales invoice
         si = SalesInvoice(invoiceDate=datetime.now(),
                           customer="WALK-IN",
-                          idCashier_id=request.session['userID'])# will replace to request.session['userID']
-        ils =[]
+                          idCashier_id=request.session['userID'])  # will replace to request.session['userID']
+        ils = []
         itms = []
-        itms_dict ={}
+        itms_dict = {}
         pazucc = True
         items = request.POST.getlist('prod_codes[]')
         qtys = request.POST.getlist('qty[]')
         discs = request.POST.getlist('disc[]')
-        for i,item in enumerate(items,0):
+        for i, item in enumerate(items, 0):
             if item not in itms:
                 itms.append(item)
-                itms_dict[item]=0
+                itms_dict[item] = 0
 
             prod = Product.objects.get(idProduct=item)
             il = InvoiceLines(qty=float(qtys[i]),
@@ -390,17 +414,19 @@ def pos(request):
                 i.idSales = si
                 i.save()
         return HttpResponseRedirect(reverse('pos'))
-        #loop the arrays
+        # loop the arrays
     p = Product.objects.all()
     b = Branch.objects.get(pk=request.session['branchID'])
 
     for product in p:
         unitsInStock = product.get_product_count(product, b)
         product.unitsInStock = unitsInStock
-    return render(request, 'salikneta/pos/pos.html',{'products': p,
-                                                     'si_num':SalesInvoice.get_latest_invoice_num(),
-                                                     'date':datetime.now(),
-                                                     'categories':Category.objects.all()})
+    return render(request, 'salikneta/pos/pos.html', {'products': p,
+                                                      'si_num': SalesInvoice.get_latest_invoice_num(),
+                                                      'date': datetime.now(),
+                                                      'categories': Category.objects.all()})
+
+
 def signout(request):
     return redirect('index')
 
@@ -418,16 +444,19 @@ def purchaseOrder(request):
     purchaseOrders = PurchaseOrder.objects.filter().select_related("idSupplier").order_by('-idPurchaseOrder')
 
     context = {
-        "suppliers":s,"branch":b,"rawmaterials":i,"purchaseOrders":purchaseOrders,
+        "suppliers": s, "branch": b, "rawmaterials": i, "purchaseOrders": purchaseOrders,
     }
-    return render(request, 'salikneta/purchaseOrder.html',context)
+    return render(request, 'salikneta/purchaseOrder.html', context)
+
 
 def register(request):
     branches = Branch.objects.all()
     context = {
-        "branches":branches
+        "branches": branches
     }
-    return render(request, 'salikneta/register.html',context)
+    return render(request, 'salikneta/register.html', context)
+
+
 def register_validate(request):
     if request.method == 'POST':
         username = request.POST.get('user')
@@ -439,14 +468,12 @@ def register_validate(request):
         print(branch)
         print(usertype)
         if usertype == "manager":
-            manager = Manager(firstname = fname, lastname = lname, username=username,password=password, idBranch_id=branch)
+            manager = Manager(firstname=fname, lastname=lname, username=username, password=password, idBranch_id=branch)
             manager.save()
         if usertype == "cashier":
-            cashier = Cashier(firstname = fname, lastname = lname, username=username,password=password, idBranch_id=branch)
+            cashier = Cashier(firstname=fname, lastname=lname, username=username, password=password, idBranch_id=branch)
             cashier.save()
         print("done")
-
-
 
         # if usertype == "os":
         #     group = Group.objects.get(name="Operations Supervisor")
@@ -463,20 +490,22 @@ def register_validate(request):
         return render(request, 'salikneta/login.html')
     return render(request, 'salikneta/register.html')
 
+
 def manageCategories(request):
     c = Category.objects.all()
     context = {
-        "categories":c,
+        "categories": c,
     }
 
-    return render(request, 'salikneta/manageCategories.html',context)
+    return render(request, 'salikneta/manageCategories.html', context)
+
 
 def manageSuppliers(request):
     s = Supplier.objects.all()
     context = {
-        "suppliers":s,
+        "suppliers": s,
     }
-    return render(request, 'salikneta/manageSuppliers.html',context)
+    return render(request, 'salikneta/manageSuppliers.html', context)
 
 
 def manageItems(request, id):
@@ -489,14 +518,16 @@ def manageItems(request, id):
         product.unitsInStock = unitsInStock
 
     context = {
-        "categories":c,
-        "products":i,
-        "branch":b,
+        "categories": c,
+        "products": i,
+        "branch": b,
     }
     if request.method == 'POST':
         c = Product(name=request.POST['itemName'], description=request.POST['description'],
-                    suggestedUnitPrice=request.POST['price'], img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],
-                    unitOfMeasure=request.POST['unitsOfMeasure'], SKU=request.POST['SKU'],idCategory_id=request.POST['category'])
+                    suggestedUnitPrice=request.POST['price'], img_path=request.FILES['image'],
+                    reorderLevel=request.POST['reorder'],
+                    unitOfMeasure=request.POST['unitsOfMeasure'], SKU=request.POST['SKU'],
+                    idCategory_id=request.POST['category'])
         c.save()
 
         branches = Branch.objects.all()
@@ -509,9 +540,9 @@ def manageItems(request, id):
 
             cc.save()
 
-        Notifs.write("New Item -" +c.name+"- has been added.")
-        return HttpResponseRedirect(reverse('manageItems', kwargs={'id':b.idBranch}))
-    return render(request, 'salikneta/manageItems.html',context)
+        Notifs.write("New Item -" + c.name + "- has been added.")
+        return HttpResponseRedirect(reverse('manageItems', kwargs={'id': b.idBranch}))
+    return render(request, 'salikneta/manageItems.html', context)
 
 
 def manageRawMaterials(request):
@@ -522,32 +553,35 @@ def manageRawMaterials(request):
     for rawMaterial in r:
         unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
         rawMaterial.unitsInStock = unitsInStock
-        rawMaterial.rawMaterialCountID = RawMaterialCount.objects.get(idBranch=b, idrawmaterial=rawMaterial).rawmaterialcountid
+        rawMaterial.rawMaterialCountID = RawMaterialCount.objects.get(idBranch=b,
+                                                                      idrawmaterial=rawMaterial).rawmaterialcountid
 
     context = {
-        "rawmaterials":r,
-        "suppliers":s,
-        "branch":b,
+        "rawmaterials": r,
+        "suppliers": s,
+        "branch": b,
     }
 
     if request.method == 'POST':
-        r = RawMaterials(name=request.POST['rawMaterialName'], unitOfMeasure=request.POST['unitsOfMeasure'], idSupplier_id=request.POST['supplier'])
+        r = RawMaterials(name=request.POST['rawMaterialName'], unitOfMeasure=request.POST['unitsOfMeasure'],
+                         idSupplier_id=request.POST['supplier'])
         r.save()
 
         branches = Branch.objects.all()
 
         for branch in branches:
             if branch == b:
-                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=request.POST['startStock'])
+                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=request.POST['startStock'],
+                                      unitsreserved=0)
             else:
-                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=0)
+                rr = RawMaterialCount(idrawmaterial=r, idBranch=branch, unitsinstock=0, unitsreserved=0)
 
             rr.save()
 
-        Notifs.write("New Raw Material -" +r.name+"- has been added.")
+        Notifs.write("New Raw Material -" + r.name + "- has been added.")
         return HttpResponseRedirect(reverse('manageRawMaterials'))
 
-    return render(request, 'salikneta/manageRawMats.html',context)
+    return render(request, 'salikneta/manageRawMats.html', context)
 
 
 def manageIngredients(request, id):
@@ -556,9 +590,9 @@ def manageIngredients(request, id):
     c = Category.objects.all()
     i = Product.objects.all().order_by("name")
 
-#    for rawMaterial in r:
-#        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
-#        rawMaterial.unitsInStock = unitsInStock
+    #    for rawMaterial in r:
+    #        unitsInStock = rawMaterial.get_product_count(rawMaterial, b)
+    #        rawMaterial.unitsInStock = unitsInStock
 
     context = {
         "rawmaterials": r,
@@ -615,9 +649,9 @@ def backload(request):
         product.unitsInStock = unitsInStock
 
     context = {
-        "products":i,"backloads":b,
+        "products": i, "backloads": b,
     }
-    return render(request, 'salikneta/backloads.html',context)
+    return render(request, 'salikneta/backloads.html', context)
 
 
 def transferOrderProducts(request):
@@ -642,10 +676,10 @@ def transferOrderProducts(request):
     to = to.order_by("-idTransferOrderProduct")
 
     context = {
-        "source":branch,
-        "destination":destination,
-        "products":p,
-        "transferOrders":to,
+        "source": branch,
+        "destination": destination,
+        "products": p,
+        "transferOrders": to,
     }
 
     return render(request, 'salikneta/transferOrderProducts.html', context)
@@ -678,24 +712,26 @@ def transferOrderRawMaterials(request):
     to = to.order_by("-idTransferOrderRawMaterial")
 
     context = {
-        "source":branch,
-        "destination":destination,
-        "products":p,
-        "transferOrders":to,
-        "rawMaterials":r,
+        "source": branch,
+        "destination": destination,
+        "products": p,
+        "transferOrders": to,
+        "rawMaterials": r,
     }
 
     return render(request, 'salikneta/transferOrderRawMaterials.html', context)
+
 
 def ajaxAddCategory(request):
     print("AW")
     name = request.GET.get('categoryName')
     desc = request.GET.get('description')
     print("WEW")
-    c = Category(name=name,description=desc)
+    c = Category(name=name, description=desc)
     c.save()
 
     return HttpResponse()
+
 
 def ajaxAddItem(request):
     print("AW")
@@ -707,10 +743,13 @@ def ajaxAddItem(request):
     unitsOfMeasure = request.GET.get('unitsOfMeasure')
     description = request.GET.get('description')
     print("WEW")
-    c = Product(name=itemName,description=description, suggestedUnitPrice=price, unitsInStock=0,img_path=request.FILES['image'], reorderLevel=reorder,unitOfMeasure=unitsOfMeasure,SKU=SKU,idCategory_id = category)
+    c = Product(name=itemName, description=description, suggestedUnitPrice=price, unitsInStock=0,
+                img_path=request.FILES['image'], reorderLevel=reorder, unitOfMeasure=unitsOfMeasure, SKU=SKU,
+                idCategory_id=category)
     c.save()
 
     return HttpResponse()
+
 
 def ajaxAddSupplier(request):
     supplierName = request.GET.get('supplierName')
@@ -724,8 +763,9 @@ def ajaxAddSupplier(request):
     country = request.GET.get('country')
     postal = request.GET.get('postal')
 
-    s = Supplier(name=supplierName, contactNumber=contactNumber, emailAddress=emailAddress, website=website, address1=address1, address2=address2, city=city,province=province,
-        country=country,postal=postal)
+    s = Supplier(name=supplierName, contactNumber=contactNumber, emailAddress=emailAddress, website=website,
+                 address1=address1, address2=address2, city=city, province=province,
+                 country=country, postal=postal)
     s.save()
 
     return HttpResponse()
@@ -736,28 +776,30 @@ def ajaxGetUpdatedCategories(request):
     c = Category.objects.all()
     categories = []
     for x in range(0, len(c)):
-        categories.append({"name":c[x].name,"description":c[x].description})
-
+        categories.append({"name": c[x].name, "description": c[x].description})
 
     return JsonResponse(categories, safe=False)
+
 
 def ajaxGetUpdatedSuppliers(request):
     print("Waa2aaaE")
     c = Supplier.objects.all()
     suppliers = []
     for x in range(0, len(c)):
-        suppliers.append({"name":c[x].name,"contactNumber":c[x].contactNumber,"emailAddress":c[x].emailAddress, "address1":c[x].address1, "city":c[x].city,"country":c[x].country})
-
-
+        suppliers.append({"name": c[x].name, "contactNumber": c[x].contactNumber, "emailAddress": c[x].emailAddress,
+                          "address1": c[x].address1, "city": c[x].city, "country": c[x].country})
 
     return JsonResponse(suppliers, safe=False)
+
 
 def ajaxGetUpdatedItems(request):
     print("Waa2aaaE")
     c = Product.objects.all()
     products = []
     for x in range(0, len(c)):
-        products.append({"name":c[x].name,"category":c[x].idCategory.name,"price":c[x].suggestedUnitPrice,"SKU":c[x].SKU,"reorder":c[x].reorderLevel})
+        products.append(
+            {"name": c[x].name, "category": c[x].idCategory.name, "price": c[x].suggestedUnitPrice, "SKU": c[x].SKU,
+             "reorder": c[x].reorderLevel})
 
     return JsonResponse(products, safe=False)
 
@@ -768,7 +810,7 @@ def ajaxGetInStockProduct(request):
     b = Branch.objects.get(pk=request.session['branchID'])
     products = []
 
-    products.append({"idProduct":c.pk,"unitsInStock":c.get_product_count(c, b)})
+    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b)})
 
     return JsonResponse(products, safe=False)
 
@@ -779,7 +821,7 @@ def ajaxGetInStock(request):
     b = Branch.objects.get(pk=request.session['branchID'])
     products = []
 
-    products.append({"idProduct":c.pk,"unitsInStock":c.get_product_count(c, b),"incoming":c.get_num_incoming})
+    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "incoming": c.get_num_incoming})
 
     return JsonResponse(products, safe=False)
 
@@ -804,13 +846,12 @@ def ajaxAddPurchaseOrder(request):
     expectedDate = request.GET.get('expectedDate')
 
     po = PurchaseOrder(orderDate=datetime.strptime(orderDate, '%d-%m-%Y').strftime('%Y-%m-%d')
-    ,expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d')
-    , idManager_id=request.session['userID'], idSupplier_id = supplier,status="In Transit")
+                       , expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d')
+                       , idManager_id=request.session['userID'], idSupplier_id=supplier, status="In Transit")
     po.save()
 
-
     for x in range(0, len(products)):
-        orderLine = OrderLines(qty=quantity[x],idRawMaterial_id=products[x],idPurchaseOrder_id=po.pk)
+        orderLine = OrderLines(qty=quantity[x], idRawMaterial_id=products[x], idPurchaseOrder_id=po.pk)
         orderLine.save()
 
     Notifs.write("New PO" + str(po.pk) + " has been added.")
@@ -818,17 +859,18 @@ def ajaxAddPurchaseOrder(request):
 
     return JsonResponse([], safe=False)
 
+
 def ajaxAddBackload(request):
     products = request.GET.getlist('products[]')
     quantity = request.GET.getlist('quantity[]')
     reasons = request.GET.getlist('reasons[]')
 
     backloadDate = datetime.now().strftime("%Y-%m-%d")
-    b = BackLoad(backloadDate=backloadDate,idCashier_id=request.session['userID'])
+    b = BackLoad(backloadDate=backloadDate, idCashier_id=request.session['userID'])
     b.save()
 
     for x in range(0, len(products)):
-        b1 = BackloadLines(qty=quantity[x],idProduct_id=products[x],reason=reasons[x],idBackload_id=b.pk)
+        b1 = BackloadLines(qty=quantity[x], idProduct_id=products[x], reason=reasons[x], idBackload_id=b.pk)
         b1.save()
         p = Product.objects.get(pk=products[x])
         print(p.unitsInStock)
@@ -842,12 +884,12 @@ def ajaxAddBackload(request):
     # , idCashier_id=request.session['userID'], idSupplier_id = supplier,status="In Transit")
     # po.save()
 
-
     # for x in range(0, len(products)):
     #     orderLine = OrderLines(qty=quantity[x],idProduct_id=products[x],idPurchaseOrder_id=po.pk)
     #     orderLine.save()
 
-    return JsonResponse([],safe=False)
+    return JsonResponse([], safe=False)
+
 
 def ajaxSaveDelivery(request):
     print("WEW")
@@ -858,24 +900,24 @@ def ajaxSaveDelivery(request):
     idPurchaseOrder = request.GET.get('idPurchaseOrder')
     b = Branch.objects.get(pk=request.session['branchID'])
 
-    deliveryDate =datetime.now().strftime("%Y-%m-%d")
+    deliveryDate = datetime.now().strftime("%Y-%m-%d")
 
-    d = Delivery(deliveryDate=deliveryDate,idPurchaseOrder_id=idPurchaseOrder)
+    d = Delivery(deliveryDate=deliveryDate, idPurchaseOrder_id=idPurchaseOrder)
     d.save()
 
     isOkay = True
     hasExcess = False
-   # print(len(ordered))
-   # print(len(quantity))
-   # print(len(products))
+    # print(len(ordered))
+    # print(len(quantity))
+    # print(len(products))
     for x in range(0, len(products)):
-        d1 = DeliveredProducts(qty=quantity[x],idDelivery_id=d.pk,idOrderLines_id=lines[x])
+        d1 = DeliveredProducts(qty=quantity[x], idDelivery_id=d.pk, idOrderLines_id=lines[x])
         d1.save()
         p = RawMaterials.objects.get(pk=products[x])
         pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
         if float(ordered[x]) != float(quantity[x]) and float(ordered[x]) > float(quantity[x]):
-            #print(float(p.unitsInStock))
-            #print(float(quantity[x]))
+            # print(float(p.unitsInStock))
+            # print(float(quantity[x]))
             isOkay = False
 
         pc.unitsinstock = int(pc.unitsinstock) + int(quantity[x])
@@ -899,7 +941,7 @@ def ajaxSaveDelivery(request):
         qwe.status = "PARTIALLY RECEIVED"
         qwe.save()
 
-    return JsonResponse([],safe=False)
+    return JsonResponse([], safe=False)
 
 
 def ajaxTransferOrder(request):
@@ -911,7 +953,10 @@ def ajaxTransferOrder(request):
     transferDate = request.GET.get('transferDate')
     expectedDate = request.GET.get('expectedDate')
 
-    to = TransferOrderProduct(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Pending for Request")
+    to = TransferOrderProduct(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'),
+                              expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'),
+                              idManager=Manager.objects.get(pk=request.session['userID']), source_id=source,
+                              destination_id=destination, status="Pending for Request")
     b = to.source
     to.save()
 
@@ -925,7 +970,8 @@ def ajaxTransferOrder(request):
             pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
             pc.save()
 
-        Notifs.write("Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name +" has been made.")
+        Notifs.write("Transfer Order for Products (TO# " + str(
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made.")
     else:
         for x in range(0, len(products)):
             tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
@@ -940,7 +986,7 @@ def ajaxTransferOrder(request):
         Notifs.write("Transfer Order for Products (TO# " + str(
             to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
 
-    return JsonResponse([],safe=False)
+    return JsonResponse([], safe=False)
 
 
 def ajaxTransferOrderRawMaterials(request):
@@ -952,13 +998,17 @@ def ajaxTransferOrderRawMaterials(request):
     transferDate = request.GET.get('transferDate')
     expectedDate = request.GET.get('expectedDate')
 
-    to = TransferOrderRawMaterial(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'), expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'), idManager=Manager.objects.get(pk=request.session['userID']), source_id=source, destination_id=destination, status="Pending for Request")
+    to = TransferOrderRawMaterial(transferDate=datetime.strptime(transferDate, '%d-%m-%Y').strftime('%Y-%m-%d'),
+                                  expectedDate=datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d'),
+                                  idManager=Manager.objects.get(pk=request.session['userID']), source_id=source,
+                                  destination_id=destination, status="Pending for Request")
     b = to.source
     to.save()
 
     if to.destination.pk != 1:
         for x in range(0, len(products)):
-            tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x], idTransferOrderRawMaterial_id=to.pk)
+            tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x],
+                                          idTransferOrderRawMaterial_id=to.pk)
             tl.save()
             p = RawMaterials.objects.get(pk=products[x])
             pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
@@ -966,7 +1016,8 @@ def ajaxTransferOrderRawMaterials(request):
             pc.unitsreserved = int(pc.unitsreserved) + int(quantity[x])
             pc.save()
 
-        Notifs.write("Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name +" has been made.")
+        Notifs.write("Transfer Order for Raw Materials (TO# " + str(
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made.")
     else:
         for x in range(0, len(products)):
             tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x],
@@ -982,7 +1033,7 @@ def ajaxTransferOrderRawMaterials(request):
         Notifs.write("Transfer Order for Raw Materials (TO# " + str(
             to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
 
-    return JsonResponse([],safe=False)
+    return JsonResponse([], safe=False)
 
 
 def ajaxInTransitTO(request):
@@ -999,8 +1050,9 @@ def ajaxInTransitTO(request):
     to.status = "In Transit"
     to.save()
     Notifs.write(
-        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
-    return JsonResponse([],safe=False)
+        "Transfer Order for Products (TO# " + str(
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxInTransitTORawMaterial(request):
@@ -1017,8 +1069,9 @@ def ajaxInTransitTORawMaterial(request):
     to.status = "In Transit"
     to.save()
     Notifs.write(
-        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
-    return JsonResponse([],safe=False)
+        "Transfer Order for Raw Materials (TO# " + str(
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxFinishedTO(request):
@@ -1039,8 +1092,9 @@ def ajaxFinishedTO(request):
     to.receivedDate = date.today()
     to.save()
     Notifs.write(
-        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
-    return JsonResponse([],safe=False)
+        "Transfer Order for Products (TO# " + str(
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxFinishedTORawMaterial(request):
@@ -1061,7 +1115,8 @@ def ajaxFinishedTORawMaterial(request):
     to.receivedDate = date.today()
     to.save()
     Notifs.write(
-        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
+        "Transfer Order for Raw Materials (TO# " + str(
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
     return JsonResponse([], safe=False)
 
 
@@ -1081,8 +1136,9 @@ def ajaxCancelTO(request):
     to.status = "Cancelled"
     to.save()
     Notifs.write(
-        "Transfer Order for Products (TO# " + str(to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
-    return JsonResponse([],safe=False)
+        "Transfer Order for Products (TO# " + str(
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxCancelTORawMaterial(request):
@@ -1101,8 +1157,9 @@ def ajaxCancelTORawMaterial(request):
     to.status = "Cancelled"
     to.save()
     Notifs.write(
-        "Transfer Order for Raw Materials (TO# " + str(to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
-    return JsonResponse([],safe=False)
+        "Transfer Order for Raw Materials (TO# " + str(
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
+    return JsonResponse([], safe=False)
 
 
 def ajaxGetIngredients(request):
@@ -1114,7 +1171,7 @@ def ajaxGetIngredients(request):
 
     for ingredient in i:
         if b.idBranch == 5 or b.idBranch == 6:
-            ingredients.append({"pk":ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
+            ingredients.append({"pk": ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
                                 "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
         else:
             ingredients.append({"pk": ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
@@ -1150,7 +1207,8 @@ def ajaxGetAmountCanProduce(request):
 
     p = Product.objects.get(idProduct=pk)
 
-    ingredients.append({"amount":p.get_amount_can_produce(p, b), "unitsInStock":ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock})
+    ingredients.append({"amount": p.get_amount_can_produce(p, b),
+                        "unitsInStock": ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock})
 
     return JsonResponse(ingredients, safe=False)
 
@@ -1174,10 +1232,10 @@ def ajaxAddIngredient(request):
     rawmaterial = RawMaterials.objects.get(idrawmaterials=rawMaterialPK)
 
     i = IngredientsList(idProduct=product, idrawmaterials=rawmaterial,
-                     qtyneeded=qtyNeeded)
+                        qtyneeded=qtyNeeded)
     i.save()
 
-    Notifs.write("New Ingredient -"+ i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.")
+    Notifs.write("New Ingredient -" + i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.")
 
     i = IngredientsList.objects.filter(idProduct=productPK)
     ingredients = []
@@ -1196,7 +1254,8 @@ def ajaxRemoveIngredient(request):
 
     productPK = ingredient.idProduct
 
-    Notifs.write("Ingredient -"+ ingredient.idrawmaterials.name + "- for -" + ingredient.idProduct.name + "- has been removed.")
+    Notifs.write(
+        "Ingredient -" + ingredient.idrawmaterials.name + "- for -" + ingredient.idProduct.name + "- has been removed.")
 
     ingredient.delete()
 
@@ -1229,7 +1288,7 @@ def ajaxProduceItems(request):
                             "uom": ingredient.idProduct.unitOfMeasure,
                             "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, b),
                             "unitsInStockProduct": pc.unitsInStock,
-                            "amount":p.get_amount_can_produce(p, b)})
+                            "amount": p.get_amount_can_produce(p, b)})
 
     Notifs.write("Produced " + amount + " stocks for product: " + p.name)
 
@@ -1388,8 +1447,8 @@ def inventory_report_per_month(dates, branchPK):
             r["deliveries"] = deliveries
             r["returns"] = backloads
             r["transfer_out"] = tos
-            r["sales"] = randint(1,101)
-            #r["sales"] = sl
+            r["sales"] = randint(1, 101)
+            # r["sales"] = sl
 
         gen_info["report_data"] = report_data
         needed_info.append(gen_info)
@@ -1444,9 +1503,9 @@ def inventory_sales_per_month(dates, productPK):
                             sales_malabon += il.qty
                         sl += il.qty
 
-            #r["sales_marketing"] = randint(1,101)
-            #r["sales_taft"] = randint(1,101)
-            #r["sales_malabon"] = randint(1,101)
+            # r["sales_marketing"] = randint(1,101)
+            # r["sales_taft"] = randint(1,101)
+            # r["sales_malabon"] = randint(1,101)
 
             r["sales_marketing"] = sales_marketing
             r["sales_taft"] = sales_taft
@@ -1461,10 +1520,7 @@ def inventory_sales_per_month(dates, productPK):
 
 def forecasting_detail(request, id, method):
     si = SalesInvoice.objects.earliest('invoiceDate')
-    bload = BackLoad.objects.earliest('backloadDate')
-    deliv = Delivery.objects.earliest('deliveryDate')
-    to = TransferOrderProduct.objects.earliest('transferDate')
-    earliestDate = min([si.invoiceDate.date(), bload.backloadDate, deliv.deliveryDate, to.transferDate])
+    earliestDate = min([si.invoiceDate.date()])
     today = date.today()
 
     three_months = date.today() + relativedelta(months=+3)
@@ -1486,7 +1542,6 @@ def forecasting_detail(request, id, method):
         ingredients = IngredientsList.objects.filter(idProduct=productID)
         product = Product.objects.get(idProduct=id)
 
-
     product_inventory_sales = []
     for row in awit:
         product_inventory_sales.append(row['report_data'][0])
@@ -1499,7 +1554,6 @@ def forecasting_detail(request, id, method):
         productTaftSales.append(row['sales_taft'])
         productMalabonSales.append(row['sales_malabon'])
 
-
     forecast_next_three_months = []
 
     for x in next_three_month_dates:
@@ -1509,7 +1563,6 @@ def forecasting_detail(request, id, method):
             "forecast_taft": 0,
             "forecast_malabon": 0,
         })
-
 
     temp1 = productMarketingSales
     temp2 = productTaftSales
@@ -1634,14 +1687,14 @@ def forecasting(request, method):
 
         total = marketingProductForecast + taftProductForecast + malabonProductForecast
 
-        forecast.append({"id":p.idProduct,
-                        "product": p.name,
-                        "description":p.description,
-                        "uom":p.unitOfMeasure,
-                        "marketing_branch":marketingProductForecast,
-                        "taft_branch":taftProductForecast,
-                        "malabon_branch":malabonProductForecast,
-                        "total":total})
+        forecast.append({"id": p.idProduct,
+                         "product": p.name,
+                         "description": p.description,
+                         "uom": p.unitOfMeasure,
+                         "marketing_branch": marketingProductForecast,
+                         "taft_branch": taftProductForecast,
+                         "malabon_branch": malabonProductForecast,
+                         "total": total})
 
     if method == "ar":
         forecastingMethod = "Autoregression"
@@ -1655,7 +1708,6 @@ def forecasting(request, method):
     }
 
     return render(request, 'salikneta/forecasting.html', context)
-
 
 
 def forecast_autoregression(data):
