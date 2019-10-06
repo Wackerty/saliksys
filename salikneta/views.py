@@ -409,6 +409,12 @@ def pos(request):
                 prod = ProductCount.objects.get(idProduct=i, idBranch=b)
                 prod.unitsInStock = prod.unitsInStock - itms_dict[i]
                 prod.save()
+
+                product = Product.objects.get(idProduct=i)
+                pb = product.get_earliest_expiring_batch(product, b)
+                pb.currentCount = pb.currentCount - float(itms_dict[i])
+                pb.save()
+
             si.save()
             for i in ils:
                 i.idSales = si
@@ -515,7 +521,9 @@ def manageItems(request, id):
 
     for product in i:
         unitsInStock = product.get_product_count(product, b)
+        earliestExpiringBatch = product.get_earliest_expiring_batch(product, b)
         product.unitsInStock = unitsInStock
+        product.earliestExpiringBatch = earliestExpiringBatch
 
     context = {
         "categories": c,
@@ -527,7 +535,7 @@ def manageItems(request, id):
                     suggestedUnitPrice=request.POST['price'], img_path=request.FILES['image'],
                     reorderLevel=request.POST['reorder'],
                     unitOfMeasure=request.POST['unitsOfMeasure'], SKU=request.POST['SKU'],
-                    idCategory_id=request.POST['category'])
+                    idCategory_id=request.POST['category'], expiration=request.POST['expiration'])
         c.save()
 
         branches = Branch.objects.all()
@@ -970,6 +978,23 @@ def ajaxTransferOrder(request):
             pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
             pc.save()
 
+            toTransfer = float(quantity[x])
+
+            #while toTransfer >= 0:
+            pb = p.get_earliest_expiring_batch(p, b)
+            #if (pb.currentCount-toTransfer) >= 0:
+            pb.currentCount = pb.currentCount - toTransfer
+            pb.save()
+
+            destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
+            newPb = ProductBatch(idProductCount=destinationPC,
+                                 manufacturedDate=pb.manufacturedDate,
+                                 currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
+
+            newPb.save()
+
+            tl.save()
+
         Notifs.write("Transfer Order for Products (TO# " + str(
             to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made.")
     else:
@@ -982,6 +1007,18 @@ def ajaxTransferOrder(request):
             pc.save()
             to.status = "In Transit"
             to.save()
+
+            pb = p.get_earliest_expiring_batch(p, b)
+            pb.currentCount = pb.currentCount - float(quantity[x])
+            pb.save()
+
+            destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
+            newPb = ProductBatch(idProductCount=destinationPC,
+                                 manufacturedDate=pb.manufacturedDate,
+                                 currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
+            newPb.save()
+
+            tl.save()
 
         Notifs.write("Transfer Order for Products (TO# " + str(
             to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
@@ -1088,6 +1125,22 @@ def ajaxFinishedTO(request):
         print(pc.unitsInStock)
         pc.save()
 
+    pb = ProductBatch.objects.filter(idTransferOrderProduct=to)
+
+    for batch in pb:
+        if ProductBatch.objects.filter(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate, status="In stock").exists():
+            check = ProductBatch.objects.get(idProductCount=batch.idProductCount,
+                                             manufacturedDate=batch.manufacturedDate, status="In stock")
+            check.currentCount = check.currentCount + batch.currentCount
+            check.status = "In stock"
+            check.save()
+            batch.delete()
+        else:
+            batch.status = "In stock"
+            batch.save()
+
+
+
     to.status = "Received"
     to.receivedDate = date.today()
     to.save()
@@ -1133,6 +1186,13 @@ def ajaxCancelTO(request):
         pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
         print(pc.unitsInStock)
         pc.save()
+
+    pb = ProductBatch.objects.filter(idTransferOrderProduct=to)
+
+    for batch in pb:
+        batch.status = "Cancelled"
+        batch.save()
+
     to.status = "Cancelled"
     to.save()
     Notifs.write(
@@ -1180,6 +1240,24 @@ def ajaxGetIngredients(request):
                                                                                             b)})
 
     return JsonResponse(ingredients, safe=False)
+
+
+def ajaxGetBatches(request):
+    pk = request.GET.get('productPk')
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+    pc = ProductCount.objects.get(idProduct= pk, idBranch=b)
+    pb = ProductBatch.objects.filter(idProductCount=pc, status="In stock").order_by('manufacturedDate')
+
+    batches = []
+
+    for batch in pb:
+        batches.append({
+            "manufacturedDate": batch.manufacturedDate,
+            "currentCount": batch.currentCount,
+            "expiringDate": batch.expiringDate,
+        })
+
+    return JsonResponse(batches, safe=False)
 
 
 def ajaxGetRawMaterialCountLogs(request):
@@ -1291,6 +1369,16 @@ def ajaxProduceItems(request):
                             "amount": p.get_amount_can_produce(p, b)})
 
     Notifs.write("Produced " + amount + " stocks for product: " + p.name)
+
+    batch = ProductBatch(idProductCount=pc, manufacturedDate=date.today(),
+                         currentCount=amount, expiringDate=date.today()+timedelta(days=p.expiration), status="In stock")
+
+    if ProductBatch.objects.filter(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate).exists():
+        check = ProductBatch.objects.get(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate)
+        check.currentCount = check.currentCount + batch.currentCount
+        check.save()
+    else:
+        batch.save()
 
     return JsonResponse(ingredients, safe=False)
 

@@ -4,7 +4,11 @@
     //window.location.href = "http://127.0.0.1:8000/salikneta/";
     </script>
 {% endif %}
-
+<style>
+    .dropdown-menu>li>a {
+        white-space: normal;
+    }
+</style>
 
 <!-- **********************************************************************************************************************************************************
         TOP BAR CONTENT & NOTIFICATIONS
@@ -125,7 +129,7 @@
                item +='<br><span class="small italic">'+obj[i].timestamp+'</span></a></li>';
                $("#notif_list").append(item);
            }
-               $("#notif_list").append('<li><a href="salikneta/notifications/">See all notifications</a></li>');
+               $("#notif_list").append('<li><a href="notifications/">See all notifications</a></li>');
 
         });
     }

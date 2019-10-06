@@ -21,6 +21,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('salikneta/', views.index, name='index'),
     path('home/', views.home, name='home'),
     path('signout', views.signout, name='signout'),
     path('log_in/', views.log_in, name='log_in'),
@@ -76,6 +77,7 @@ urlpatterns = [
     path('ajax/ajaxCancelTO/', views.ajaxCancelTO, name='ajaxCancelTO'),
     path('ajax/ajaxCancelTORawMaterial/', views.ajaxCancelTORawMaterial, name='ajaxCancelTORawMaterial'),
     path('ajax/ajaxGetIngredients/', views.ajaxGetIngredients, name='ajaxGetIngredients'),
+    path('ajax/ajaxGetBatches/', views.ajaxGetBatches, name='ajaxGetBatches'),
     path('ajax/ajaxGetUOM/', views.ajaxGetUOM, name='ajaxGetUOM'),
     path('ajax/ajaxAddIngredient/', views.ajaxAddIngredient, name='ajaxAddIngredient'),
     path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),

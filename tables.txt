@@ -120,7 +120,7 @@ class DjangoSession(models.Model):
 
 class Notifs(models.Model):
     notif_id = models.AutoField(primary_key=True)
-    msg = models.CharField(max_length=150, blank=True, null=True)
+    msg = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(blank=True, null=True)
     viewed = models.IntegerField(blank=True, null=True)
 
@@ -263,10 +263,25 @@ class SaliknetaProduct(models.Model):
     barcode = models.CharField(max_length=45)
     img_path = models.CharField(max_length=150, blank=True, null=True)
     idcategory = models.ForeignKey(SaliknetaCategory, models.DO_NOTHING, db_column='idCategory_id')  # Field name made lowercase.
+    expiration = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'salikneta_product'
+
+
+class SaliknetaProductbatch(models.Model):
+    idproductbatch = models.AutoField(db_column='idProductBatch', primary_key=True)  # Field name made lowercase.
+    idproductcount = models.ForeignKey('SaliknetaProductcount', models.DO_NOTHING, db_column='idProductCount_id')  # Field name made lowercase.
+    manufactureddate = models.DateField(db_column='manufacturedDate')  # Field name made lowercase.
+    currentcount = models.FloatField(db_column='currentCount')  # Field name made lowercase.
+    expiringdate = models.DateField(db_column='expiringDate')  # Field name made lowercase.
+    status = models.CharField(max_length=45, blank=True, null=True)
+    idtransferorderproduct = models.ForeignKey('SaliknetaTransferorderproduct', models.DO_NOTHING, db_column='idTransferOrderProduct_id', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_productbatch'
 
 
 class SaliknetaProductcount(models.Model):
@@ -275,6 +290,7 @@ class SaliknetaProductcount(models.Model):
     idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
     unitsinstock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
     unitsreserved = models.IntegerField(db_column='unitsReserved', blank=True, null=True)  # Field name made lowercase.
+    unitsreservedfromproduction = models.IntegerField(db_column='unitsReservedFromProduction', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -300,6 +316,7 @@ class SaliknetaRawmaterialcount(models.Model):
     idbranch = models.ForeignKey(SaliknetaBranch, models.DO_NOTHING, db_column='idBranch_id')  # Field name made lowercase.
     unitsinstock = models.FloatField(db_column='unitsInStock', blank=True, null=True)  # Field name made lowercase.
     unitsreserved = models.IntegerField(db_column='unitsReserved', blank=True, null=True)  # Field name made lowercase.
+    unitsreservedfromproduction = models.IntegerField(db_column='unitsReservedFromProduction', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -346,13 +363,13 @@ class SaliknetaSupplier(models.Model):
     name = models.CharField(max_length=45)
     contactnumber = models.CharField(db_column='contactNumber', max_length=45)  # Field name made lowercase.
     emailaddress = models.CharField(db_column='emailAddress', max_length=45)  # Field name made lowercase.
-    website = models.CharField(max_length=45)
-    address1 = models.CharField(max_length=45)
-    address2 = models.CharField(max_length=45)
+    website = models.CharField(max_length=45, blank=True, null=True)
+    address1 = models.CharField(max_length=45, blank=True, null=True)
+    address2 = models.CharField(max_length=45, blank=True, null=True)
     city = models.CharField(max_length=45)
-    province = models.CharField(max_length=45)
-    country = models.CharField(max_length=45)
-    postal = models.CharField(max_length=45)
+    province = models.CharField(max_length=45, blank=True, null=True)
+    country = models.CharField(max_length=45, blank=True, null=True)
+    postal = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -398,6 +415,15 @@ class SaliknetaTransferorderrawmaterial(models.Model):
     class Meta:
         managed = False
         db_table = 'salikneta_transferorderrawmaterial'
+
+
+class SaliknetaUsertype(models.Model):
+    usertypeid = models.IntegerField(db_column='userTypeID', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(max_length=45, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_usertype'
 
 
 class SaliknetaTransferlinesrawmaterial(models.Model):

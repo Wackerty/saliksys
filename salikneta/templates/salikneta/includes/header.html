@@ -5,7 +5,11 @@
     </script>
 {% endif %}
 
-
+<style>
+    .dropdown-menu>li>a {
+        white-space: normal;
+    }
+</style>
 <!-- **********************************************************************************************************************************************************
         TOP BAR CONTENT & NOTIFICATIONS
         *********************************************************************************************************************************************************** -->
@@ -139,12 +143,12 @@
        console.log(obj);
                if (obj[i].num_notif === 0){$("#notif_num").hide();}
                else{$("#notif_num").show().html(obj[i].num_notif);}
-               item = '<li><a href="#">';
+               item = '<li><a class="wide" href="#">';
                item += obj[i].msg;
                item +='<br><span class="small italic">'+obj[i].timestamp+'</span></a></li>';
                $("#notif_list").append(item);
            }
-               $("#notif_list").append('<li><a href="salikneta/notifications/">See all notifications</a></li>');
+               $("#notif_list").append('<li><a href="notifications/">See all notifications</a></li>');
 
         });
     }

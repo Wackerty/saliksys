@@ -68,6 +68,10 @@
                                 <label class="control-label">Starting Stock</label>
                                 <input type="number" class="form-control" id="SKU" name="startStock" placeholder="Opening stock" autofocus>
                             </div>
+                            <div class="col-md-6">
+                                <label class="control-label">Days before expiration</label>
+                                <input type="number" class="form-control" id="expiration" name="expiration" placeholder="Expiration" autofocus>
+                            </div>
                         </div>
                          <br>
                          <div class="row">
@@ -141,8 +145,7 @@
                 </div>
               </div>
             </div>
-
-            <div class="modal fade" id="modal_ingredients" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal fade" id="modal_ingredients" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -163,6 +166,34 @@
                               </tbody>
                           </table>
                           <center><a href="" id="addIngredientsLink">Add ingredients</a></center>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+              <div class="modal fade" id="modal_batch" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">PRODUCT BATCHES</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="login-wrap">
+                          <table class="table table-hover" id="batchesTable">
+                              <thead>
+                                <tr>
+                                  <th>Produced Date</th>
+                                  <th>Current Count</th>
+                                  <th>Expiring Date</th>
+                                </tr>
+                              </thead>
+                              <tbody id="batchesTable_Body">
+                              </tbody>
+                          </table>
                       </div>
                     </div>
                     <div class="modal-footer">
@@ -209,6 +240,8 @@
                       <th>Current Stocks</th>
                       <th>UOM</th>
                       <th>Re-order level</th>
+                      <th>Lifespan</th>
+                      <th>Expiring</th>
                       <th>Ingredients</th>
                     </tr>
                   </thead>
@@ -226,6 +259,16 @@
                                   </td>
                                   <td bgcolor="lightcoral">{{product.unitOfMeasure}}</td>
                                   <td bgcolor="lightcoral">{{product.reorderLevel}}</td>
+                                  {% if product.expiration  is None %}
+                                    <td bgcolor="lightcoral">0 days</td>
+                                  {% else %}
+                                    <td bgcolor="lightcoral">{{product.expiration}} days</td>
+                                  {% endif %}
+                                  {% if product.earliestExpiringBatch is not None %}
+                                    <td bgcolor="lightcoral">{{product.earliestExpiringBatch.currentCount|floatformat:0}} <a href="#modal_batch" data-toggle="modal" data-target="#modal_batch" item_id="{{ product.idProduct }}" onclick="getBatches(this)">stocks</a> expiring on {{ product.earliestExpiringBatch.expiringDate|date:"m/d/Y" }} </td>
+                                  {% else %}
+                                      <td bgcolor="lightcoral">None</td>
+                                  {% endif %}
                                   <td bgcolor="lightcoral"><button class="btn btn-round btn-primary" data-toggle="modal" data-target="#modal_ingredients" item_id="{{ product.idProduct }}" onclick="getIngredients(this)">View</button>
                               </tr>
                           {% else %}
@@ -237,6 +280,17 @@
                                   <td>{{product.unitsInStock|floatformat:2}}</td>
                                   <td>{{product.unitOfMeasure}}</td>
                                   <td>{{product.reorderLevel}}</td>
+                                  {% if product.expiration  is None %}
+                                    <td>0 days</td>
+                                  {% else %}
+                                    <td>{{product.expiration}} days</td>
+                                  {% endif %}
+                                  {% if product.earliestExpiringBatch is not None %}
+                                    <td>{{product.earliestExpiringBatch.currentCount|floatformat:0}} <a href="#modal_batch" data-toggle="modal" data-target="#modal_batch" item_id="{{ product.idProduct }}" onclick="getBatches(this)">stocks</a> expiring on {{ product.earliestExpiringBatch.expiringDate|date:"m/d/Y" }} </td>
+                                  {% else %}
+                                      <td>None</td>
+                                  {% endif %}
+
                                   <td><button class="btn btn-round btn-primary" data-toggle="modal" data-target="#modal_ingredients" item_id="{{ product.idProduct }}" onclick="getIngredients(this)">View</button>
                               </tr>
                           {% endif %}
@@ -296,6 +350,33 @@
                   rows += "</tr>";
               }
               $("#ingredientTable_Body").html(rows);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+    }
+
+    function getBatches(obj){
+        var productPK = $(obj).attr("item_id");
+
+        $.ajax({
+          url: '{% url "ajaxGetBatches" %}',
+          data: {
+            "productPk":productPK,
+          },
+          dataType: 'json',
+          success: function(data){
+              var rows = "";
+              for(var i = 0; i < data.length; i++){
+                  rows += "<tr>";
+                  rows += "<td>" + data[i].manufacturedDate + "</td>";
+                  rows += "<td>" + data[i].currentCount + "</td>";
+                  rows += "<td>" + data[i].expiringDate + "</td>";
+                  rows += "</tr>";
+              }
+              $("#batchesTable_Body").html(rows);
           },
           error: function () {
             alert("error");

@@ -112,6 +112,7 @@
           },
           error: function () {
             alert("No ingredients assigned for the selected product");
+            $("#produceItemButton").attr("disabled", "true");
           },
 
         });

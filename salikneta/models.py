@@ -51,7 +51,7 @@ class Category(models.Model):
 
 class Notifs(models.Model):
     notif_id = models.AutoField(primary_key=True)
-    msg = models.CharField(max_length=150, blank=True, null=True)
+    msg = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(blank=True, null=True)
     viewed = models.IntegerField(blank=True, null=True)
 
@@ -106,6 +106,7 @@ class Product(models.Model):
     barcode = models.CharField(max_length=45)
     img_path = models.ImageField(upload_to="prod_img/")
     idCategory = models.ForeignKey(Category, on_delete=models.CASCADE,db_column='idCategory_id')
+    expiration = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -168,6 +169,15 @@ class Product(models.Model):
         ct = (pc.unitsInStock + deliveries)-(sales+backloads+tos)
         return ct
 
+    @staticmethod
+    def get_earliest_expiring_batch(self, branchID):
+        productCount = ProductCount.objects.get(idProduct=self.idProduct, idBranch=branchID)
+        try:
+            earliestExpiringBatch = ProductBatch.objects.filter(idProductCount=productCount, currentCount__gt=0, status="In stock").order_by('manufacturedDate')[0]
+        except:
+            earliestExpiringBatch = None
+        return earliestExpiringBatch
+
 
 class ProductCount(models.Model):
     idProductCount = models.AutoField(db_column='productCountID', primary_key=True)  # Field name made lowercase.
@@ -175,6 +185,7 @@ class ProductCount(models.Model):
     idBranch = models.ForeignKey(Branch, models.CASCADE, db_column='idBranch_id')  # Field name made lowercase.
     unitsInStock = models.FloatField(db_column='unitsInStock')  # Field name made lowercase.
     unitsReserved = models.IntegerField(db_column='unitsReserved', default=0)  # Field name made lowercase.
+
 
     class Meta:
         managed = False
@@ -481,3 +492,19 @@ class RawMaterialCountLog(models.Model):
     class Meta:
         managed = False
         db_table = 'salikneta_rawmaterialcountlog'
+
+
+class ProductBatch(models.Model):
+    idProductBatch = models.AutoField(db_column='idProductBatch', primary_key=True)  # Field name made lowercase.
+    idProductCount = models.ForeignKey(ProductCount, models.DO_NOTHING, db_column='idProductCount_id')  # Field name made lowercase.
+    manufacturedDate = models.DateField(db_column='manufacturedDate')  # Field name made lowercase.
+    currentCount = models.FloatField(db_column='currentCount')  # Field name made lowercase.
+    expiringDate = models.DateField(db_column='expiringDate')  # Field name made lowercase.
+    status = models.CharField(max_length=45)
+    idTransferOrderProduct = models.ForeignKey(TransferOrderProduct, models.DO_NOTHING,
+                                               db_column='idTransferOrderProduct_id', blank=True,
+                                               null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_productbatch'

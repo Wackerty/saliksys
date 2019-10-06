@@ -43,11 +43,37 @@
                   </div>
                   <div class="col-md-4 mb">
                     <div class="twitter-panel pn">
-                      <i class="fa fa-truck fa-4x"></i>
+                      <i class="fa fa-dollar fa-4x"></i>
                       <h4 class="mt" style="color: white">Purchase Orders</h4>
                         <a href="{% url 'purchaseOrder' %}"><button class="btn btn-small ">Navigate</button></a>
                     </div>
                   </div>
+                  <div class="col-md-4 mb">
+                    <div class="twitter-panel pn">
+                      <i class="fa fa-truck fa-4x"></i>
+                      <h4 class="mt" style="color: white">Transfer Orders</h4>
+                        <a href="{% url 'transferOrderProducts' %}"><button class="btn btn-small ">Products</button></a>
+                        <a href="{% url 'transferOrderRawMaterials' %}"><button class="btn btn-small ">Raw Materials</button></a>
+                    </div>
+                  </div>
+               </div>
+           {% elif request.session.usertype == 'production' %}
+              <div class="row">
+                  <div class="col-md-4 mb">
+                    <div class="twitter-panel pn">
+                      <i class="fa fa-cubes fa-4x"></i>
+                      <h4 class="mt" style="color: white">Produce Items</h4>
+                        <a href="{% url 'produceItems' 0  %}"><button class="btn btn-small">Navigate</button></a>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb">
+                        <div class="twitter-panel pn">
+                          <i class="fa fa-truck fa-4x"></i>
+                          <h4 class="mt" style="color: white">Transfer Orders</h4>
+                            <a href="{% url 'transferOrderProducts' %}"><button class="btn btn-small ">Products</button></a>
+                            <a href="{% url 'transferOrderRawMaterials' %}"><button class="btn btn-small ">Raw Materials</button></a>
+                        </div>
+                      </div>
                </div>
           {% endif %}
 
@@ -67,7 +93,7 @@
               <div class="details">
                 <p>
                   <muted>{{ notif.get_time_ago }}</muted>
-                  <br/>{{notif.msg }}<br/>
+                  <br/>{{notif.msg|linebreaksbr }}<br/>
                 </p>
               </div>
             </div>
