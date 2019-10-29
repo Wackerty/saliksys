@@ -105,8 +105,8 @@
           },
           dataType: 'json',
           success: function(data){
-              $("#canProduce").html('Can produce: ' + data[0].amount + ' stock/s');
-              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStock + ' stock/s');
+              $("#canProduce").html('Can produce: ' + data[0].amount + " " + data[0].uom);
+              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStock + " " + data[0].uom);
               $("#amount").val(data[0].amount);
 
           },
@@ -178,8 +178,8 @@
           dataType: 'json',
           success: function(data){
               alert("Produced " + amount + " stocks for product: " + $("option:selected", $("#products")).text());
-              $("#canProduce").html('Can produce: ' + data[0].amount + ' stock/s');
-              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStockProduct + ' stock/s');
+              $("#canProduce").html('Can produce: ' + data[0].amount + " " + data[0].uom);
+              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStockProduct + " " + data[0].uom);
               update_table(data);
           },
           error: function () {

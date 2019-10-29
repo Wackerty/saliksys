@@ -4,7 +4,7 @@ from datetime import date
 from django.utils import timezone
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    help = 'Gets the expiring/expired products'
 
     def handle(self, *args, **kwargs):
         time = timezone.now().strftime('%X')

@@ -31,6 +31,13 @@
                         <a href="{% url 'pos' %}"><button class="btn btn-small ">Navigate</button></a>
                     </div>
                   </div>
+                 <div class="col-md-4 mb">
+                    <div class="twitter-panel pn">
+                      <i class="fa fa-cubes fa-4x"></i>
+                      <h4 class="mt" style="color: white">Backloads</h4>
+                        <a href="{% url 'backload'  %}"><button class="btn btn-small">Navigate</button></a>
+                    </div>
+                 </div>
               </div>
           {% elif request.session.usertype == 'marketing' %}
               <div class="row">

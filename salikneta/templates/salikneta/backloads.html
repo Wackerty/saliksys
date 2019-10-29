@@ -18,6 +18,30 @@
 
             <div class="form-panel">
               <h4 class="mb"><i class="fa fa-angle-right"></i> Backload</h4>
+              <h5 class="mb"><i class="fa fa-angle-right"></i> Expiring/Expired products</h5>
+              <table id="cat_tbl" class="table table-striped table-bordered" style="width:100%">
+                  <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Expiring/Expired stocks</th>
+                        <th>Days til expiring</th>
+                        <th>Expiry Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for product in expiringProducts %}
+                        {% if product.daysTilExpiring <= 14 %}
+                            <tr>
+                                <td>{{product.idProductCount.idProduct.name}}</td>
+                                <td>{{product.currentCount}} {{ product.idProductCount.idProduct.unitOfMeasure }}</td>
+                                <td>{{product.daysTilExpiring}}</td>
+                                <td>{{product.expiringDate|date:"m/d/Y"}}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                  </tbody>
+              </table>
+
               <button class="btn btn-success btn-md" data-toggle="modal" data-target="#myModal" style="margin-bottom: 1vh">Add Backload</button>
 
  				<table id="cat_tbl" class="table table-striped table-bordered" style="width:100%">
@@ -29,8 +53,6 @@
                     </tr>
                   </thead>
                   <tbody>
-                   
-
                       {% for b in backloads reversed %}
                      <tr>
                         <td>{{b.pk}}</td>
@@ -72,8 +94,8 @@
 	                                <tbody>
 	                             		{% for wew in b.get_backload_lines %}
 	                                		<tr>
-	                                			<th>{{wew.idProduct_id}}</th>
-	                                			<th>{{wew.qty}}</th>
+	                                			<th>{{wew.idProduct.name}}</th>
+	                                			<th>{{wew.qty}} {{ wew.idProduct.unitOfMeasure }}</th>
 	                                			<th>{{wew.reason}}</th>
 	                                		</tr>
 	                                	{% endfor %}
@@ -126,6 +148,7 @@
 			                                    <th>In stock</th>
 			                                    <th width="10%">Remove stock</th>
 			                                    <th>Stock after</th>
+			                                    <th>UOM</th>
 			                                    <th>Reason</th>
 			                                  </tr>
 			                                </thead>
@@ -183,10 +206,11 @@
         WindowObject.close();
 
     }
-	function itemObject(idProduct, productName, unitsInStock){
+	function itemObject(idProduct, productName, unitsInStock, unitOfMeasure){
 		this.idProduct = idProduct;
 		this.productName = productName;
 		this.unitsInStock = unitsInStock;
+		this.unitOfMeasure = unitOfMeasure;
 
 		}
 	function deleteRow(id){
@@ -195,8 +219,7 @@
 	function appendRow(){
     var items = new Array()
     {% for p in products %}
-      items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock}}"));
-
+      items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock|floatformat:"-3"}}", "{{ p.unitOfMeasure }}"));
     {% endfor %}
 
     var tbl = document.getElementById("tableData");
@@ -213,7 +236,8 @@
      			'</td>'+
      			'<td id="unitsInStock' + rCount+ '">'+ items[0].unitsInStock+'</td>'+
      			'<td><input id="removeStock'+rCount+'" onkeyup="updateAfter('+rCount+')" type="number" class="form-control"/></td>'+
-     			'<td id="stockAfter' + rCount +'">2</td>'+
+     			'<td id="stockAfter' + rCount +'">0</td>'+
+     			'<td id="unitOfMeasure' + rCount +'">'+ items[0].unitOfMeasure +'</td>'+
      			'<td><input class="form-control" type="text" value="Expired"></td>'+
      		'</tr> ';   		
    
@@ -229,18 +253,22 @@
 	}
    function updateInStock(id){
     var td = document.getElementById("unitsInStock"+id);
+    var td2 = document.getElementById("stockAfter"+id);
+    var td3 = document.getElementById("unitOfMeasure"+id);
 
     var dropdown = document.getElementById("dropdown"+id);
 
     
       $.ajax({
-      url: '{% url "ajaxGetInStock" %}',
+      url: '{% url "ajaxGetInStockProduct" %}',
       data: {
         "idProduct":dropdown.value,
       },
       dataType: 'json',
       success: function(data){  
         td.innerHTML = data[0].unitsInStock;
+        td2.innerHTML = 0;
+        td3.innerHTML = data[0].uom;
 
       }
       
@@ -256,7 +284,7 @@
     for(var i = 0; i < rCount; i++){
       products.push(tbl.rows[i].cells[1].children[0].value);
       quantity.push(tbl.rows[i].cells[3].children[0].value);
-      reasons.push(tbl.rows[i].cells[5].children[0].value);
+      reasons.push(tbl.rows[i].cells[6].children[0].value);
       // alert(tbl.rows[i].cells[0].children[0].value); 
     }
     $.ajax({

@@ -128,7 +128,7 @@
                                         {% for o in to.get_transfer_lines %}
                                           <tr>
                                             <td>{{ o.get_raw_material.name }}</td>
-                                            <td>{{ o.qty }}</td>
+                                            <td>{{ o.qty }} {{ o.idRawMaterial.unitOfMeasure }}</td>
 
                                           </tr>
                                         {% endfor %}
@@ -399,7 +399,7 @@ function finishTO(id){
  function appendRow(){
     var items = new Array()
     {% for r in rawMaterials %}
-      items.push(new itemObject("{{r.pk}}","{{r.name}}","{{r.unitsInStock}}"));
+      items.push(new itemObject("{{r.pk}}","{{r.name}}","{{r.unitsInStock|floatformat:"-3"}} {{ r.unitOfMeasure }}"));
 
     {% endfor %}
 
@@ -480,7 +480,7 @@ function finishTO(id){
       },
       dataType: 'json',
       success: function(data){  
-        td.innerHTML = data[0].unitsInStock;
+        td.innerHTML = data[0].unitsInStock + " " + data[0].uom;
 
       }
       

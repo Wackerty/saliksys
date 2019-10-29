@@ -128,7 +128,7 @@
                                         {% for o in to.get_transfer_lines %}
                                           <tr>
                                             <td>{{ o.get_product.name }}</td>
-                                            <td>{{ o.qty }}</td>
+                                            <td>{{ o.qty }} {{ o.idProduct.unitOfMeasure }}</td>
 
                                           </tr>
                                         {% endfor %}
@@ -149,7 +149,7 @@
                                   <button type="button" id="cancelBtn{{to.pk}}" onclick="cancelTO('{{to.pk}}')" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                                   {% endif %}
                                   {% if to.status == "In Transit" and to.destination == source %}
-                                  <button type="button" id="finishBtn{{to.pk}}" onclick="finishTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Finish</button>
+                                  <button type="button" id="finishBtn{{to.pk}}" onclick="finishTO('{{to.pk}}')" class="btn btn-success" data-dismiss="modal">Receive</button>
                                   {% endif %}
 
                                   <button type="button" id="printBtn{{to.pk}}" class="btn btn-primary" onclick="printDiv('print_div_{{ to.pk }}')" style="float: left;">Print</button>
@@ -272,7 +272,8 @@ s
                                 <thead>
                                   <tr>
                                     <th>Product name</th>
-                                    <th>Products In stock</th>
+                                    <th>Products In stock (source)</th>
+                                    <th>Products In stock (destination)</th>
 
                                     <th>Quantity</th>
                                   </tr>
@@ -289,13 +290,10 @@ s
                             <div class="col-md-4"></div>
                             <div class="col-md-4">
                               <button class="form-control" type="button" onclick="appendRow()">+</button>
+                                <input type="hidden" id="hiddenDestinationCount">
                             </div>
                             <div class="col-md-4"></div>
                           </div>
-
-
-
-
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -397,11 +395,11 @@ function finishTO(id){
 
 
  function appendRow(){
-
+    var dropdown = document.getElementById("destination");
 
     var items = new Array()
     {% for p in products %}
-      items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock}}"));
+      items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock|floatformat:"-3"}} {{ p.unitOfMeasure }}"));
 
     {% endfor %}
 
@@ -415,6 +413,7 @@ function finishTO(id){
       }
       wew += '</select></td>'+
       '<td id="unitsInStock'+rCount+'">'+items[0].unitsInStock+'</td>'+
+      '<td id="unitsInStockDestination'+rCount+'">'+getDestinationStock(items[0].idProduct, dropdown.value)+'</td>'+
       '<td><input type="number" class="form-control" value = 1/></td>'+
 
     '</tr>';
@@ -475,8 +474,10 @@ function finishTO(id){
 
   function updateInStock(id){
     var td = document.getElementById("unitsInStock"+id);
+    var td2 = document.getElementById("unitsInStockDestination"+id);
 
     var dropdown = document.getElementById("dropdown"+id);
+    var destination = document.getElementById("destination");
 
     
       $.ajax({
@@ -486,11 +487,33 @@ function finishTO(id){
       },
       dataType: 'json',
       success: function(data){  
-        td.innerHTML = data[0].unitsInStock;
-
+        td.innerHTML = data[0].unitsInStock + " " + data[0].uom;
       }
-      
    });
+      td2.innerHTML = getDestinationStock(dropdown.value, destination.value);
   }
+
+
+  function getDestinationStock(productID, branchID){
+    var x;
+    $.ajax({
+      url: '{% url "ajaxGetDestinationStock" %}',
+      async: false,
+      data: {
+        "idProduct":productID,
+        "idBranch":branchID,
+      },
+      dataType: 'json',
+      success: function(data){
+          x = data[0].unitsInStock + " " + data[0].uom;
+      }
+    });
+    return x;
+  }
+
+  $("#destination").change(function() {
+      $("#tableData").html("");
+
+  });
 </script>
             <!--custom chart end-->

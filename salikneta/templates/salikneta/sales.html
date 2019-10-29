@@ -136,7 +136,7 @@
         $("#modal-in-date").html("INVOICE DATE: "+$(obj).attr("i_date"));
         $("#modal-in-num").html("INVOICE NO: "+$(obj).attr("i_num"));
         $("#r_net_total").html($(obj).attr("i_total"));
-           let invoice_data =  $.get("/salikneta/ajax/get_invoicelines_by_salesid/"+id+"/");
+           let invoice_data =  $.get("/ajax/get_invoicelines_by_salesid/"+id+"/");
            invoice_data.done(function(results){
                 obj = results.data;
                 for (i in obj){

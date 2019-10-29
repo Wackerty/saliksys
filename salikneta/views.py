@@ -406,14 +406,16 @@ def pos(request):
                 messages.warning(request, 'Account Created.')
         if pazucc:
             for i in itms_dict:
-                prod = ProductCount.objects.get(idProduct=i, idBranch=b)
-                prod.unitsInStock = prod.unitsInStock - itms_dict[i]
-                prod.save()
+                # prod = ProductCount.objects.get(idProduct=i, idBranch=b)
+                # prod.unitsInStock = prod.unitsInStock - itms_dict[i]
+                # prod.save()
 
                 product = Product.objects.get(idProduct=i)
-                pb = product.get_earliest_expiring_batch(product, b)
-                pb.currentCount = pb.currentCount - float(itms_dict[i])
-                pb.save()
+                # pb = product.get_earliest_expiring_batch(product, b)
+                # pb.currentCount = pb.currentCount - float(itms_dict[i])
+                # pb.save()
+
+                product.deduct_stock(product, b, itms_dict[i])
 
             si.save()
             for i in ils:
@@ -651,13 +653,23 @@ def backload(request):
     branch = Branch.objects.get(pk=request.session['branchID'])
     b = BackLoad.objects.all()
 
-    i = Product.objects.all()
+    i = Product.objects.all().order_by('name')
     for product in i:
         unitsInStock = product.get_product_count(product, branch)
         product.unitsInStock = unitsInStock
 
+    expiringProducts = ProductBatch.objects.filter(idProductCount__idBranch=branch, currentCount__gt=0)
+
+    today = date.today()
+    for product in expiringProducts:
+        expiringDate = product.expiringDate
+        gap = expiringDate - today
+        product.daysTilExpiring = gap.days
+
+
     context = {
         "products": i, "backloads": b,
+        "expiringProducts": expiringProducts,
     }
     return render(request, 'salikneta/backloads.html', context)
 
@@ -812,13 +824,26 @@ def ajaxGetUpdatedItems(request):
     return JsonResponse(products, safe=False)
 
 
+def ajaxGetDestinationStock(request):
+    pk = request.GET.get('idProduct')
+    branch = request.GET.get('idBranch')
+    c = Product.objects.get(pk=pk)
+    b = Branch.objects.get(pk=branch)
+    products = []
+
+
+    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "uom": c.unitOfMeasure})
+
+    return JsonResponse(products, safe=False)
+
+
 def ajaxGetInStockProduct(request):
     pk = request.GET.get('idProduct')
     c = Product.objects.get(pk=pk)
     b = Branch.objects.get(pk=request.session['branchID'])
     products = []
 
-    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b)})
+    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "uom": c.unitOfMeasure})
 
     return JsonResponse(products, safe=False)
 
@@ -840,7 +865,7 @@ def ajaxGetInStockRawMaterials(request):
     b = Branch.objects.get(pk=request.session['branchID'])
     rawmaterials = []
 
-    rawmaterials.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b)})
+    rawmaterials.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "uom": c.unitOfMeasure})
 
     return JsonResponse(rawmaterials, safe=False)
 
@@ -881,10 +906,13 @@ def ajaxAddBackload(request):
         b1 = BackloadLines(qty=quantity[x], idProduct_id=products[x], reason=reasons[x], idBackload_id=b.pk)
         b1.save()
         p = Product.objects.get(pk=products[x])
-        print(p.unitsInStock)
-        p.unitsInStock = p.unitsInStock - int(quantity[x]);
-        print(p.unitsInStock)
-        p.save()
+        p.deduct_stock(p, b.idCashier.idBranch, int(quantity[x]))
+        # pc = ProductCount.objects.get(idProduct=p, idBranch=b.idCashier.idBranch)
+        # pc.unitsInStock = pc.unitsInStock - int(quantity[x])
+        # pc.save()
+        # pb = p.get_earliest_expiring_batch(p, branchID=b.idCashier.idBranch)
+        # pb.currentCount = pb.currentCount - int(quantity[x])
+        # pb.save()
 
     Notifs.write("Products have been backloaded.")
     # po = PurchaseOrder(orderDate=datetime.datetime.strptime(orderDate, '%d-%m-%Y').strftime('%Y-%m-%d')
@@ -968,30 +996,31 @@ def ajaxTransferOrder(request):
     b = to.source
     to.save()
 
-    if to.destination.pk != 1:
+    if to.destination.pk != 1 and to.source.pk != 1:
         for x in range(0, len(products)):
             tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
             tl.save()
             p = Product.objects.get(pk=products[x])
+            p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
-            pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
             pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
             pc.save()
 
-            toTransfer = float(quantity[x])
-
-            #while toTransfer >= 0:
-            pb = p.get_earliest_expiring_batch(p, b)
-            #if (pb.currentCount-toTransfer) >= 0:
-            pb.currentCount = pb.currentCount - toTransfer
-            pb.save()
-
-            destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
-            newPb = ProductBatch(idProductCount=destinationPC,
-                                 manufacturedDate=pb.manufacturedDate,
-                                 currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
-
-            newPb.save()
+            # toTransfer = float(quantity[x])
+            #
+            # p.transfer_stock(p, b, quantity[x], to)
+            # #while toTransfer >= 0:
+            # pb = p.get_earliest_expiring_batch(p, b)
+            # #if (pb.currentCount-toTransfer) >= 0:
+            # pb.currentCount = pb.currentCount - toTransfer
+            # pb.save()
+            #
+            # destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
+            # newPb = ProductBatch(idProductCount=destinationPC,
+            #                      manufacturedDate=pb.manufacturedDate,
+            #                      currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
+            #
+            # newPb.save()
 
             tl.save()
 
@@ -1002,21 +1031,21 @@ def ajaxTransferOrder(request):
             tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
             tl.save()
             p = Product.objects.get(pk=products[x])
+            p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
-            pc.unitsInStock = int(pc.unitsInStock) - int(quantity[x])
+            pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
             pc.save()
             to.status = "In Transit"
             to.save()
-
-            pb = p.get_earliest_expiring_batch(p, b)
-            pb.currentCount = pb.currentCount - float(quantity[x])
-            pb.save()
-
-            destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
-            newPb = ProductBatch(idProductCount=destinationPC,
-                                 manufacturedDate=pb.manufacturedDate,
-                                 currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
-            newPb.save()
+            # pb = p.get_earliest_expiring_batch(p, b)
+            # pb.currentCount = pb.currentCount - float(quantity[x])
+            # pb.save()
+            #
+            # destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
+            # newPb = ProductBatch(idProductCount=destinationPC,
+            #                      manufacturedDate=pb.manufacturedDate,
+            #                      currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
+            # newPb.save()
 
             tl.save()
 
@@ -1246,7 +1275,7 @@ def ajaxGetBatches(request):
     pk = request.GET.get('productPk')
     b = Branch.objects.get(idBranch=request.session['branchID'])
     pc = ProductCount.objects.get(idProduct= pk, idBranch=b)
-    pb = ProductBatch.objects.filter(idProductCount=pc, status="In stock").order_by('manufacturedDate')
+    pb = ProductBatch.objects.filter(idProductCount=pc, status="In stock", currentCount__gt=0).order_by('manufacturedDate')
 
     batches = []
 
@@ -1286,7 +1315,9 @@ def ajaxGetAmountCanProduce(request):
     p = Product.objects.get(idProduct=pk)
 
     ingredients.append({"amount": p.get_amount_can_produce(p, b),
-                        "unitsInStock": ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock})
+                        "unitsInStock": ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock,
+                        "uom": p.unitOfMeasure
+                        })
 
     return JsonResponse(ingredients, safe=False)
 
@@ -1375,7 +1406,7 @@ def ajaxProduceItems(request):
 
     if ProductBatch.objects.filter(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate).exists():
         check = ProductBatch.objects.get(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate)
-        check.currentCount = check.currentCount + batch.currentCount
+        check.currentCount = check.currentCount + float(batch.currentCount)
         check.save()
     else:
         batch.save()

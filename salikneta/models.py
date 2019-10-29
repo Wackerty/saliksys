@@ -178,6 +178,65 @@ class Product(models.Model):
             earliestExpiringBatch = None
         return earliestExpiringBatch
 
+    @staticmethod
+    def deduct_stock(self, branchID, deducting):
+        pc = ProductCount.objects.get(idProduct=self.idProduct, idBranch=branchID)
+        pc.unitsInStock = pc.unitsInStock - float(deducting)
+        pc.save()
+
+        x = float(deducting)
+        while x > 0:
+            temp = x
+            pb = Product.get_earliest_expiring_batch(self, branchID)
+
+            if pb.currentCount < x:
+                x = x - pb.currentCount
+
+                if pb.currentCount - temp < 0:
+                    pb.currentCount = 0
+                else:
+                    pb.currentCount = pb.currentCount - temp
+
+            else:
+                pb.currentCount = pb.currentCount - x
+                x = 0
+            pb.save()
+
+    @staticmethod
+    def transfer_stock(self, branchID, transferring, transferOrder):
+        pc = ProductCount.objects.get(idProduct=self.idProduct, idBranch=branchID)
+        pc.unitsInStock = pc.unitsInStock - float(transferring)
+        pc.save()
+
+        x = float(transferring)
+        while x > 0:
+            temp = x
+            pb = Product.get_earliest_expiring_batch(self, branchID)
+            destinationPC = ProductCount.objects.get(idProduct=self, idBranch=transferOrder.destination)
+
+            if pb.currentCount < x:
+                willTransfer = pb.currentCount
+                x = x - pb.currentCount
+
+                if pb.currentCount - temp < 0:
+                    pb.currentCount = 0
+                else:
+                    pb.currentCount = pb.currentCount - temp
+
+            else:
+                pb.currentCount = pb.currentCount - x
+                willTransfer = x
+                x = 0
+
+            newPb = ProductBatch(idProductCount=destinationPC,
+                                 manufacturedDate=pb.manufacturedDate,
+                                 currentCount=willTransfer, expiringDate=pb.expiringDate, status="Transit",
+                                 idTransferOrderProduct=transferOrder)
+
+            newPb.save()
+
+            pb.save()
+
 
 class ProductCount(models.Model):
     idProductCount = models.AutoField(db_column='productCountID', primary_key=True)  # Field name made lowercase.
