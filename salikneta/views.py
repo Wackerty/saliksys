@@ -1405,7 +1405,7 @@ def ajaxProduceItems(request):
                          currentCount=amount, expiringDate=date.today()+timedelta(days=p.expiration), status="In stock")
 
     if ProductBatch.objects.filter(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate).exists():
-        check = ProductBatch.objects.get(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate)
+        check = ProductBatch.objects.filter(idProductCount=batch.idProductCount, manufacturedDate=batch.manufacturedDate)[0]
         check.currentCount = check.currentCount + float(batch.currentCount)
         check.save()
     else:

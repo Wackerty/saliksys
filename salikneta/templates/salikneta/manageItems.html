@@ -240,7 +240,7 @@
                       <th>Current Stocks</th>
                       <th>UOM</th>
                       <th>Re-order level</th>
-                      <th>Lifespan</th>
+                      <th>Days before expiration</th>
                       <th>Expiring</th>
                       <th>Ingredients</th>
                     </tr>
@@ -317,7 +317,7 @@
 
 
     $( "#branch" ).change(function() {
-        window.location.href = "/salikneta/manageItems/"  + $(this).val();
+        window.location.href = "/manageItems/"  + $(this).val();
     });
 
     function editItem_Price(obj){
@@ -332,7 +332,7 @@
     function getIngredients(obj){
         var productPK = $(obj).attr("item_id");
 
-        $("#addIngredientsLink").attr("href","/salikneta/manageIngredients/" + productPK);
+        $("#addIngredientsLink").attr("href","/manageIngredients/" + productPK);
 
         $.ajax({
           url: '{% url "ajaxGetIngredients" %}',
