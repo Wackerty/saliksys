@@ -259,6 +259,8 @@ s
                            
                           </div>
                           <br>
+                          <input type="checkbox" id="lowStocksCheckbox"> Low stocks
+                          <br><br>
                           <div class="row">
                             <div class="col-md-12">
                               <h4>Products</h4>
@@ -514,6 +516,12 @@ function finishTO(id){
   $("#destination").change(function() {
       $("#tableData").html("");
 
+  });
+
+  $("#lowStocksCheckbox").change(function() {
+    if(this.checked) {
+        console.log("fuck u"); 
+    }
   });
 </script>
             <!--custom chart end-->

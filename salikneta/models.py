@@ -54,6 +54,7 @@ class Notifs(models.Model):
     msg = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(blank=True, null=True)
     viewed = models.IntegerField(blank=True, null=True)
+    type = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -75,8 +76,8 @@ class Notifs(models.Model):
         else:
             return str(diff.months) + " months ago"
     @staticmethod
-    def write(message):
-        n = Notifs(msg=message,timestamp=datetime.now())
+    def write(message, type):
+        n = Notifs(msg=message,timestamp=datetime.now(), type=type, viewed=0)
         n.save()
 
     @staticmethod

@@ -332,7 +332,7 @@ def editItemPrice(request):
         print("waaat", request.POST['item_price'])
         p.suggestedUnitPrice = float(request.POST['item_price'])
         p.save()
-        Notifs.write("Price for " + p.name + " has been updated.")
+        Notifs.write("Price for " + p.name + " has been updated.", 1)
     return HttpResponseRedirect(reverse('manageItems'))
 
 
@@ -349,7 +349,7 @@ def editMaterialStock(request):
         rc.save()
         rcl.save()
         Notifs.write(
-            "Raw Material Stocks for " + rc.idrawmaterial.name + " in " + rc.idBranch.name + " branch has been updated.")
+            "Raw Material Stocks for " + rc.idrawmaterial.name + " in " + rc.idBranch.name + " branch has been updated.", 2)
     return HttpResponseRedirect(reverse('manageRawMaterials'))
 
 
@@ -368,7 +368,8 @@ def check_notif(request):
     for n in notifs:
         data.append({"num_notif": chk,
                      "msg": n.msg
-                        , "timestamp": n.get_time_ago})
+                        , "timestamp": n.get_time_ago,
+                     "type": n.type})
     return JsonResponse({"data": data})
 
 
@@ -550,7 +551,7 @@ def manageItems(request, id):
 
             cc.save()
 
-        Notifs.write("New Item -" + c.name + "- has been added.")
+        Notifs.write("New Item -" + c.name + "- has been added.", 1)
         return HttpResponseRedirect(reverse('manageItems', kwargs={'id': b.idBranch}))
     return render(request, 'salikneta/manageItems.html', context)
 
@@ -588,7 +589,7 @@ def manageRawMaterials(request):
 
             rr.save()
 
-        Notifs.write("New Raw Material -" + r.name + "- has been added.")
+        Notifs.write("New Raw Material -" + r.name + "- has been added.", 2)
         return HttpResponseRedirect(reverse('manageRawMaterials'))
 
     return render(request, 'salikneta/manageRawMats.html', context)
@@ -618,7 +619,7 @@ def manageIngredients(request, id):
                     SKU=request.POST['SKU'], idCategory_id=request.POST['category'])
         c.save()
 
-        Notifs.write("New Item -" + c.name + "- has been added.")
+        Notifs.write("New Item -" + c.name + "- has been added.", 3)
         return HttpResponseRedirect(reverse('manageIngredients'))
     return render(request, 'salikneta/manageIngredients.html', context)
 
@@ -644,7 +645,7 @@ def produceItems(request, id):
                     SKU=request.POST['SKU'], idCategory_id=request.POST['category'])
         c.save()
 
-        Notifs.write("New Item -" + c.name + "- has been added.")
+        Notifs.write("New Item -" + c.name + "- has been added.", 4)
         return HttpResponseRedirect(reverse('manageIngredients'))
     return render(request, 'salikneta/produceItems.html', context)
 
@@ -887,7 +888,7 @@ def ajaxAddPurchaseOrder(request):
         orderLine = OrderLines(qty=quantity[x], idRawMaterial_id=products[x], idPurchaseOrder_id=po.pk)
         orderLine.save()
 
-    Notifs.write("New PO" + str(po.pk) + " has been added.")
+    Notifs.write("New PO" + str(po.pk) + " has been added.", 5)
     print("Success")
 
     return JsonResponse([], safe=False)
@@ -914,7 +915,7 @@ def ajaxAddBackload(request):
         # pb.currentCount = pb.currentCount - int(quantity[x])
         # pb.save()
 
-    Notifs.write("Products have been backloaded.")
+    Notifs.write("Products have been backloaded.", 6)
     # po = PurchaseOrder(orderDate=datetime.datetime.strptime(orderDate, '%d-%m-%Y').strftime('%Y-%m-%d')
     # ,expectedDate=datetime.datetime.strptime(expectedDate, '%d-%m-%Y').strftime('%Y-%m-%d')
     # , idCashier_id=request.session['userID'], idSupplier_id = supplier,status="In Transit")
@@ -1025,7 +1026,7 @@ def ajaxTransferOrder(request):
             tl.save()
 
         Notifs.write("Transfer Order for Products (TO# " + str(
-            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made.")
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made.", 7)
     else:
         for x in range(0, len(products)):
             tl = TransferLinesProduct(qty=quantity[x], idProduct_id=products[x], idTransferOrderProduct_id=to.pk)
@@ -1050,7 +1051,7 @@ def ajaxTransferOrder(request):
             tl.save()
 
         Notifs.write("Transfer Order for Products (TO# " + str(
-            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.", 7)
 
     return JsonResponse([], safe=False)
 
@@ -1083,7 +1084,7 @@ def ajaxTransferOrderRawMaterials(request):
             pc.save()
 
         Notifs.write("Transfer Order for Raw Materials (TO# " + str(
-            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made.")
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made.", 8)
     else:
         for x in range(0, len(products)):
             tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x],
@@ -1097,7 +1098,7 @@ def ajaxTransferOrderRawMaterials(request):
             to.save()
 
         Notifs.write("Transfer Order for Raw Materials (TO# " + str(
-            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.")
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.", 8)
 
     return JsonResponse([], safe=False)
 
@@ -1117,7 +1118,7 @@ def ajaxInTransitTO(request):
     to.save()
     Notifs.write(
         "Transfer Order for Products (TO# " + str(
-            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.", 7)
     return JsonResponse([], safe=False)
 
 
@@ -1136,7 +1137,7 @@ def ajaxInTransitTORawMaterial(request):
     to.save()
     Notifs.write(
         "Transfer Order for Raw Materials (TO# " + str(
-            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.")
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is in transit.", 8)
     return JsonResponse([], safe=False)
 
 
@@ -1175,7 +1176,7 @@ def ajaxFinishedTO(request):
     to.save()
     Notifs.write(
         "Transfer Order for Products (TO# " + str(
-            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is received.", 7)
     return JsonResponse([], safe=False)
 
 
@@ -1198,7 +1199,7 @@ def ajaxFinishedTORawMaterial(request):
     to.save()
     Notifs.write(
         "Transfer Order for Raw Materials (TO# " + str(
-            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is received.")
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is received.", 8)
     return JsonResponse([], safe=False)
 
 
@@ -1226,7 +1227,7 @@ def ajaxCancelTO(request):
     to.save()
     Notifs.write(
         "Transfer Order for Products (TO# " + str(
-            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
+            to.idTransferOrderProduct) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.", 7)
     return JsonResponse([], safe=False)
 
 
@@ -1247,7 +1248,7 @@ def ajaxCancelTORawMaterial(request):
     to.save()
     Notifs.write(
         "Transfer Order for Raw Materials (TO# " + str(
-            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.")
+            to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " is cancelled.", 8)
     return JsonResponse([], safe=False)
 
 
@@ -1344,7 +1345,7 @@ def ajaxAddIngredient(request):
                         qtyneeded=qtyNeeded)
     i.save()
 
-    Notifs.write("New Ingredient -" + i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.")
+    Notifs.write("New Ingredient -" + i.idrawmaterials.name + "- for -" + i.idProduct.name + "- has been added.", 3)
 
     i = IngredientsList.objects.filter(idProduct=productPK)
     ingredients = []
@@ -1364,7 +1365,7 @@ def ajaxRemoveIngredient(request):
     productPK = ingredient.idProduct
 
     Notifs.write(
-        "Ingredient -" + ingredient.idrawmaterials.name + "- for -" + ingredient.idProduct.name + "- has been removed.")
+        "Ingredient -" + ingredient.idrawmaterials.name + "- for -" + ingredient.idProduct.name + "- has been removed.", 3)
 
     ingredient.delete()
 
@@ -1399,7 +1400,7 @@ def ajaxProduceItems(request):
                             "unitsInStockProduct": pc.unitsInStock,
                             "amount": p.get_amount_can_produce(p, b)})
 
-    Notifs.write("Produced " + amount + " stocks for product: " + p.name)
+    Notifs.write("Produced " + amount + " stocks for product: " + p.name, 4)
 
     batch = ProductBatch(idProductCount=pc, manufacturedDate=date.today(),
                          currentCount=amount, expiringDate=date.today()+timedelta(days=p.expiration), status="In stock")

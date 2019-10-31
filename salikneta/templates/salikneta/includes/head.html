@@ -71,11 +71,44 @@
        notif_data.done(function(results){
        obj = results.data;
        for (i in obj){
+               console.log(obj);
+               if (obj[i].num_notif == 0){
+                   $("#notif_num").hide();
+               }
+               else{
+                   $("#notif_num").show().html(obj[i].num_notif);
+               }
 
-       console.log(obj);
-               if (obj[i].num_notif === 0){$("#notif_num").hide();}
-               else{$("#notif_num").show().html(obj[i].num_notif);}
-               item = '<li><a href="/notifications/">';
+               switch (obj[i].type) {
+                   case 1:
+                       item = '<li><a href="{% url 'manageItems' 0 %}">';
+                       break;
+                   case 2:
+                       item = '<li><a href="{% url 'manageRawMaterials' %}">';
+                       break;
+                   case 3:
+                       item = '<li><a href="{% url 'manageIngredients' 0 %}">';
+                       break;
+                   case 4:
+                       item = '<li><a href="{% url 'produceItems' 0 %}">';
+                       break;
+                   case 5:
+                       item = '<li><a href="{% url 'purchaseOrder' %}">';
+                       break;
+                   case 6:
+                       item = '<li><a href="{% url 'backload' %}">';
+                       break;
+                   case 7:
+                       item = '<li><a href="{% url 'transferOrderProducts' %}">';
+                       break;
+                   case 8:
+                       item = '<li><a href="{% url 'transferOrderRawMaterials' %}">';
+                       break;
+                   default:
+                       item = '<li><a href="{% url 'notifications' %}">';
+                       break;
+               }
+
                if(obj[i].msg.substring(0, 9) == "Inventory"){
                    item += "Click to check expiring products";
                }
