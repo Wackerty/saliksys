@@ -320,11 +320,11 @@ function generateChartData() {
     });
 
     $( "#products" ).change(function() {
-        window.location.href = "/salikneta/forecasting/product="  + $(this).val() + "method=" + $("#method").val();
+        window.location.href = "/forecasting/product="  + $(this).val() + "method=" + $("#method").val();
     });
 
     $( "#method" ).change(function() {
-        window.location.href = "/salikneta/forecasting/product="  + $("#products").val() + "method=" + $(this).val();
+        window.location.href = "/forecasting/product="  + $("#products").val() + "method=" + $(this).val();
     });
 </script>
             <!--custom chart end-->

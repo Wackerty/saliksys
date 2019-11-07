@@ -43,6 +43,7 @@ def log_in_validate(request):
             request.session['firstname'] = Cashier.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Cashier.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Cashier.objects.get(username=user, password=password).idBranch.idBranch
+            request.session['branch'] = Cashier.objects.get(username=user, password=password).idBranch.name
             request.session['header'] = "salikneta/includes/cashier_header.html"
             return redirect('pos')
         elif try2:
@@ -54,6 +55,7 @@ def log_in_validate(request):
             request.session['firstname'] = Manager.objects.get(username=user, password=password).firstname
             request.session['lastname'] = Manager.objects.get(username=user, password=password).lastname
             request.session['branchID'] = Manager.objects.get(username=user, password=password).idBranch.idBranch
+            request.session['branch'] = Manager.objects.get(username=user, password=password).idBranch.name
             request.session['managerID'] = Manager.objects.get(username=user, password=password).idManager
 
             if request.session['branchID'] == 1:
@@ -267,6 +269,8 @@ def inventory_report_detail(request):
                 r["transfer_in"] = toin
                 r["sales"] = sl
 
+                context = {"report_data": report_data, "gen_info": gen_info}
+
         elif request.POST['type'] == "month":
             m = request.POST["month"].split("-")[1] + "-" + request.POST["month"].split("-")[0] + "-01 00:00:00"
             m = datetime.strptime(m, '%Y-%m-%d %H:%M:%S')
@@ -318,10 +322,32 @@ def inventory_report_detail(request):
                 r["transfer_out"] = toout
                 r["transfer_in"] = toin
                 r["sales"] = sl
+
+                context = {"report_data": report_data, "gen_info": gen_info}
+        elif request.POST['type'] == "low":
+            report_data = []
+            products = Product.objects.all()
+            branch = Branch.objects.get(pk=request.session['branchID'])
+            for product in products:
+                unitsInStock = product.get_product_count(product, branch)
+                earliestExpiringBatch = product.get_earliest_expiring_batch(product, branch)
+                product.unitsInStock = unitsInStock
+                product.earliestExpiringBatch = earliestExpiringBatch
+
+                report_data.append({"id": product.idProduct,
+                                    "product": product.name,
+                                    "uom": product.unitOfMeasure,
+                                    "unit_price": product.suggestedUnitPrice,
+                                    "unitsInStock": product.unitsInStock,
+                                    "reorderLevel": product.reorderLevel,
+                                    })
+
+            context = {"report_data": report_data, "gen_info": "low stock",
+                                    "datetime": datetime.now()}
     else:
         return redirect('inventory_report')
     return render(request, 'salikneta/reports/inventory_report_detail.html',
-                  {"report_data": report_data, "gen_info": gen_info})
+                  context)
 
 
 def editItemPrice(request):

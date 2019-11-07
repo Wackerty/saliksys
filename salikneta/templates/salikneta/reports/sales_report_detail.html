@@ -18,7 +18,7 @@
 
             <div class="form-panel" id="print_div" style="padding: 50px">
                 <div class="row">
-                    <h4 class="mb"><i class="fa fa-angle-right"></i> Item Sales Report -</h4>
+                    <h4 class="mb"><i class="fa fa-angle-right"></i> Item Sales Report - ({{ request.session.branch }} branch)</h4>
                     <h5>{{ gen_info.message }}</h5>
                     <!--<h5>Total Item Sold: {{ gen_info.total_qty|floatformat:2 }}</h5> -->
                     <h5>Total Sales: {{ gen_info.total_sales|floatformat:2 }}</h5>
@@ -38,7 +38,7 @@
                   text-align: right;
               }
           </style>
-                <table id="sup_tbl" class="table table-bordered table-striped table-condensed" style="width: 100%">
+                <table id="itm_tbl" class="table table-bordered table-striped table-condensed" style="width: 100%">
                   <thead>
                     <tr>
                       <th>Product</th>
@@ -73,6 +73,7 @@
         var printCont = document.getElementById(div);
         var html = '<html><head>'+
                '<title>Sales Report {{ gen_info.message }}</title>'+
+                '<img src="/static/img/salikneta_ico.png" alt="salikneta logo" width="100" height="100" align="right">'+
                '</head><body style="background:#ffffff;">'+
                printCont.innerHTML+
                '</body></html>'+printStr;
@@ -106,5 +107,14 @@
                 }
            });
     }
+</script>
+<script>
+    $(document).ready(function() {
+        $('#itm_tbl').DataTable({
+            searching: false,
+            paging: false,
+            info: false
+        });
+    });
 </script>
             <!--custom chart end-->

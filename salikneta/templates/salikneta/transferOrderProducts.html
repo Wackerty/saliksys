@@ -178,7 +178,40 @@
                         var yyyy = today.getFullYear();
 
                         $('#transferDate').val(dd+'-'+mm+'-'+yyyy);
+
+                        function nextWeekdayDate(date, day_in_week) {
+                            var ret = new Date(date||new Date());
+                            ret.setDate(ret.getDate() + (day_in_week - 1 - ret.getDay() + 7) % 7 + 1);
+                            return ret;
+                        }
+
+                        var date = new Date();
+                        {#console.log(nextWeekdayDate(date, 3));#}
+                        {##}
+                        {#var dt = new Date();#}
+                        {#console.log("getDay() : " + dt.getDay() );#}
+
+                        var dayOfWeek = date.getDay();
+                        var getDayDate = 0;
+
+                        if(dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6){
+                            getDayDate = 1;
+                        }
+                        else if(dayOfWeek === 1 || dayOfWeek === 2){
+                            getDayDate = 3;
+                        }
+                        else if(dayOfWeek === 3 || dayOfWeek === 4){
+                            getDayDate = 5;
+                        }
+
+                        console.log(nextWeekdayDate(date, getDayDate));
+
+                        var nextWeekdayDate = nextWeekdayDate(date, getDayDate);
+                        dd = String(nextWeekdayDate.getDate()).padStart(2, '0');
+                        mm = String(nextWeekdayDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        yyyy = nextWeekdayDate.getFullYear();
                         $('#expectedDate').val(dd+'-'+mm+'-'+yyyy);
+
                     } );
                 </script>
             </div>

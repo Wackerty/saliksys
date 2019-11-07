@@ -99,7 +99,7 @@
         $("#modal-in-date").html("INVOICE DATE: "+$(obj).attr("i_date"));
         $("#modal-in-num").html("INVOICE NO: "+$(obj).attr("i_num"));
         $("#r_net_total").html($(obj).attr("i_total"));
-           let invoice_data =  $.get("/salikneta/ajax/get_invoicelines_by_salesid/"+id+"/");
+           let invoice_data =  $.get("/ajax/get_invoicelines_by_salesid/"+id+"/");
            invoice_data.done(function(results){
                 obj = results.data;
                 for (i in obj){
@@ -119,11 +119,11 @@
 
     function forecasting_details(obj){
         var id = $(obj).attr("item_id");
-        window.location.href = "/salikneta/forecasting/product="  + id + "method=ar";
+        window.location.href = "/forecasting/product="  + id + "method=ar";
     }
 
     $( "#method" ).change(function() {
-        window.location.href = "/salikneta/forecasting/method=" + $(this).val();
+        window.location.href = "/forecasting/method=" + $(this).val();
     });
 
     $(document).ready(function(){
