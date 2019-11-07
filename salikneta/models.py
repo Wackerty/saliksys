@@ -332,6 +332,22 @@ class RawMaterialCount(models.Model):
         print("deducted: " + str(amount) + " stocks to " + str(self.idrawmaterial.name))
 
 
+class ProductProduction(models.Model):
+    idProductProduction = models.AutoField(db_column='idProductProduction', primary_key=True)  # Field name made lowercase.
+    idProductCount = models.ForeignKey(ProductCount, models.DO_NOTHING, db_column='idProductCount_id')  # Field name made lowercase.
+    count = models.FloatField(blank=True, null=True)
+    produced = models.FloatField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    dateStartProduction = models.DateTimeField(db_column='dateStartProduction', blank=True,
+                                               null=True)  # Field name made lowercase.
+    dateFinishProduction = models.DateTimeField(db_column='dateFinishProduction', blank=True,
+                                                null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'salikneta_productproduction'
+
+
 class PurchaseOrder(models.Model):
     idPurchaseOrder = models.AutoField(primary_key=True)
     idManager = models.ForeignKey(Manager, models.CASCADE, db_column='idManager_id')

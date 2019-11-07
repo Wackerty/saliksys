@@ -629,24 +629,17 @@ def produceItems(request, id):
     c = Category.objects.all()
     i = Product.objects.all().order_by("name")
     b = Branch.objects.get(idBranch=request.session['branchID'])
+    p = ProductProduction.objects.all().order_by('status')
 
     context = {
         "rawmaterials": r,
         "categories": c,
         "products": i,
         "branch": b,
-        "productID": id
+        "productID": id,
+        "production": p
     }
-    if request.method == 'POST':
-        c = Product(name=request.POST['itemName'], description=request.POST['description'],
-                    suggestedUnitPrice=request.POST['price'], unitsInStock=request.POST['startStock'],
-                    img_path=request.FILES['image'], reorderLevel=request.POST['reorder'],
-                    unitOfMeasure=request.POST['unitsOfMeasure'],
-                    SKU=request.POST['SKU'], idCategory_id=request.POST['category'])
-        c.save()
 
-        Notifs.write("New Item -" + c.name + "- has been added.", 4)
-        return HttpResponseRedirect(reverse('manageIngredients'))
     return render(request, 'salikneta/produceItems.html', context)
 
 
@@ -1333,6 +1326,19 @@ def ajaxGetUOM(request):
     return JsonResponse(uom, safe=False)
 
 
+def ajaxGetProductProduction(request):
+    pk = request.GET.get('pk')
+    i = ProductProduction.objects.get(idProductProduction=pk)
+
+    pp = []
+
+    pp.append({
+        "name": i.idProductCount.idProduct.name
+    })
+
+    return JsonResponse(pp, safe=False)
+
+
 def ajaxAddIngredient(request):
     productPK = request.GET.get('productPK')
     rawMaterialPK = request.GET.get('rawMaterialPK')
@@ -1382,9 +1388,15 @@ def ajaxRemoveIngredient(request):
 def ajaxProduceItems(request):
     pk = request.GET.get('productPK')
     amount = request.GET.get('amount')
-    b = Branch.objects.get(idBranch=request.session['branchID'])
+    b = Branch.objects.get(idBranch=2)
 
-    p = Product.objects.get(idProduct=pk)
+    pp = ProductProduction.objects.get(idProductProduction=pk)
+    pp.produced = amount
+    pp.status = 1
+    pp.dateFinishProduction = datetime.now()
+    pp.save()
+
+    p = Product.objects.get(idProduct=pp.idProductCount.idProduct.idProduct)
     pc = ProductCount.objects.get(idProduct=p, idBranch=b)
 
     pc.add_stocks(pc, amount)
@@ -1398,9 +1410,10 @@ def ajaxProduceItems(request):
                             "uom": ingredient.idProduct.unitOfMeasure,
                             "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials, b),
                             "unitsInStockProduct": pc.unitsInStock,
-                            "amount": p.get_amount_can_produce(p, b)})
+                            "amount": p.get_amount_can_produce(p, b),
+                            "name": p.name})
 
-    Notifs.write("Produced " + amount + " stocks for product: " + p.name, 4)
+    Notifs.write("Produced " + amount + " " + p.unitOfMeasure + " for product: " + p.name, 4)
 
     batch = ProductBatch(idProductCount=pc, manufacturedDate=date.today(),
                          currentCount=amount, expiringDate=date.today()+timedelta(days=p.expiration), status="In stock")
@@ -1411,6 +1424,27 @@ def ajaxProduceItems(request):
         check.save()
     else:
         batch.save()
+
+    return JsonResponse(ingredients, safe=False)
+
+
+def ajaxToProduceItems(request):
+    pk = request.GET.get('productPK')
+    amount = request.GET.get('amount')
+    b = Branch.objects.get(idBranch=request.session['branchID'])
+
+    p = Product.objects.get(idProduct=pk)
+    pc = ProductCount.objects.get(idProduct=p, idBranch=b)
+
+
+    production = ProductProduction(idProductCount=pc, count=amount, status=0, dateStartProduction=datetime.now())
+    production.save()
+    Notifs.write(amount + " " + p.unitOfMeasure + " of " + p.name + " to be produced", 4)
+
+    ingredients = [{
+        "message": amount + " " + p.unitOfMeasure + " of " + p.name + " to be produced"
+    }]
+
 
     return JsonResponse(ingredients, safe=False)
 
