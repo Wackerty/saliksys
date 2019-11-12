@@ -22,7 +22,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('salikneta/', views.index, name='index'),
-    path('home/', views.home, name='home'),
+    path('home/', views.homeyes, name='homeYes'),
+    path('home/product=<int:id>method=<str:method>/', views.home, name='home'),
     path('signout', views.signout, name='signout'),
     path('log_in/', views.log_in, name='log_in'),
     path('verify/', views.log_in_validate, name='verify'),

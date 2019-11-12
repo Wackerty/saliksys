@@ -64,6 +64,169 @@
                     </div>
                   </div>
                </div>
+               <div class="row">
+                  <div class="col-md-12 mb">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <br>
+                            <center> <i class="fa fa-area-chart fa-3x"> <a href="{% url 'forecasting' 'ma' %}">Forecasting</a></i></center>
+                            <br>
+                            <div class="col-md-6">
+                                <label for="products">Products</label><select class="form-control" name="products" id="products">
+                                    {% for product in products %}
+                                      <option value="{{product.pk}}">{{product.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="method">Method</label><select class="form-control" name="method" id="method">
+                                      <option value="ar">Autoregression </option>
+                                      <option value="ma">Moving Average</option>
+                                </select>
+                            </div>
+                            <br><br><br>
+                            <br>
+                            <div class="col-md-12">
+                                <table id="sup_tbl" class="table table-bordered">
+                                  <thead>
+                                    <tr>
+                                      <th></th>
+                                      <th>Marketing Branch</th>
+                                      <th>Taft Branch</th>
+                                      <th>Malabon Branch</th>
+                                      <th>Total</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id ="sales_tbl">
+                                     <tr>
+                                        <td class="cell_bdr" style="border: 1px solid black"><b>Forecast for next month:</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ marketingProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ taftProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ malabonProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ totalForecast }} {{ product.unitOfMeasure }}</b></td>
+                                     </tr>
+                                  </tbody>
+                                </table>
+{#                                <h5 class="mb"><i class="fa fa-angle-right"></i> <b>Products Needed</b></h5>#}
+{#                                <div class="row show-grid">#}
+{#                                  <div class="col-md-4">#}
+{#                                        <h5>Marketing Branch:</h5>#}
+{#                                        <table class="table table-hover" id="ingredientTable">#}
+{#                                          <thead>#}
+{#                                            <tr>#}
+{#                                              <th>Forecast</th>#}
+{#                                              <th>In Stock</th>#}
+{#                                              <th>Actual Needed</th>#}
+{#                                            </tr>#}
+{#                                          </thead>#}
+{#                                          <tbody id="ingredientTable_Body">#}
+{#                                                <tr>#}
+{#                                                    <td>{{ marketingProductForecast }}</td>#}
+{#                                                    <td>{{ marketingProductInStock }}</td>#}
+{#                                                    {% if marketingActualNeed >= 0 %}#}
+{#                                                        <td>{{ marketingActualNeed }}</td>#}
+{#                                                    {% else %}#}
+{#                                                        <td>0</td>#}
+{#                                                    {% endif %}#}
+{#                                                </tr>#}
+{#                                          </tbody>#}
+{#                                        </table>#}
+{#                                  </div>#}
+{#                                  <div class="col-md-4">#}
+{#                                        <h5>Taft Branch:</h5>#}
+{#                                        <table class="table table-hover" id="ingredientTable">#}
+{#                                          <thead>#}
+{#                                            <tr>#}
+{#                                              <th>Forecast</th>#}
+{#                                              <th>In Stock</th>#}
+{#                                              <th>Actual Needed</th>#}
+{#                                            </tr>#}
+{#                                          </thead>#}
+{#                                          <tbody id="ingredientTable_Body">#}
+{#                                                <tr>#}
+{#                                                    <td>{{ taftProductForecast }}</td>#}
+{#                                                    <td>{{ taftProductInStock }}</td>#}
+{#                                                    {% if taftActualNeed >= 0 %}#}
+{#                                                        <td>{{ taftActualNeed }}</td>#}
+{#                                                    {% else %}#}
+{#                                                        <td>0</td>#}
+{#                                                    {% endif %}#}
+{#                                                </tr>#}
+{#                                          </tbody>#}
+{#                                        </table>#}
+{#                                  </div>#}
+{#                                  <div class="col-md-4">#}
+{#                                        <h5>Malabon Branch:</h5>#}
+{#                                        <table class="table table-hover" id="ingredientTable">#}
+{#                                          <thead>#}
+{#                                            <tr>#}
+{#                                              <th>Forecast</th>#}
+{#                                              <th>In Stock</th>#}
+{#                                              <th>Actual Needed</th>#}
+{#                                            </tr>#}
+{#                                          </thead>#}
+{#                                          <tbody id="ingredientTable_Body">#}
+{#                                                <tr>#}
+{#                                                    <td>{{ malabonProductForecast }}</td>#}
+{#                                                    <td>{{ malabonProductInStock }}</td>#}
+{#                                                    {% if malabonActualNeed >= 0 %}#}
+{#                                                        <td>{{ malabonActualNeed }}</td>#}
+{#                                                    {% else %}#}
+{#                                                        <td>0</td>#}
+{#                                                    {% endif %}#}
+{#                                                </tr>#}
+{#                                          </tbody>#}
+{#                                        </table>#}
+{#                                  </div>#}
+{#                                </div>#}
+{#                                <h5 class="mb"><i class="fa fa-angle-right"></i> <b>Raw Materials Needed</b></h5>#}
+{#                                <table class="table table-hover" id="ingredientTable">#}
+{#                                  <thead>#}
+{#                                    <tr>#}
+{#                                      <th>Raw Material</th>#}
+{#                                      <th>Quantity Needed (Marketing)</th>#}
+{#                                      <th>Quantity Needed (Taft)</th>#}
+{#                                      <th>Quantity Needed (Malabon)</th>#}
+{#                                      <th>UOM</th>#}
+{#                                    </tr>#}
+{#                                  </thead>#}
+{#                                  <tbody id="ingredientTable_Body">#}
+{#                                    {% for ingredient in ingredients %}#}
+{#                                        <tr>#}
+{#                                            <td>{{ ingredient.idrawmaterials.name }}</td>#}
+{#                                            {% if ingredient.qtyneededmarketing  >= 0 %}#}
+{#                                                <td>{{ ingredient.qtyneededmarketing }}</td>#}
+{#                                            {% else %}#}
+{#                                                <td>0</td>#}
+{#                                            {% endif %}#}
+{#                                            {% if ingredient.qtyneededtaft  >= 0 %}#}
+{#                                                <td>{{ ingredient.qtyneededtaft }}</td>#}
+{#                                            {% else %}#}
+{#                                                <td>0</td>#}
+{#                                            {% endif %}#}
+{#                                            {% if ingredient.qtyneededmalabon  >= 0 %}#}
+{#                                                <td>{{ ingredient.qtyneededmalabon }}</td>#}
+{#                                            {% else %}#}
+{#                                                <td>0</td>#}
+{#                                            {% endif %}#}
+{#                                            <td>{{ ingredient.idrawmaterials.unitOfMeasure }}</td>#}
+{#                                        </tr>#}
+{#                                    {% endfor %}#}
+{#                                  </tbody>#}
+{#                                </table>#}
+{#                                {% for ingredient in ingredients %}#}
+{#                                    <big>Total needed for {{ ingredient.idrawmaterials.name }}:#}
+{#                                        {% if ingredient.totalneeded >= 0 %}#}
+{#                                            <b>{{ ingredient.totalneeded }} {{ ingredient.idrawmaterials.unitOfMeasure }} </b></big><br>#}
+{#                                        {% else %}#}
+{#                                            <b>0</b></big><br>#}
+{#                                        {% endif %}#}
+{#                                {% endfor %}#}
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+               </div>
            {% elif request.session.usertype == 'production' %}
               <div class="row">
                   <div class="col-md-4 mb">
@@ -81,6 +244,169 @@
                             <a href="{% url 'transferOrderRawMaterials' %}"><button class="btn btn-small ">Raw Materials</button></a>
                         </div>
                       </div>
+               </div>
+              <div class="row">
+                  <div class="col-md-12 mb">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <br>
+                            <center> <i class="fa fa-area-chart fa-3x"> Forecasting</i></center>
+                            <br>
+                            <div class="col-md-6">
+                                <label for="products">Products</label><select class="form-control" name="products" id="products">
+                                    {% for product in products %}
+                                      <option value="{{product.pk}}">{{product.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="method">Method</label><select class="form-control" name="method" id="method">
+                                      <option value="ar">Autoregression </option>
+                                      <option value="ma">Moving Average</option>
+                                </select>
+                            </div>
+                            <br><br><br>
+                            <br>
+                            <div class="col-md-12">
+                                <table id="sup_tbl" class="table table-bordered">
+                                  <thead>
+                                    <tr>
+                                      <th></th>
+                                      <th>Marketing Branch</th>
+                                      <th>Taft Branch</th>
+                                      <th>Malabon Branch</th>
+                                      <th>Total</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id ="sales_tbl">
+                                     <tr>
+                                        <td class="cell_bdr" style="border: 1px solid black"><b>Forecast for next month:</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ marketingProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ taftProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ malabonProductForecast }} {{ product.unitOfMeasure }}</b></td>
+                                        <td class="cell_bdr txt_al_right" style="border: 1px solid black"><b>{{ totalForecast }} {{ product.unitOfMeasure }}</b></td>
+                                     </tr>
+                                  </tbody>
+                                </table>
+                                <h5 class="mb"><i class="fa fa-angle-right"></i> <b>Products Needed</b></h5>
+                                <div class="row show-grid">
+                                  <div class="col-md-4">
+                                        <h5>Marketing Branch:</h5>
+                                        <table class="table table-hover" id="ingredientTable">
+                                          <thead>
+                                            <tr>
+                                              <th>Forecast</th>
+                                              <th>In Stock</th>
+                                              <th>Actual Needed</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody id="ingredientTable_Body">
+                                                <tr>
+                                                    <td>{{ marketingProductForecast }}</td>
+                                                    <td>{{ marketingProductInStock }}</td>
+                                                    {% if marketingActualNeed >= 0 %}
+                                                        <td>{{ marketingActualNeed }}</td>
+                                                    {% else %}
+                                                        <td>0</td>
+                                                    {% endif %}
+                                                </tr>
+                                          </tbody>
+                                        </table>
+                                  </div>
+                                  <div class="col-md-4">
+                                        <h5>Taft Branch:</h5>
+                                        <table class="table table-hover" id="ingredientTable">
+                                          <thead>
+                                            <tr>
+                                              <th>Forecast</th>
+                                              <th>In Stock</th>
+                                              <th>Actual Needed</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody id="ingredientTable_Body">
+                                                <tr>
+                                                    <td>{{ taftProductForecast }}</td>
+                                                    <td>{{ taftProductInStock }}</td>
+                                                    {% if taftActualNeed >= 0 %}
+                                                        <td>{{ taftActualNeed }}</td>
+                                                    {% else %}
+                                                        <td>0</td>
+                                                    {% endif %}
+                                                </tr>
+                                          </tbody>
+                                        </table>
+                                  </div>
+                                  <div class="col-md-4">
+                                        <h5>Malabon Branch:</h5>
+                                        <table class="table table-hover" id="ingredientTable">
+                                          <thead>
+                                            <tr>
+                                              <th>Forecast</th>
+                                              <th>In Stock</th>
+                                              <th>Actual Needed</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody id="ingredientTable_Body">
+                                                <tr>
+                                                    <td>{{ malabonProductForecast }}</td>
+                                                    <td>{{ malabonProductInStock }}</td>
+                                                    {% if malabonActualNeed >= 0 %}
+                                                        <td>{{ malabonActualNeed }}</td>
+                                                    {% else %}
+                                                        <td>0</td>
+                                                    {% endif %}
+                                                </tr>
+                                          </tbody>
+                                        </table>
+                                  </div>
+                                </div>
+                                <h5 class="mb"><i class="fa fa-angle-right"></i> <b>Raw Materials Needed</b></h5>
+                                <table class="table table-hover" id="ingredientTable">
+                                  <thead>
+                                    <tr>
+                                      <th>Raw Material</th>
+                                      <th>Quantity Needed (Marketing)</th>
+                                      <th>Quantity Needed (Taft)</th>
+                                      <th>Quantity Needed (Malabon)</th>
+                                      <th>UOM</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="ingredientTable_Body">
+                                    {% for ingredient in ingredients %}
+                                        <tr>
+                                            <td>{{ ingredient.idrawmaterials.name }}</td>
+                                            {% if ingredient.qtyneededmarketing  >= 0 %}
+                                                <td>{{ ingredient.qtyneededmarketing }}</td>
+                                            {% else %}
+                                                <td>0</td>
+                                            {% endif %}
+                                            {% if ingredient.qtyneededtaft  >= 0 %}
+                                                <td>{{ ingredient.qtyneededtaft }}</td>
+                                            {% else %}
+                                                <td>0</td>
+                                            {% endif %}
+                                            {% if ingredient.qtyneededmalabon  >= 0 %}
+                                                <td>{{ ingredient.qtyneededmalabon }}</td>
+                                            {% else %}
+                                                <td>0</td>
+                                            {% endif %}
+                                            <td>{{ ingredient.idrawmaterials.unitOfMeasure }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+                                {% for ingredient in ingredients %}
+                                    <big>Total needed for {{ ingredient.idrawmaterials.name }}:
+                                        {% if ingredient.totalneeded >= 0 %}
+                                            <b>{{ ingredient.totalneeded }} {{ ingredient.idrawmaterials.unitOfMeasure }} </b></big><br>
+                                        {% else %}
+                                            <b>0</b></big><br>
+                                        {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                  </div>
                </div>
           {% endif %}
 
@@ -117,5 +443,19 @@
   </section>
   <!-- js placed at the end of the document so the pages load faster -->=
 </body>
+<script>
+    $(document).ready(function(){
+       $("#products").val({{ productID }});
+       console.log('{{ method }}');
+       $("#method").val('{{ method }}');
+    });
 
+    $( "#products" ).change(function() {
+        window.location.href = "/home/product="  + $(this).val() + "method=" + $("#method").val();
+    });
+
+    $( "#method" ).change(function() {
+        window.location.href = "/home/product="  + $("#products").val() + "method=" + $(this).val();
+    });
+</script>
 </html>

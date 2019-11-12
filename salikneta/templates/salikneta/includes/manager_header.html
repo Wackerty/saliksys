@@ -16,14 +16,14 @@
         <img src="{% static 'img/salikneta_ico.png' %}" style="height: 3vh;width:2vw;">
       </div>
       <!--logo start-->
-      <a href="{% url 'home' %}" class="logo"><b>SALIKNETA<span>-POSIS</span></b></a>
+      <a href="{% url 'home' 0 'ma' %}" class="logo"><b>SALIKNETA<span>-POSIS</span></b></a>
       <!--logo end-->
       <div class="nav notify-row" id="top_menu">
         <!--  notification start -->
         <ul class="nav top-menu">
           <!-- settings start -->
           <li class="dropdown">
-            <a  class="dropdown-toggle" href="{% url 'home' %}">
+            <a  class="dropdown-toggle" href="{% url 'home' 0 'ma' %}">
               <i class="fa fa-dashboard"></i>
             </a>
           </li>
@@ -66,7 +66,7 @@
          <h5 class="centered" >{{request.session.firstname}} {{request.session.lastname}}</h5>
          <h5 class="centered">{{request.session.usertype}}</h5>
           <li class="mt">
-            <a class="{% if request.resolver_match.view_name ==  'home' %}active{% endif %}" href="{% url 'home' %}">
+            <a class="{% if request.resolver_match.view_name ==  'home' %}active{% endif %}" href="{% url 'home' 0 'ma' %}">
               <i class="fa fa-dashboard"></i>
               <span>Dashboard</span>
             </a>

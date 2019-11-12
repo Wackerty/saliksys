@@ -71,15 +71,161 @@ def log_in_validate(request):
                 request.session['header'] = "salikneta/includes/manager_header.html"
                 request.session['usertype'] = "manager"
 
-            return redirect('home')
+            return HttpResponseRedirect(reverse('home', kwargs={'id': 0, "method": "ma"}))
         else:
             messages.warning(request, 'Wrong credentials, please try again.')
 
     return render(request, 'salikneta/login.html')
 
+def home(request, id, method):
+    si = SalesInvoice.objects.earliest('invoiceDate')
+    earliestDate = min([si.invoiceDate.date()])
+    today = date.today()
 
-def home(request):
-    return render(request, 'salikneta/home.html', {"notifs": Notifs.objects.all().order_by("-notif_id")})
+    three_months = date.today() + relativedelta(months=+3)
+
+    next_three_month_dates = [dt for dt in rrule(MONTHLY, dtstart=today + relativedelta(months=+1), until=three_months)]
+
+    dates = [dt for dt in rrule(MONTHLY, dtstart=earliestDate, until=today)]
+
+    if id == 0:
+        hold = Product.objects.all().order_by('name')
+
+        awit = inventory_sales_per_month(dates, hold[0].pk)
+        productID = hold[0].pk
+        productName = hold[0].name
+        ingredients = IngredientsList.objects.filter(idProduct=productID)
+        product = hold[0]
+    else:
+        awit = inventory_sales_per_month(dates, Product.objects.get(idProduct=id).pk)
+        productID = Product.objects.get(idProduct=id).idProduct
+        productName = Product.objects.get(idProduct=id).name
+        ingredients = IngredientsList.objects.filter(idProduct=productID)
+        product = Product.objects.get(idProduct=id)
+
+    product_inventory_sales = []
+    for row in awit:
+        product_inventory_sales.append(row['report_data'][0])
+
+    productMarketingSales = []
+    productTaftSales = []
+    productMalabonSales = []
+    for row in product_inventory_sales:
+        productMarketingSales.append(row['sales_marketing'])
+        productTaftSales.append(row['sales_taft'])
+        productMalabonSales.append(row['sales_malabon'])
+
+    forecast_next_three_months = []
+
+    for x in next_three_month_dates:
+        forecast_next_three_months.append({
+            "date": x.date(),
+            "forecast_marketing": 0,
+            "forecast_taft": 0,
+            "forecast_malabon": 0,
+        })
+
+    temp1 = productMarketingSales
+    temp2 = productTaftSales
+    temp3 = productMalabonSales
+
+    if method == "ar":
+        marketingProductForecast = abs(int(forecast_autoregression(productMarketingSales)))
+        taftProductForecast = abs(int(forecast_autoregression(productTaftSales)))
+        malabonProductForecast = abs(int(forecast_autoregression(productMalabonSales)))
+
+        for y in forecast_next_three_months:
+            yes1 = abs(int(forecast_autoregression(temp1)))
+            yes2 = abs(int(forecast_autoregression(temp2)))
+            yes3 = abs(int(forecast_autoregression(temp3)))
+
+            y['forecast_marketing'] = yes1
+            y['forecast_taft'] = yes2
+            y['forecast_malabon'] = yes3
+
+            temp1.append(yes1)
+            temp2.append(yes2)
+            temp3.append(yes3)
+
+        forecastingMethod = "Autoregression"
+
+    elif method == "ma":
+        marketingProductForecast = abs(int(forecast_moving_average(productMarketingSales)))
+        taftProductForecast = abs(int(forecast_moving_average(productTaftSales)))
+        malabonProductForecast = abs(int(forecast_moving_average(productMalabonSales)))
+
+        for y in forecast_next_three_months:
+            yes1 = abs(int(forecast_moving_average(temp1)))
+            yes2 = abs(int(forecast_moving_average(temp2)))
+            yes3 = abs(int(forecast_moving_average(temp3)))
+
+            y['forecast_marketing'] = yes1
+            y['forecast_taft'] = yes2
+            y['forecast_malabon'] = yes3
+
+            temp1.append(yes1)
+            temp2.append(yes2)
+            temp3.append(yes3)
+
+        forecastingMethod = "Moving Average"
+
+    marketingProductInStock = product.get_product_count(product, Branch.objects.get(idBranch=1))
+    taftProductInStock = product.get_product_count(product, Branch.objects.get(idBranch=5))
+    malabonProductInStock = product.get_product_count(product, Branch.objects.get(idBranch=6))
+
+    marketingActualNeed = marketingProductForecast - marketingProductInStock
+    taftActualNeed = taftProductForecast - taftProductInStock
+    malabonActualNeed = malabonProductForecast - malabonProductInStock
+
+    for i in ingredients:
+        i.totalneeded = 0
+
+    for i in ingredients:
+        i.qtyneededmarketing = i.qtyneeded * marketingActualNeed
+        i.qtyneededtaft = i.qtyneeded * taftActualNeed
+        i.qtyneededmalabon = i.qtyneeded * malabonActualNeed
+        i.totalneeded += i.qtyneededmarketing + i.qtyneededtaft + i.qtyneededmalabon
+
+    products = Product.objects.all().order_by('name')
+
+    context = {
+        "productSales": product_inventory_sales,
+        "products": products,
+        "productID": productID,
+        "productName": productName,
+        "product": product,
+        "method": method,
+        "ingredients": ingredients,
+        "marketingProductInStock": marketingProductInStock,
+        "taftProductInStock": taftProductInStock,
+        "malabonProductInStock": malabonProductInStock,
+        "marketingActualNeed": marketingActualNeed,
+        "taftActualNeed": taftActualNeed,
+        "malabonActualNeed": malabonActualNeed,
+        "forecastingMethod": forecastingMethod,
+        'forecast_next_three_months': forecast_next_three_months
+    }
+
+    context = {
+        "notifs": Notifs.objects.all().order_by("-notif_id"),
+        "products": Product.objects.all().order_by('name'),
+        "marketingProductForecast": marketingProductForecast,
+        "taftProductForecast": taftProductForecast,
+        "malabonProductForecast": malabonProductForecast,
+        "totalForecast": marketingProductForecast + taftProductForecast + malabonProductForecast,
+        "product": product,
+        "method": method,
+        "productID": productID,
+        "ingredients": ingredients,
+        "marketingProductInStock": marketingProductInStock,
+        "taftProductInStock": taftProductInStock,
+        "malabonProductInStock": malabonProductInStock,
+    }
+    return render(request, 'salikneta/home.html', context)
+
+
+def homeyes(request):
+    return HttpResponseRedirect(reverse('home', kwargs={'id': 0, "method": "ma"}))
 
 
 def notifications(request):
