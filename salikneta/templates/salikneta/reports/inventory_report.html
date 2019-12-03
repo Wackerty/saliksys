@@ -52,7 +52,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <h6>Low stocks for today</h6>
+                        <h6>Expiring Products</h6>
                         <form action="{% url 'inventory_report_detail' %}"  method="post">
                             {% csrf_token %}
                             <input type="hidden" name="type" value="low">

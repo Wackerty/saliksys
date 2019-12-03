@@ -486,6 +486,7 @@ def inventory_report_detail(request):
                                     "unit_price": product.suggestedUnitPrice,
                                     "unitsInStock": product.unitsInStock,
                                     "reorderLevel": product.reorderLevel,
+                                    "earliestExpiringBatch": product.earliestExpiringBatch,
                                     })
 
             context = {"report_data": report_data, "gen_info": "low stock",

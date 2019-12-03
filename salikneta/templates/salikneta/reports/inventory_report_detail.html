@@ -19,7 +19,7 @@
                 <div class="row">
                     {% if gen_info == "low stock" %}
 
-                        <h3 class="mb"><i class="fa fa-angle-right"></i> Inventory Low Stock Report ({{ request.session.branch }} branch)-</h3>
+                        <h3 class="mb"><i class="fa fa-angle-right"></i> Inventory Expiring Products Report ({{ request.session.branch }} branch)-</h3>
 {#                        <div class="pull-right" style="margin-right: 2vw"><img src="{% static 'img/salikneta_ico.png' %}" alt="salikneta logo" width="100" height="80"></div>#}
                         <h4>Date: {{ datetime|date:"Y/m/d" }}</h4>
                         <h4>Time: {{ datetime|date:"H:i:s" }}</h4>
@@ -54,18 +54,22 @@
                       <th>Product</th>
                       <th>UOM</th>
                       <th>Current Inventory</th>
-                      <th>Re-order Level</th>
+                      <th>Expiring Count</th>
+                      <th>Expiry Date</th>
                     </tr>
                   </thead>
                   <tbody id ="sales_tbl">
                     {% for r in report_data %}
-                        {% if r.unitsInStock < r.reorderLevel %}
-                            <tr>
-                                <td class="cell_bdr" style="border: 1px solid black">{{ r.product }}</td>
-                                <td class="cell_bdr txt_al_center" style="border: 1px solid black">{{ r.uom }}</td>
-                                <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ r.unitsInStock }}</td>
-                                <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ r.reorderLevel }}</td>
-                            </tr>
+                        {% if r.earliestExpiringBatch is not None %}
+                            {% if product.daysTilExpiring <= 14 %}
+                                <tr>
+                                    <td class="cell_bdr" style="border: 1px solid black">{{ r.product }}</td>
+                                    <td class="cell_bdr txt_al_center" style="border: 1px solid black">{{ r.uom }}</td>
+                                    <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ r.unitsInStock }}</td>
+                                    <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ r.earliestExpiringBatch.currentCount }}</td>
+                                    <td class="cell_bdr txt_al_right" style="border: 1px solid black">{{ r.earliestExpiringBatch.expiringDate }}</td>
+                                </tr>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                   </tbody>
