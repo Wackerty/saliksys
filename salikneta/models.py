@@ -273,9 +273,9 @@ class ProductCount(models.Model):
 
         for ingredient in i:
             rc = RawMaterialCount.objects.get(idrawmaterial=ingredient.idrawmaterials, idBranch=self.idBranch)
-            rc.deduct_stock(rc, ingredient.qtyneeded*int(amount))
+            rc.deduct_stock(rc, ingredient.qtyneeded*float(amount))
 
-        self.unitsInStock = self.unitsInStock + int(amount)
+        self.unitsInStock = self.unitsInStock + float(amount)
 
         self.save()
 
@@ -283,7 +283,7 @@ class ProductCount(models.Model):
 
     @staticmethod
     def receive_stocks(self, amount):
-        self.unitsInStock = self.unitsInStock + int(amount)
+        self.unitsInStock = self.unitsInStock + float(amount)
 
         self.save()
 

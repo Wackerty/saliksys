@@ -1087,7 +1087,7 @@ def ajaxAddBackload(request):
         b1 = BackloadLines(qty=quantity[x], idProduct_id=products[x], reason=reasons[x], idBackload_id=b.pk)
         b1.save()
         p = Product.objects.get(pk=products[x])
-        p.deduct_stock(p, b.idCashier.idBranch, int(quantity[x]))
+        p.deduct_stock(p, b.idCashier.idBranch, float(quantity[x]))
         # pc = ProductCount.objects.get(idProduct=p, idBranch=b.idCashier.idBranch)
         # pc.unitsInStock = pc.unitsInStock - int(quantity[x])
         # pc.save()
@@ -1137,7 +1137,7 @@ def ajaxSaveDelivery(request):
             # print(float(quantity[x]))
             isOkay = False
 
-        pc.unitsinstock = int(pc.unitsinstock) + int(quantity[x])
+        pc.unitsinstock = float(pc.unitsinstock) + float(quantity[x])
         pc.save()
 
     qwe = PurchaseOrder.objects.get(pk=idPurchaseOrder)
@@ -1184,7 +1184,7 @@ def ajaxTransferOrder(request):
             p = Product.objects.get(pk=products[x])
             p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
-            pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
+            pc.unitsReserved = float(pc.unitsReserved) + float(quantity[x])
             if pc.unitsInStock <= p.reorderLevel:
                 Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 1)
             pc.save()
@@ -1200,7 +1200,7 @@ def ajaxTransferOrder(request):
             p = Product.objects.get(pk=products[x])
             p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
-            pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
+            pc.unitsReserved = float(pc.unitsReserved) + float(quantity[x])
             pc.save()
             to.status = "In Transit"
             to.save()
@@ -1229,7 +1229,7 @@ def ajaxTransferOrderRawMaterials(request):
     b = to.source
     to.save()
 
-    if to.destination.pk != 1:
+    if to.source.pk != 1:
         for x in range(0, len(products)):
             tl = TransferLinesRawMaterial(qty=quantity[x], idRawMaterial_id=products[x],
                                           idTransferOrderRawMaterial_id=to.pk)
@@ -1257,6 +1257,7 @@ def ajaxTransferOrderRawMaterials(request):
         Notifs.write("Transfer Order for Raw Materials (TO# " + str(
             to.idTransferOrderRawMaterial) + ") from " + to.source.name + " to " + to.destination.name + " has been made and is in transit.", 8)
 
+    print(to.status)
     return JsonResponse([], safe=False)
 
 
@@ -1268,7 +1269,7 @@ def ajaxInTransitTO(request):
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
         pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
-        pc.unitsReserved = pc.unitsReserved - int(wew[x].qty)
+        pc.unitsReserved = pc.unitsReserved - float(wew[x].qty)
         pc.save()
 
     to.status = "In Transit"
@@ -1287,7 +1288,7 @@ def ajaxInTransitTORawMaterial(request):
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
         pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
-        pc.unitsreserved = pc.unitsreserved - int(wew[x].qty)
+        pc.unitsreserved = pc.unitsreserved - float(wew[x].qty)
         pc.save()
 
     to.status = "In Transit"
@@ -1308,7 +1309,7 @@ def ajaxFinishedTO(request):
         aw = wew[x].idProduct
         pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
         print(pc.unitsInStock)
-        pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
+        pc.unitsInStock = float(pc.unitsinstock) + float(wew[x].qty)
         print(pc.unitsInStock)
         pc.save()
 
@@ -1346,8 +1347,10 @@ def ajaxFinishedTORawMaterial(request):
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
         pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
-        print(pc.unitsinstock)
-        pc.unitsinstock = pc.unitsinstock + int(wew[x].qty)
+
+        pc.unitsinstock = float(pc.unitsinstock) + float(wew[x].qty)
+        print(float(pc.unitsinstock))
+        print(float(wew[x].qty))
         print(pc.unitsinstock)
         pc.save()
 
@@ -1368,9 +1371,9 @@ def ajaxCancelTO(request):
     for x in range(0, len(wew)):
         aw = wew[x].idProduct
         pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
-        pc.unitsReserved = pc.unitsReserved - int(wew[x].qty)
+        pc.unitsReserved = pc.unitsReserved - float(wew[x].qty)
         print(pc.unitsInStock)
-        pc.unitsInStock = pc.unitsInStock + int(wew[x].qty)
+        pc.unitsInStock = float(pc.unitsinstock)+ float(wew[x].qty)
         print(pc.unitsInStock)
         pc.save()
 
@@ -1396,9 +1399,9 @@ def ajaxCancelTORawMaterial(request):
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
         pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
-        pc.unitsreserved = pc.unitsreserved - int(wew[x].qty)
+        pc.unitsreserved = pc.unitsreserved - float(wew[x].qty)
         print(pc.unitsinstock)
-        pc.unitsinstock = pc.unitsinstock + int(wew[x].qty)
+        pc.unitsinstock = pc.unitsinstock + float(wew[x].qty)
         print(pc.unitsinstock)
         pc.save()
     to.status = "Cancelled"
