@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% include 'salikneta/includes/head.html' %}
 <body>
-  <section id="container">
+  <section "container">
 
   <style>
 .datepicker{z-index:1151 !important;}
@@ -215,7 +215,9 @@
                                 <label>Destination store</label>
                                <select class="form-control" id="destination">
                                  {% for d in destination %}
-                                  <option value="{{d.pk}}">{{d.name}}</option>
+                                     {% if d.name == "Production" %}
+                                         <option value="{{d.pk}}">{{d.name}}</option>
+                                     {% endif %}
                                  {% endfor %}
                                 </select>
                               </div>
@@ -252,16 +254,48 @@
                                     </div>
                                   </div>
                                 </div>
-s
-
                             </div>
 
                            
                           </div>
                           <br>
                           <div class="row">
+                            <div class="col-md-6">
+                                <label>Stocks below re-order level</label>
+                                <input type="checkbox" id="stocksCheckbox">
+                            </div>
+
+                            <div class="col-md-6" id="dropdownOfBranches" style="visibility: hidden">
+                                <label>Branch</label>
+                                <select class="form-control" id="branchStocks">
+                                    <option value="1">Marketing </option>
+                                    <option value="5">Taft</option>
+                                    <option value="6">Malabon</option>
+                                </select>
+                            </div>
+
+                          </div>
+                  <br>
+                          <div class="row">
+                            <div class="col-md-6">
+                                <label>Product</label>
+                                <select class="form-control" id="products">
+                                    <option value="0"></option>
+                                    {% for product in products %}
+                                        <option value="{{product.pk}}">{{product.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Count</label>
+                                <input type="number" id="productCount" size="16" class="form-control">
+                            </div>
+
                             <div class="col-md-12">
                               <h4>Raw Materials</h4>
+                                <div id="qtyNeededDiv">
+                                </div>
                             </div>
 
                             
@@ -288,7 +322,7 @@ s
                           <div class="row">
                             <div class="col-md-4"></div>
                             <div class="col-md-4">
-                              <button class="form-control" type="button" onclick="appendRow()">+</button>
+                              <button id="appendButton" class="form-control" type="button" onclick="appendRow()">+</button>
                             </div>
                             <div class="col-md-4"></div>
                           </div>
@@ -413,7 +447,7 @@ function finishTO(id){
       }
       wew += '</select></td>'+
       '<td id="unitsInStock'+rCount+'">'+items[0].unitsInStock+'</td>'+
-      '<td><input type="number" class="form-control" value = 1/></td>'+
+      '<td><input id="quantity'+rCount+'" type="number" class="form-control" value = ""></td>'+
 
     '</tr>';
 
@@ -462,9 +496,6 @@ function finishTO(id){
       },
       
    });
-
-  
-
   }
 
   function updateInStock(id){
@@ -486,5 +517,134 @@ function finishTO(id){
       
    });
   }
+</script>
+
+<script>
+    function getIngredients(pk){
+        $.ajax({
+          url: '{% url "ajaxGetIngredients" %}',
+          data: {
+            "productPk":pk,
+          },
+          dataType: 'json',
+          success: function(data){
+              update_table(data);
+          },
+          error: function () {
+            alert("error");
+          },
+
+        });
+    }
+
+    $("#products").change(function() {
+        getIngredients($(this).val());
+
+        $.ajax({
+          url: '{% url "ajaxGetAmountCanProduce" %}',
+          data: {
+            "productPk":$(this).val(),
+          },
+          dataType: 'json',
+          success: function(data){
+              $("#canProduce").html('Can produce: ' + data[0].amount + " " + data[0].uom);
+              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStock + " " + data[0].uom);
+              $("#amount").val(data[0].amount);
+              $("#appendButton").attr("disabled", "disabled");
+          },
+          error: function () {
+              alert("No ingredients assigned for the selected product");
+              $("#appendButton").removeAttr("disabled");
+          },
+
+        });
+    });
+
+    function update_table(data){
+        $("#tableData").html("");
+        for(var i = 0; i < data.length; i++){
+            appendRow();
+        }
+
+        var div = "<input type='hidden' value='" + data.length +"' id='ingredientCount'>";
+
+        for(var i = 0; i < data.length; i++){
+            $("#dropdown" + (i+1)).val(data[i].rawMaterialId);
+            $("#dropdown" + (i+1)).attr("disabled", "disabled");
+
+            updateInStock((i+1));
+
+            div += "<input type='hidden' value='" + data[i].qtyneeded +"' id='qtyNeeded"+ (i+1) +"'>";
+
+            $("#qtyNeededDiv").html(div);
+        }
+    }
+
+    $("#productCount").keyup(function() {
+        var count = $(this).val();
+        console.log(count);
+        var length = $("#ingredientCount").val();
+
+        for(var i = 1; i <= length; i++){
+            updateQuantity(i);
+        }
+
+    });
+
+    function updateQuantity(id){
+        var count = $("#productCount").val();
+
+        var qtyNeeded = $("#qtyNeeded" + id).val();
+
+        var quantity = count * qtyNeeded;
+        $("#quantity" + id).val(quantity);
+
+    }
+
+    $("#stocksCheckbox").click(function () {
+        if($(this).prop("checked") == true){
+            $("#dropdownOfBranches").css("visibility", "visible");
+            var branch = $("#branchStocks").val();
+
+            updateProductDropdown(branch);
+
+        }
+        else if($(this).prop("checked") == false){
+            $("#dropdownOfBranches").css("visibility", "hidden");
+            var html = "<option value='0'></option>";
+
+            {% for product in products %}
+                html += "<option value='{{ product.pk }}'>{{ product.name }}</option>";
+            {% endfor %}
+
+            $("#products").html(html);
+        }
+    });
+
+    $("#branchStocks").change(function() {
+        updateProductDropdown($(this).val());
+    });
+
+    function updateProductDropdown(branchID){
+        $.ajax({
+              url: '{% url "ajaxGetBelowReOrderLevel" %}',
+              data: {
+                "branch":branchID
+              },
+              dataType: 'json',
+              success: function(data){
+                  console.log(data);
+                  var html = "<option value='0'></option>";
+                  for(var i = 0; i < data.length; i++){
+                      html += "<option value='" + data[i].pk + "'>" + data[i].productName + "</option>";
+                  }
+                  $("#products").html(html);
+              },
+              error: function () {
+                alert("error");
+              },
+
+        });
+    }
 </script>
             <!--custom chart end-->

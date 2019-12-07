@@ -55,6 +55,8 @@ class Notifs(models.Model):
     timestamp = models.DateTimeField(blank=True, null=True)
     viewed = models.IntegerField(blank=True, null=True)
     type = models.IntegerField(blank=True, null=True)
+    seenUsers = models.CharField(db_column='seenUsers', max_length=100, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -88,10 +90,16 @@ class Notifs(models.Model):
         return False
 
     @staticmethod
-    def check_num_new_notif():
+    def check_num_new_notif(userID):
         ctr=0
         for n in Notifs.objects.all():
-            if n.viewed == 0:
+            if n.seenUsers is not None:
+                seenUsers = n.seenUsers.split(',')
+                if str(userID) in seenUsers:
+                    print("")
+                else:
+                    ctr+=1
+            else:
                 ctr+=1
         return ctr
 

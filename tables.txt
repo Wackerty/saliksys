@@ -124,6 +124,7 @@ class Notifs(models.Model):
     timestamp = models.DateTimeField(blank=True, null=True)
     viewed = models.IntegerField(blank=True, null=True)
     type = models.IntegerField(blank=True, null=True)
+    seenusers = models.CharField(db_column='seenUsers', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False

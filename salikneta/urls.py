@@ -88,6 +88,7 @@ urlpatterns = [
     path('ajax/ajaxProduceItems/', views.ajaxProduceItems, name='ajaxProduceItems'),
     path('ajax/ajaxToProduceItems/', views.ajaxToProduceItems, name='ajaxToProduceItems'),
     path('ajax/ajaxGetRawMaterialCountLogs/', views.ajaxGetRawMaterialCountLogs, name='ajaxGetRawMaterialCountLogs'),
+    path('ajax/ajaxGetBelowReOrderLevel/', views.ajaxGetBelowReOrderLevel, name='ajaxGetBelowReOrderLevel'),
 
 
     path('get/', views.get, name='get'),

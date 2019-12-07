@@ -527,16 +527,28 @@ def editMaterialStock(request):
 
 
 def open_notif(request):
+    userID = request.session['userID']
     notifs = Notifs.objects.all()
     for n in notifs:
+        if n.seenUsers is not None:
+            seenUsers = n.seenUsers.split(',')
+            if str(userID) in seenUsers:
+                print("")
+            else:
+                n.seenUsers = str(n.seenUsers) + "," + str(userID)
+
+        else:
+            n.seenUsers = userID
+
         n.viewed = 1
         n.save()
     return JsonResponse({"data": 'ok'})
 
 
 def check_notif(request):
+    userID = request.session['userID']
     notifs = Notifs.objects.all().order_by("-timestamp")[0:5]
-    chk = Notifs.check_num_new_notif()
+    chk = Notifs.check_num_new_notif(userID)
     data = []
     for n in notifs:
         data.append({"num_notif": chk,
@@ -590,6 +602,8 @@ def pos(request):
                 # pb.save()
 
                 product.deduct_stock(product, b, itms_dict[i])
+                if prod.unitsInStock <= product.reorderLevel:
+                    Notifs.write("Product " + prod.name + "in " + product.idBranch.name + " is below re-order level", 1)
 
             si.save()
             for i in ils:
@@ -1171,23 +1185,9 @@ def ajaxTransferOrder(request):
             p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
             pc.unitsReserved = int(pc.unitsReserved) + int(quantity[x])
+            if pc.unitsInStock <= p.reorderLevel:
+                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 1)
             pc.save()
-
-            # toTransfer = float(quantity[x])
-            #
-            # p.transfer_stock(p, b, quantity[x], to)
-            # #while toTransfer >= 0:
-            # pb = p.get_earliest_expiring_batch(p, b)
-            # #if (pb.currentCount-toTransfer) >= 0:
-            # pb.currentCount = pb.currentCount - toTransfer
-            # pb.save()
-            #
-            # destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
-            # newPb = ProductBatch(idProductCount=destinationPC,
-            #                      manufacturedDate=pb.manufacturedDate,
-            #                      currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
-            #
-            # newPb.save()
 
             tl.save()
 
@@ -1204,15 +1204,6 @@ def ajaxTransferOrder(request):
             pc.save()
             to.status = "In Transit"
             to.save()
-            # pb = p.get_earliest_expiring_batch(p, b)
-            # pb.currentCount = pb.currentCount - float(quantity[x])
-            # pb.save()
-            #
-            # destinationPC = ProductCount.objects.get(idProduct=p, idBranch=to.destination)
-            # newPb = ProductBatch(idProductCount=destinationPC,
-            #                      manufacturedDate=pb.manufacturedDate,
-            #                      currentCount=float(quantity[x]), expiringDate=pb.expiringDate, status="Transit", idTransferOrderProduct=to)
-            # newPb.save()
 
             tl.save()
 
@@ -1245,8 +1236,8 @@ def ajaxTransferOrderRawMaterials(request):
             tl.save()
             p = RawMaterials.objects.get(pk=products[x])
             pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
-            pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
-            pc.unitsreserved = int(pc.unitsreserved) + int(quantity[x])
+            pc.unitsinstock = float(pc.unitsinstock) - float(quantity[x])
+            pc.unitsreserved = float(pc.unitsreserved) + float(quantity[x])
             pc.save()
 
         Notifs.write("Transfer Order for Raw Materials (TO# " + str(
@@ -1258,7 +1249,7 @@ def ajaxTransferOrderRawMaterials(request):
             tl.save()
             p = RawMaterials.objects.get(pk=products[x])
             pc = RawMaterialCount.objects.get(idrawmaterial=p, idBranch=b)
-            pc.unitsinstock = int(pc.unitsinstock) - int(quantity[x])
+            pc.unitsinstock = float(pc.unitsinstock) - float(quantity[x])
             pc.save()
             to.status = "In Transit"
             to.save()
@@ -1428,12 +1419,14 @@ def ajaxGetIngredients(request):
     for ingredient in i:
         if b.idBranch == 5 or b.idBranch == 6:
             ingredients.append({"pk": ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
-                                "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure})
+                                "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure,
+                                "rawMaterialId": ingredient.idrawmaterials.idrawmaterials})
         else:
             ingredients.append({"pk": ingredient.pk, "rawMaterialName": ingredient.idrawmaterials.name,
                                 "qtyneeded": ingredient.qtyneeded, "uom": ingredient.idrawmaterials.unitOfMeasure,
                                 "unitsInStock": ingredient.idrawmaterials.get_product_count(ingredient.idrawmaterials,
-                                                                                            b)})
+                                                                                            b),
+                                "rawMaterialId": ingredient.idrawmaterials.idrawmaterials})
 
     return JsonResponse(ingredients, safe=False)
 
@@ -1620,6 +1613,25 @@ def ajaxToProduceItems(request):
 
 
     return JsonResponse(ingredients, safe=False)
+
+
+def ajaxGetBelowReOrderLevel(request):
+    branch = Branch.objects.get(idBranch=request.GET.get('branch'))
+
+    pc = ProductCount.objects.filter(idBranch=branch).order_by("idProduct__name")
+
+    products = []
+
+    for product in pc:
+        if product.unitsInStock <= product.idProduct.reorderLevel:
+            products.append({
+                "pk": product.idProduct.pk,
+                "productName": product.idProduct.name,
+                "productCount": product.unitsInStock,
+                "reOrderLevel": product.idProduct.reorderLevel,
+            })
+
+    return JsonResponse(products, safe=False)
 
 
 def get(request):
