@@ -843,16 +843,22 @@ def backload(request):
 
     expiringProducts = ProductBatch.objects.filter(idProductCount__idBranch=branch, currentCount__gt=0)
 
+    legitExpiring = []
+
     today = date.today()
     for product in expiringProducts:
         expiringDate = product.expiringDate
         gap = expiringDate - today
         product.daysTilExpiring = gap.days
+        if product.daysTilExpiring <= 14:
+            if not product.idProductCount.idProduct in legitExpiring:
+                legitExpiring.append(product.idProductCount.idProduct)
 
 
     context = {
         "products": i, "backloads": b,
         "expiringProducts": expiringProducts,
+        "legitExpiring": legitExpiring
     }
     return render(request, 'salikneta/backloads.html', context)
 
@@ -1026,7 +1032,19 @@ def ajaxGetInStockProduct(request):
     b = Branch.objects.get(pk=request.session['branchID'])
     products = []
 
-    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "uom": c.unitOfMeasure})
+    expiringProducts = ProductBatch.objects.filter(idProductCount__idBranch=b, currentCount__gt=0, idProductCount__idProduct=c)
+
+    today = date.today()
+    expiringCount = 0
+    for product in expiringProducts:
+        expiringDate = product.expiringDate
+        gap = expiringDate - today
+        product.daysTilExpiring = gap.days
+        if product.daysTilExpiring <= 0:
+            expiringCount += product.currentCount
+
+    products.append({"idProduct": c.pk, "unitsInStock": c.get_product_count(c, b), "uom": c.unitOfMeasure, "expiringCount": expiringCount})
+
 
     return JsonResponse(products, safe=False)
 

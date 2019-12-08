@@ -217,32 +217,33 @@
 		document.getElementById("row"+id).remove();
 	}
 	function appendRow(){
-    var items = new Array()
-    {% for p in products %}
-      items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock|floatformat:"-3"}}", "{{ p.unitOfMeasure }}"));
-    {% endfor %}
+        var items = new Array()
+        {% for p in legitExpiring %}
+            items.push(new itemObject("{{p.pk}}","{{p.name}}","{{p.unitsInStock|floatformat:"-3"}}", "{{ p.unitOfMeasure }}"));
+        {% endfor %}
 
-    var tbl = document.getElementById("tableData");
-    var rCount = tbl.rows.length + 1;
+        var tbl = document.getElementById("tableData");
+        var rCount = tbl.rows.length + 1;
 
-    wew = '<tr id="row'+rCount+'">'+
-    		'<td><button id="delete'+rCount+'" onclick="deleteRow('+rCount+')" class="btn btn-danger">x</button></td>'+
-			'<td>'+
-     			'<select class="form-control" id="dropdown'+rCount +'" onchange=updateInStock('+rCount+')>';
-     			for(var q = 0; q < items.length; q++){
-     				wew += '<option value="'+items[q].idProduct+'">' + items[q].productName + '</option>';
-     			}
-     				wew += '</select>'+
-     			'</td>'+
-     			'<td id="unitsInStock' + rCount+ '">'+ items[0].unitsInStock+'</td>'+
-     			'<td><input id="removeStock'+rCount+'" onkeyup="updateAfter('+rCount+')" type="number" class="form-control"/></td>'+
-     			'<td id="stockAfter' + rCount +'">0</td>'+
-     			'<td id="unitOfMeasure' + rCount +'">'+ items[0].unitOfMeasure +'</td>'+
-     			'<td><input class="form-control" type="text" value="Expired"></td>'+
-     		'</tr> ';   		
+        wew = '<tr id="row'+rCount+'">'+
+                '<td><button id="delete'+rCount+'" onclick="deleteRow('+rCount+')" class="btn btn-danger">x</button></td>'+
+                '<td>'+
+                    '<select class="form-control" id="dropdown'+rCount +'" onchange=updateInStock('+rCount+')>';
+                    for(var q = 0; q < items.length; q++){
+                        wew += '<option value="'+items[q].idProduct+'">' + items[q].productName + '</option>';
+                    }
+                        wew += '</select>'+
+                    '</td>'+
+                    '<td id="unitsInStock' + rCount+ '">'+ items[0].unitsInStock+'</td>'+
+                    '<td><input id="removeStock'+rCount+'" onkeyup="updateAfter('+rCount+')" type="number" class="form-control"/></td>'+
+                    '<td id="stockAfter' + rCount +'">0</td>'+
+                    '<td id="unitOfMeasure' + rCount +'">'+ items[0].unitOfMeasure +'</td>'+
+                    '<td><input class="form-control" type="text" value="Expired"></td>'+
+                '</tr> ';
    
    		 $("#tableData").append(wew);
-		 }
+        updateInStock(rCount);
+    }
 
 	function updateAfter(id){
 		var stockAfter = document.getElementById("stockAfter"+id);
@@ -255,6 +256,7 @@
     var td = document.getElementById("unitsInStock"+id);
     var td2 = document.getElementById("stockAfter"+id);
     var td3 = document.getElementById("unitOfMeasure"+id);
+    var td4 = document.getElementById("removeStock"+id);
 
     var dropdown = document.getElementById("dropdown"+id);
 
@@ -269,41 +271,43 @@
         td.innerHTML = data[0].unitsInStock;
         td2.innerHTML = 0;
         td3.innerHTML = data[0].uom;
-
+        td4.value = data[0].expiringCount
       }
       
    });
   }
   function recordBackload(){
+    if (confirm("Are you sure you want to backload these items?")){
+        var tbl = document.getElementById("tableData");
+        var rCount = tbl.rows.length;
+        var products = new Array();
+        var quantity = new Array();
+        var reasons = new Array();
+        for(var i = 0; i < rCount; i++){
+          products.push(tbl.rows[i].cells[1].children[0].value);
+          quantity.push(tbl.rows[i].cells[3].children[0].value);
+          reasons.push(tbl.rows[i].cells[6].children[0].value);
+          // alert(tbl.rows[i].cells[0].children[0].value);
+        }
+        $.ajax({
+          url: '{% url "ajaxAddBackload" %}',
+          data: {
 
-    var tbl = document.getElementById("tableData");
-    var rCount = tbl.rows.length;
-    var products = new Array();
-    var quantity = new Array();
-    var reasons = new Array();
-    for(var i = 0; i < rCount; i++){
-      products.push(tbl.rows[i].cells[1].children[0].value);
-      quantity.push(tbl.rows[i].cells[3].children[0].value);
-      reasons.push(tbl.rows[i].cells[6].children[0].value);
-      // alert(tbl.rows[i].cells[0].children[0].value); 
+
+            "products[]":products,
+            "quantity[]":quantity,
+            "reasons[]":reasons,
+          },
+          dataType: 'json',
+          success: function(data){
+
+            alert("New backload is successfully added!");
+            window.location.href = "{% url 'backload'%}";
+          }
+
+       });
     }
-    $.ajax({
-      url: '{% url "ajaxAddBackload" %}',
-      data: {
 
-
-        "products[]":products,  
-        "quantity[]":quantity,
-        "reasons[]":reasons,
-      },
-      dataType: 'json',
-      success: function(data){  
-
-        alert("New backload is successfully added!");
-        window.location.href = "{% url 'backload'%}";
-      }
-      
-   });
 
 
   }
