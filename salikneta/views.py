@@ -533,7 +533,7 @@ def open_notif(request):
         if n.seenUsers is not None:
             seenUsers = n.seenUsers.split(',')
             if str(userID) in seenUsers:
-                print("")
+                x = True
             else:
                 n.seenUsers = str(n.seenUsers) + "," + str(userID)
 
@@ -602,8 +602,10 @@ def pos(request):
                 # pb.save()
 
                 product.deduct_stock(product, b, itms_dict[i])
+                print("pazucc")
                 if prod.unitsInStock <= product.reorderLevel:
-                    Notifs.write("Product " + prod.name + "in " + product.idBranch.name + " is below re-order level", 1)
+                    print("below")
+                    Notifs.write("Product " + product.name + " in " + prod.idBranch.name + " branch is below re-order level", 1)
 
             si.save()
             for i in ils:
@@ -1201,6 +1203,8 @@ def ajaxTransferOrder(request):
             p.transfer_stock(p, b, quantity[x], to)
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
             pc.unitsReserved = float(pc.unitsReserved) + float(quantity[x])
+            if pc.unitsInStock <= p.reorderLevel:
+                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 1)
             pc.save()
             to.status = "In Transit"
             to.save()
@@ -1309,7 +1313,7 @@ def ajaxFinishedTO(request):
         aw = wew[x].idProduct
         pc = ProductCount.objects.get(idProduct=aw, idBranch=b)
         print(pc.unitsInStock)
-        pc.unitsInStock = float(pc.unitsinstock) + float(wew[x].qty)
+        pc.unitsInStock = float(pc.unitsInStock) + float(wew[x].qty)
         print(pc.unitsInStock)
         pc.save()
 
@@ -1347,11 +1351,9 @@ def ajaxFinishedTORawMaterial(request):
     for x in range(0, len(wew)):
         aw = wew[x].idRawMaterial
         pc = RawMaterialCount.objects.get(idrawmaterial=aw, idBranch=b)
-
-        pc.unitsinstock = float(pc.unitsinstock) + float(wew[x].qty)
-        print(float(pc.unitsinstock))
-        print(float(wew[x].qty))
-        print(pc.unitsinstock)
+        newStock = float(pc.unitsinstock) + float(wew[x].qty)
+        print(newStock)
+        pc.unitsinstock = newStock
         pc.save()
 
     to.status = "Received"

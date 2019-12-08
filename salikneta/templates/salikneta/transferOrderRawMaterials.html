@@ -215,7 +215,7 @@
                                 <label>Destination store</label>
                                <select class="form-control" id="destination">
                                  {% for d in destination %}
-                                     {% if d.name == "Production" %}
+                                     {% if d.name == "Production" or d.name == "Marketing" %}
                                          <option value="{{d.pk}}">{{d.name}}</option>
                                      {% endif %}
                                  {% endfor %}

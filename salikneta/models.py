@@ -96,7 +96,7 @@ class Notifs(models.Model):
             if n.seenUsers is not None:
                 seenUsers = n.seenUsers.split(',')
                 if str(userID) in seenUsers:
-                    print("")
+                    x = True
                 else:
                     ctr+=1
             else:
