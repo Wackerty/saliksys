@@ -27,7 +27,7 @@ class Command(BaseCommand):
                                          str(gap.days) + " days (" + str(product.expiringDate) + ")\n")
                     #print(str(productCount) + " " + productName + " in " + productBranch + " branch will expire in: " +
                     #      str(gap.days) + " days (" + str(product.expiringDate) + ")")
-        Notifs.write(expiringProducts)
+        Notifs.write(expiringProducts, 1)
         print(expiringProducts)
 
     # def add_arguments(self, parser):
