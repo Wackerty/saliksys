@@ -17,6 +17,29 @@
                     <div class="form-panel">
                       <h4 class="mb"><i class="fa fa-angle-right"></i> Produce Products</h4>
                       <h5 class="mb">Select a Product</h5>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Stocks below re-order level</label>
+                            <input type="checkbox" id="stocksCheckbox">
+                        </div>
+                        <div class="col-md-2" id="dropdownOfBranches" style="display: none">
+                            <label>Branch</label>
+                            <select class="form-control" id="branchStocks">
+                                <option value="1">Marketing </option>
+                                <option value="5">Taft</option>
+                                <option value="6">Malabon</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="productDetailsDiv" style="display: none">
+                        <div class="col-md-12">
+                            Current count: <b><span id="currentCount"></span></b>
+                        </div>
+                        <div class="col-md-12">
+                            Re-order level: <b><span id="reorderLevel"></span></b>
+                        </div>
+                    </div>
+                    <br>
                       <select  class="form-control" name="products" id="products">
                             <option value="0"></option>
                             {% for product in products %}
@@ -192,11 +215,35 @@
           },
           error: function () {
             alert("No ingredients assigned for the selected product");
-            $("#produceItemButton").attr("disabled", "true");
+              $("#canProduce").html('Can produce: ');
+              $("#currentStock").html('Units in Stock: ');
+              $("#amount").val("");
+              $("#produceItemButton").attr("disabled", "true");
           },
 
         });
+
+        productDetails();
     });
+
+    function productDetails(){
+        $.ajax({
+          url: '{% url "ajaxGetProductDetails" %}',
+          data: {
+            "productPk":$("#products").val(),
+            "branch":$("#branchStocks").val(),
+          },
+          dataType: 'json',
+          success: function(data){
+              $("#reorderLevel").html(data[0].reorderlevel  + " " + data[0].uom);
+              $("#currentCount").html(data[0].unitsInStock + " " + data[0].uom);
+          },
+          error: function () {
+              console.log("wala");
+          },
+
+        });
+    }
 
     $( "#rawMaterial" ).change(function() {
         $.ajax({
@@ -347,6 +394,56 @@
           error: function () {
             alert("error");
           },
+
+        });
+    }
+
+    $("#stocksCheckbox").click(function () {
+        if($(this).prop("checked") == true){
+            $("#dropdownOfBranches").css("display", "block");
+            $("#productDetailsDiv").css("display", "block");
+            var branch = $("#branchStocks").val();
+
+            updateProductDropdown(branch);
+
+        }
+        else if($(this).prop("checked") == false){
+            $("#dropdownOfBranches").css("display", "none");
+            $("#productDetailsDiv").css("display", "none");
+            var html = "<option value='0'></option>";
+
+            {% for product in products %}
+                html += "<option value='{{ product.pk }}'>{{ product.name }}</option>";
+            {% endfor %}
+
+            $("#products").html(html);
+        }
+    });
+
+    $("#branchStocks").change(function() {
+        updateProductDropdown($(this).val());
+        productDetails();
+
+    });
+
+    function updateProductDropdown(branchID){
+        $.ajax({
+              url: '{% url "ajaxGetBelowReOrderLevel" %}',
+              data: {
+                "branch":branchID
+              },
+              dataType: 'json',
+              success: function(data){
+                  console.log(data);
+                  var html = "<option value='0'></option>";
+                  for(var i = 0; i < data.length; i++){
+                      html += "<option value='" + data[i].pk + "'>" + data[i].productName + "</option>";
+                  }
+                  $("#products").html(html);
+              },
+              error: function () {
+                alert("error");
+              },
 
         });
     }

@@ -85,6 +85,7 @@ urlpatterns = [
     path('ajax/ajaxAddIngredient/', views.ajaxAddIngredient, name='ajaxAddIngredient'),
     path('ajax/ajaxRemoveIngredient/', views.ajaxRemoveIngredient, name='ajaxRemoveIngredient'),
     path('ajax/ajaxGetAmountCanProduce/', views.ajaxGetAmountCanProduce, name='ajaxGetAmountCanProduce'),
+    path('ajax/ajaxGetProductDetails/', views.ajaxGetProductDetails, name='ajaxGetProductDetails'),
     path('ajax/ajaxProduceItems/', views.ajaxProduceItems, name='ajaxProduceItems'),
     path('ajax/ajaxToProduceItems/', views.ajaxToProduceItems, name='ajaxToProduceItems'),
     path('ajax/ajaxGetRawMaterialCountLogs/', views.ajaxGetRawMaterialCountLogs, name='ajaxGetRawMaterialCountLogs'),

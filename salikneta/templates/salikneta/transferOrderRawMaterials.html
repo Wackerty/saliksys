@@ -265,7 +265,7 @@
                                 <input type="checkbox" id="stocksCheckbox">
                             </div>
 
-                            <div class="col-md-6" id="dropdownOfBranches" style="visibility: hidden">
+                            <div class="col-md-6" id="dropdownOfBranches" style="display: none">
                                 <label>Branch</label>
                                 <select class="form-control" id="branchStocks">
                                     <option value="1">Marketing </option>
@@ -286,12 +286,18 @@
                                     {% endfor %}
                                 </select>
                             </div>
-
                             <div class="col-md-6">
                                 <label>Count</label>
                                 <input type="number" id="productCount" size="16" class="form-control">
                             </div>
-
+                            <div id="productDetailsDiv" style="display: none">
+                                <div class="col-md-12">
+                                    Current count: <b><span id="currentCount"></span></b>
+                                </div>
+                                <div class="col-md-12">
+                                    Re-order level: <b><span id="reorderLevel"></span></b>
+                                </div>
+                            </div>
                             <div class="col-md-12">
                               <h4>Raw Materials</h4>
                                 <div id="qtyNeededDiv">
@@ -541,15 +547,29 @@ function finishTO(id){
         getIngredients($(this).val());
 
         $.ajax({
+          url: '{% url "ajaxGetProductDetails" %}',
+          data: {
+            "productPk":$(this).val(),
+            "branch":$("#branchStocks").val(),
+          },
+          dataType: 'json',
+          success: function(data){
+              $("#reorderLevel").html(data[0].reorderlevel  + " " + data[0].uom);
+              $("#currentCount").html(data[0].unitsInStock + " " + data[0].uom);
+          },
+          error: function () {
+              console.log("wala");
+          },
+
+        });
+
+        $.ajax({
           url: '{% url "ajaxGetAmountCanProduce" %}',
           data: {
             "productPk":$(this).val(),
           },
           dataType: 'json',
           success: function(data){
-              $("#canProduce").html('Can produce: ' + data[0].amount + " " + data[0].uom);
-              $("#currentStock").html('Units in Stock: ' + data[0].unitsInStock + " " + data[0].uom);
-              $("#amount").val(data[0].amount);
               $("#appendButton").attr("disabled", "disabled");
           },
           error: function () {
@@ -603,14 +623,16 @@ function finishTO(id){
 
     $("#stocksCheckbox").click(function () {
         if($(this).prop("checked") == true){
-            $("#dropdownOfBranches").css("visibility", "visible");
+            $("#dropdownOfBranches").css("display", "block");
+            $("#productDetailsDiv").css("display", "block");
             var branch = $("#branchStocks").val();
 
             updateProductDropdown(branch);
 
         }
         else if($(this).prop("checked") == false){
-            $("#dropdownOfBranches").css("visibility", "hidden");
+            $("#dropdownOfBranches").css("display", "none");
+            $("#productDetailsDiv").css("display", "none");
             var html = "<option value='0'></option>";
 
             {% for product in products %}

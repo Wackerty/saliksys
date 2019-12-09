@@ -193,6 +193,10 @@ class Product(models.Model):
         pc.unitsInStock = pc.unitsInStock - float(deducting)
         pc.save()
 
+
+        if pc.unitsInStock <= pc.idProduct.reorderLevel:
+            Notifs.write("Product " + pc.idProduct.name + " in " + pc.idBranch.name + " branch is below re-order level", 8)
+
         x = float(deducting)
         while x > 0:
             temp = x

@@ -602,10 +602,6 @@ def pos(request):
                 # pb.save()
 
                 product.deduct_stock(product, b, itms_dict[i])
-                print("pazucc")
-                if prod.unitsInStock <= product.reorderLevel:
-                    print("below")
-                    Notifs.write("Product " + product.name + " in " + prod.idBranch.name + " branch is below re-order level", 1)
 
             si.save()
             for i in ils:
@@ -1206,7 +1202,7 @@ def ajaxTransferOrder(request):
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
             pc.unitsReserved = float(pc.unitsReserved) + float(quantity[x])
             if pc.unitsInStock <= p.reorderLevel:
-                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 1)
+                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 8)
             pc.save()
 
             tl.save()
@@ -1222,7 +1218,7 @@ def ajaxTransferOrder(request):
             pc = ProductCount.objects.get(idProduct=p, idBranch=b)
             pc.unitsReserved = float(pc.unitsReserved) + float(quantity[x])
             if pc.unitsInStock <= p.reorderLevel:
-                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 1)
+                Notifs.write("Product " + p.name + "in " + pc.idBranch.name + " is below re-order level", 8)
             pc.save()
             to.status = "In Transit"
             to.save()
@@ -1499,11 +1495,26 @@ def ajaxGetAmountCanProduce(request):
 
     ingredients.append({"amount": p.get_amount_can_produce(p, b),
                         "unitsInStock": ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock,
-                        "uom": p.unitOfMeasure
+                        "uom": p.unitOfMeasure,
+                        "reorderlevel": p.reorderLevel
                         })
 
     return JsonResponse(ingredients, safe=False)
 
+
+def ajaxGetProductDetails(request):
+    pk = request.GET.get('productPk')
+    b = Branch.objects.get(idBranch=request.GET.get('branch'))
+    ingredients = []
+
+    p = Product.objects.get(idProduct=pk)
+
+    ingredients.append({"unitsInStock": ProductCount.objects.get(idProduct=p, idBranch=b).unitsInStock,
+                        "uom": p.unitOfMeasure,
+                        "reorderlevel": p.reorderLevel
+                        })
+
+    return JsonResponse(ingredients, safe=False)
 
 def ajaxGetUOM(request):
     pk = request.GET.get('productPk')
@@ -1646,7 +1657,7 @@ def ajaxGetBelowReOrderLevel(request):
     products = []
 
     for product in pc:
-        if product.unitsInStock <= product.idProduct.reorderLevel:
+        if product.unitsInStock < product.idProduct.reorderLevel:
             products.append({
                 "pk": product.idProduct.pk,
                 "productName": product.idProduct.name,

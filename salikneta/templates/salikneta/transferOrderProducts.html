@@ -285,16 +285,15 @@
                                     </div>
                                   </div>
                                 </div>
-s
 
                             </div>
-
                            
                           </div>
                           <br>
-{#                          <input type="checkbox" id="lowStocksCheckbox"> Low stocks#}
+                          <input type="checkbox" id="stocksCheckbox"> Stocks below re-order level (Destination Store)
                           <br><br>
                           <div class="row">
+
                             <div class="col-md-12">
                               <h4>Products</h4>
                             </div>
@@ -456,8 +455,13 @@ function finishTO(id){
 
     $("#tableData").append(wew);
 
+    if($("#stocksCheckbox").prop("checked") == true){
+        var branch = $("#destination").val();
+        updateProductDropdown(branch);
 
+        console.log("hotdog");
 
+    }
 
  }
 
@@ -551,10 +555,60 @@ function finishTO(id){
 
   });
 
-  $("#lowStocksCheckbox").change(function() {
-    if(this.checked) {
-        console.log("fuck u"); 
-    }
+  $("#stocksCheckbox").click(function () {
+        if($(this).prop("checked") == true){
+            var branch = $("#destination").val();
+            updateProductDropdown(branch);
+
+        }
+        else if($(this).prop("checked") == false){
+            var html = "";
+
+            {% for product in products %}
+                html += "<option value='{{ product.pk }}'>{{ product.name }}</option>";
+            {% endfor %}
+            var tbl = document.getElementById("tableData");
+            var rCount = tbl.rows.length + 1;
+            for(var i = 1; i <= rCount; i++){
+                $("#dropdown"+i).html(html);
+                updateInStock(i);
+            }
+        }
   });
+
+  $("#destination").change(function() {
+        updateProductDropdown($(this).val());
+  });
+
+  function updateProductDropdown(branchID){
+        var tbl = document.getElementById("tableData");
+        var rCount = tbl.rows.length + 1;
+        $.ajax({
+              url: '{% url "ajaxGetBelowReOrderLevel" %}',
+              data: {
+                "branch":branchID
+              },
+              dataType: 'json',
+              success: function(data){
+                  console.log(data);
+                  var html = "";
+                  for(var i = 0; i < data.length; i++){
+                      html += "<option value='" + data[i].pk + "'>" + data[i].productName + "</option>";
+                  }
+
+                  for(var i = 1; i <= rCount; i++){
+                      $("#dropdown"+i).html(html);
+                      updateInStock(i);
+                  }
+
+              },
+              error: function () {
+                alert("error");
+              },
+
+        });
+  }
+
+
 </script>
             <!--custom chart end-->
